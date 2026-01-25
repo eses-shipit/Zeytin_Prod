@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { Factory, LayoutDashboard, Users, Scale, Menu, X, Settings, MessageSquare, ShieldCheck, CreditCard, LogOut, Package } from "lucide-react";
@@ -120,9 +121,13 @@ export function Navbar() {
           href={isSuperAdminPage ? "/admin" : "/dashboard"}
           className="flex min-w-0 shrink-0 items-center gap-2 font-bold text-slate-900 transition-opacity hover:opacity-80 md:text-xl"
         >
-          <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white", isSuperAdminPage ? "bg-indigo-900" : "bg-black")}>
-            {isSuperAdminPage ? <ShieldCheck className="h-5 w-5" /> : "Z"}
-          </div>
+          <Image
+            src="/logo-192.png"
+            alt="ZeytinSaaS"
+            width={32}
+            height={32}
+            className="h-8 w-8 shrink-0 object-contain"
+          />
           <div className="hidden min-w-0 flex-col sm:flex">
             {isSuperAdminPage ? (
               <span className="truncate">ZeytinSaaS <span className="ml-1 text-sm font-normal text-slate-400">Admin</span></span>

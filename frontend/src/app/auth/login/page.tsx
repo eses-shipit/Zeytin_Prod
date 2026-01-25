@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
+import { Lock, Mail, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,8 +56,8 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
       {/* Header / Logo */}
       <div className="mb-8 text-center animate-in fade-in slide-in-from-top-4">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-200">
-              <ShieldCheck className="h-8 w-8 text-white" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white p-2 shadow-lg">
+              <Image src="/logo-512.png" alt="ZeytinSaaS" width={56} height={56} className="object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">ZeytinSaaS</h1>
           <p className="mt-2 text-slate-500 font-medium">Zeytinyağı Fabrika Otomasyonu</p>
