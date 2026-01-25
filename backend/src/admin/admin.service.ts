@@ -312,9 +312,9 @@ export class AdminService {
       throw new BadRequestException("Bu e-posta adresi zaten kayıtlı.");
     }
 
-    // Validate role
-    const validRoles = [UserRole.ADMIN, UserRole.USER];
-    if (!validRoles.includes(data.role as UserRole)) {
+    // Validate role (SUPER_ADMIN tenant user olamaz; cast ile tip uyumu)
+    const validRoles: string[] = [UserRole.ADMIN, UserRole.USER];
+    if (!validRoles.includes(data.role)) {
       throw new BadRequestException("Geçersiz kullanıcı rolü.");
     }
 
@@ -324,7 +324,7 @@ export class AdminService {
         email: data.email,
         password: data.password, // In production, hash this!
         phone: data.phone,
-        role: data.role as UserRole,
+        role: data.role as any,
         tenantId: tenantId,
       },
       select: {
@@ -350,10 +350,10 @@ export class AdminService {
       }
     }
 
-    // Validate role if provided
+    // Validate role if provided (SUPER_ADMIN tenant user olamaz; cast ile tip uyumu)
     if (data.role) {
-      const validRoles = [UserRole.ADMIN, UserRole.USER];
-      if (!validRoles.includes(data.role as UserRole)) {
+      const validRoles: string[] = [UserRole.ADMIN, UserRole.USER];
+      if (!validRoles.includes(data.role)) {
         throw new BadRequestException("Geçersiz kullanıcı rolü.");
       }
     }
@@ -364,7 +364,7 @@ export class AdminService {
         ...(data.name && { name: data.name }),
         ...(data.email && { email: data.email }),
         ...(data.phone !== undefined && { phone: data.phone }),
-        ...(data.role && { role: data.role as UserRole }),
+        ...(data.role && { role: data.role as any }),
       },
       select: {
         id: true,

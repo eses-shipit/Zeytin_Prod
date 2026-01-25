@@ -544,12 +544,17 @@ export class ProductionService {
     if (!data.code || !data.type || !data.capacity) {
       throw new BadRequestException("Kod, tür ve kapasite zorunludur.");
     }
+    const tenantId = this.contextService.get("TENANT_ID");
+    if (!tenantId) {
+      throw new BadRequestException("Tenant bağlamı bulunamadı.");
+    }
     return this.prisma.drum.create({
       data: {
         code: data.code,
         type: data.type,
         capacity: data.capacity,
         status: "AVAILABLE",
+        tenant: { connect: { id: tenantId } },
       },
     });
   }

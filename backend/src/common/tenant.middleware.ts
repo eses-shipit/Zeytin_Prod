@@ -18,12 +18,11 @@ export class TenantMiddleware implements NestMiddleware {
         console.log("[TenantMiddleware] Authorization header:", authHeader ? "Present" : "Missing");
         
         if (authHeader && authHeader.startsWith("Bearer ")) {
+          const token = req.headers.authorization?.split(" ")[1];
+          const jwtSecret = process.env.JWT_SECRET || "super-secret-key-change-in-prod";
           try {
-            const token = authHeader.split(" ")[1];
-            // JWT_SECRET environment variable'dan al - AuthService ile aynı olmalı!
-            const jwtSecret = process.env.JWT_SECRET || "super-secret-key-change-in-prod";
             // Verify token (signature kontrolü yapar)
-            user = jwt.verify(token, jwtSecret) as any;
+            user = jwt.verify(token!, jwtSecret) as any;
             console.log("[TenantMiddleware] ✅ Token verified successfully!");
             console.log("[TenantMiddleware] User payload:", JSON.stringify({ 
               id: user?.id || user?.sub, 
