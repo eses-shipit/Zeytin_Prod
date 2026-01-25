@@ -165,7 +165,7 @@ export function WeighingTerminal() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
+    <div className="mx-auto max-w-6xl overflow-x-hidden p-4 md:p-6">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -192,9 +192,9 @@ export function WeighingTerminal() {
         </button>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[1.5fr_1fr]">
         {/* Left Column: Weighing Display & Inputs */}
-        <div className="space-y-6">
+        <div className="min-w-0 w-full space-y-6">
           {/* Live Weight Display */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
             <div className="absolute right-0 top-0 p-4">
@@ -286,7 +286,7 @@ export function WeighingTerminal() {
         </div>
 
         {/* Right Column: Customer & Action */}
-        <div className="flex flex-col gap-6">
+        <div className="min-w-0 w-full flex flex-col gap-6">
           <div className="flex-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-2 text-lg font-semibold text-slate-900">
               <UserRound className="h-5 w-5 text-indigo-600" />

@@ -475,7 +475,7 @@ export default function InventoryPage() {
               </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="w-full overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                   <tr>
@@ -552,7 +552,7 @@ export default function InventoryPage() {
           </div>
 
           {/* Create Form */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+          <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
             <h3 className="text-sm font-semibold text-slate-900">Yeni Bidon Ekle</h3>
             <div className="space-y-3 text-sm">
               <div>
