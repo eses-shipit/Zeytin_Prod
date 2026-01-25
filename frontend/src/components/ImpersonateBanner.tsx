@@ -61,7 +61,7 @@ export default function ImpersonateBanner() {
             </div>
             <div>
                 <p className="font-bold text-sm md:text-base">
-                    Dikkat: Şu an '{tenantName}' adına işlem yapıyorsunuz.
+                    Dikkat: Şu an &apos;{tenantName}&apos; adına işlem yapıyorsunuz.
                 </p>
                 <p className="text-xs text-orange-100 hidden md:block">
                     Yaptığınız işlemler bu fabrikanın veritabanına kaydedilecektir.

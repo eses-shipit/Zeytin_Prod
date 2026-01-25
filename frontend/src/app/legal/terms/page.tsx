@@ -87,7 +87,7 @@ export default function TermsPage() {
               Lisans süresinin uzatılması için gerekli işlemlerin yapılması kullanıcının sorumluluğundadır.
             </p>
             <p className="text-slate-700 leading-relaxed">
-              Kullanıcı'nın lisans süresi dolduğunda, sisteme yeni veri girişi durdurulur. Kullanıcı, geçmiş verilerine (salt okunur olarak) 30 gün daha erişebilir. <strong>30 günün sonunda ödeme yapılmazsa, sistemdeki verilerin silinme veya arşivlenme hakkı ZeytinSaaS'a aittir.</strong>
+              Kullanıcı&apos;nın lisans süresi dolduğunda, sisteme yeni veri girişi durdurulur. Kullanıcı, geçmiş verilerine (salt okunur olarak) 30 gün daha erişebilir. <strong>30 günün sonunda ödeme yapılmazsa, sistemdeki verilerin silinme veya arşivlenme hakkı ZeytinSaaS&apos;a aittir.</strong>
             </p>
           </section>
 
@@ -102,7 +102,7 @@ export default function TermsPage() {
               Yazılım, hatalı girilen veriden (Örn: 500kg yerine 50kg yazılması) kaynaklanan randıman düşüklüğünden, yanlış hesaplamadan veya müşteri ile yaşanacak uyuşmazlıklardan sorumlu tutulamaz.
             </p>
             <p className="text-slate-700 leading-relaxed">
-              Sistem kayıtları, taraflar arasında bir "delil başlangıcı" niteliğindedir ancak resmi laboratuvar sonuçlarının veya ıslak imzalı kantar fişlerinin yerini tutmaz.
+              Sistem kayıtları, taraflar arasında bir &quot;delil başlangıcı&quot; niteliğindedir ancak resmi laboratuvar sonuçlarının veya ıslak imzalı kantar fişlerinin yerini tutmaz.
             </p>
           </section>
 
@@ -110,13 +110,13 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-4">5.1. Emanet (Consignment) ve Stok Yönetimi</h2>
             <p className="text-slate-700 leading-relaxed mb-4">
-              Sistem üzerinde "Emanet" olarak işaretlenen ve fabrika tanklarına alınan yağların takibi Kullanıcı'nın sorumluluğundadır.
+              Sistem üzerinde &quot;Emanet&quot; olarak işaretlenen ve fabrika tanklarına alınan yağların takibi Kullanıcı&apos;nın sorumluluğundadır.
             </p>
             <p className="text-slate-700 leading-relaxed mb-4">
               <strong>ZeytinSaaS; fiziksel depolama koşulları, tank sızıntıları, hırsızlık, doğal afet (yangın, sel) veya zamanla oluşan fire (buharlaşma/tortu çökmesi) nedeniyle oluşabilecek miktar farklarından sorumlu değildir.</strong>
             </p>
             <p className="text-slate-700 leading-relaxed">
-              Sistemdeki "Sanal Bakiye" ile "Fiziksel Stok" arasındaki farkların mutabakatı Kullanıcı'nın yükümlülüğündedir.
+              Sistemdeki &quot;Sanal Bakiye&quot; ile &quot;Fiziksel Stok&quot; arasındaki farkların mutabakatı Kullanıcı&apos;nın yükümlülüğündedir.
             </p>
           </section>
 
@@ -135,7 +135,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-4">6. Ödeme ve Hapis Hakkı (Lien)</h2>
             <p className="text-slate-700 leading-relaxed mb-4">
-              Sistem üzerinden hesaplanan Sıkım Bedeli (Hakkediş) veya diğer hizmet bedellerinin ödenmemesi durumunda; Fabrika'nın, müşterinin içerideki ürünü (yağı) üzerinde yasal <strong>Hapis Hakkı</strong> kullanıp kullanmayacağı, Fabrika ile Müstahsil arasındaki özel hukuka tabidir.
+              Sistem üzerinden hesaplanan Sıkım Bedeli (Hakkediş) veya diğer hizmet bedellerinin ödenmemesi durumunda; Fabrika&apos;nın, müşterinin içerideki ürünü (yağı) üzerinde yasal <strong>Hapis Hakkı</strong> kullanıp kullanmayacağı, Fabrika ile Müstahsil arasındaki özel hukuka tabidir.
             </p>
             <p className="text-slate-700 leading-relaxed">
               Yazılım sadece borç bakiyesini gösterir, tahsilat garantisi vermez.
@@ -159,7 +159,7 @@ export default function TermsPage() {
               İşlenen üretim verileri, zeytin ve zeytinyağı miktarları; Tarım ve Orman Bakanlığı, Vergi Daireleri ve (varsa) Zeytinyağı Borsası gibi <strong>resmi kurumların yasal talepleri doğrultusunda veya mevzuat gereği zorunlu bildirimlerde</strong> ilgili kurumlarla paylaşılabilir.
             </p>
             <p className="text-slate-700 leading-relaxed">
-              Bu paylaşım, KVKK'nın "Kanunlarda açıkça öngörülmesi" ve "Hukuki yükümlülüğün yerine getirilmesi" şartlarına dayanır.
+              Bu paylaşım, KVKK&apos;nın &quot;Kanunlarda açıkça öngörülmesi&quot; ve &quot;Hukuki yükümlülüğün yerine getirilmesi&quot; şartlarına dayanır.
             </p>
           </section>
 
@@ -186,8 +186,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-4">11. Sorumluluk Reddi</h2>
             <p className="text-slate-700 leading-relaxed">
-              ZeytinSaaS, sistemin kesintisiz çalışmasını garanti etmez. Sistem "olduğu gibi" sunulmaktadır. 
-              Kullanıcılar, sistem kullanımından kaynaklanan doğrudan veya dolaylı zararlardan ZeytinSaaS'ı sorumlu tutamaz.
+              ZeytinSaaS, sistemin kesintisiz çalışmasını garanti etmez. Sistem &quot;olduğu gibi&quot; sunulmaktadır. 
+              Kullanıcılar, sistem kullanımından kaynaklanan doğrudan veya dolaylı zararlardan ZeytinSaaS&apos;ı sorumlu tutamaz.
             </p>
           </section>
 

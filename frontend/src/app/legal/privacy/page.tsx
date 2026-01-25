@@ -34,7 +34,7 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-semibold text-slate-900">1. Veri Sorumlusu</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              ZeytinSaaS olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında veri sorumlusu sıfatıyla, 
+              ZeytinSaaS olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) kapsamında veri sorumlusu sıfatıyla, 
               kişisel verilerinizin işlenmesi ve korunması konusunda aşağıdaki bilgileri sizlere sunmaktayız.
             </p>
           </section>
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
           {/* Footer */}
           <div className="pt-8 border-t border-slate-200">
             <p className="text-sm text-slate-500 text-center">
-              Bu aydınlatma metni, KVKK'nın 10. maddesi gereğince hazırlanmıştır.
+              Bu aydınlatma metni, KVKK&apos;nın 10. maddesi gereğince hazırlanmıştır.
             </p>
           </div>
         </div>
