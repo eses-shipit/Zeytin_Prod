@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model Tenant {
+  id                  String       @id @default(cuid())
+  name                String
+  officialName        String?      // Resmi Unvan
+  taxId               String?      // Vergi No
+  address             String?
+  city                String?
+  code                String?      @unique // Örn: 'AYD' - Fabrika kısa kodu
+  status              TenantStatus @default(ACTIVE)
+  subscriptionEndDate DateTime?
+  defaultDrumWeight   Float        @default(50.0) // Varsayılan bidon ağırlığı (kg)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  users               User[]
+  licenses            License[]
+  tickets             SupportTicket[]
+  // Relations for Tenant Data Isolation
+  products            Product[]
+  customers           Customer[]
+  weighingTickets     WeighingTicket[]
+  productionBatches   ProductionBatch[]
+  stockTanks          StockTank[]
+  transactions        Transaction[]
+  auditLogs           AuditLog[]
+  drums               Drum[]
+}
+
+// ... existing enums and models ...
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+}
+
+enum DrumType {
+  PLASTIC
+  CHROME
+  TIN
+}
+
+enum DrumStatus {
+  AVAILABLE
+  FILLED
+  WITH_CUSTOMER
+}
+
+enum ProductionStatus {
+  PROCESSING
+  COMPLETED
+  DELIVERED
+}
+
+model SupportTicket {
+  id         String              @id @default(cuid())
+  tenantId   String
+  subject    String
+  priority   TicketPriority      @default(NORMAL)
+  status     SupportTicketStatus @default(OPEN)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  resolvedAt DateTime?
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id])
+  messages TicketMessage[]
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  message   String
+  sender    String // 'ADMIN' or 'CUSTOMER'
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  action     String   // 'DELETE_BATCH', 'LOGIN', etc.
+  resourceId String?  // ID of the affected resource
+  details    Json?    // Stores old/new values
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  password        String
+  name            String?
+  phone           String? // Yetkili Telefon
+  role            UserRole  @default(USER)
+  tenantId        String?
+  acceptedTermsAt DateTime? // KVKK ve Kullanım Koşulları onay tarihi
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+}
+
+enum LicenseStatus {
+  UNUSED
+  USED
+}
+
+model License {
+  id               String        @id @default(cuid())
+  code             String        @unique // Örn: 'ZEYTIN-2026-IZMIR01'
+  status           LicenseStatus @default(UNUSED)
+  planDurationDays Int           @default(365)
+  tenantId         String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  isActive  Boolean  @default(true)
+  tenantId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant?          @relation(fields: [tenantId], references: [id])
+  tickets WeighingTicket[]
+
+  @@unique([name, tenantId]) // Her fabrika aynı isimde ürün ekleyebilir
+}
+
+model Customer {
+  id              String           @id @default(cuid())
+  name            String
+  phone           String?
+  tckn            String?
+  oliveOilBalance Float            @default(0) // Kg cinsinden yağ bakiyesi
+  balanceTL       Float            @default(0) // TL cinsinden borç/alacak
+  tenantId        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  tenant       Tenant?          @relation(fields: [tenantId], references: [id])
+  tickets      WeighingTicket[]
+  transactions Transaction[]
+  drums        Drum[]           @relation("DrumHolder")
+}
+
+enum TicketStatus {
+  PENDING
+  COMPLETED
+}
+
+enum OliveQuality {
+  TREE // Üst/Sırık
+  GROUND // Dip
+  MIXED // Karışık
+}
+
+model WeighingTicket {
+  id            String  @id @default(cuid())
+  publicId      String? // Hibrit ID: 26-0042-X7K (Unique per tenant removed from here, handled in app logic or composite unique)
+  customerId    String
+  grossKg       Int
+  tareKg        Int
+  netKg         Int
+  scaleWeightKg Int?
+
+  // Master Data
+  origin       String? // Köy/Mevkii
+  variety      String? // Deprecated: Product modeline geçildi, eski kayıtlar için kalsın
+  productId    String? // Yeni ilişki
+  quality      OliveQuality? // Kalite
+  containerNos String? // Bidon numaraları
+  note         String? // Yeni Alan: Not
+
+  status    TicketStatus @default(PENDING)
+  batchId   String?
+  tenantId  String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant   Tenant?          @relation(fields: [tenantId], references: [id])
+  customer Customer         @relation(fields: [customerId], references: [id])
+  product  Product?         @relation(fields: [productId], references: [id])
+  batch    ProductionBatch? @relation(fields: [batchId], references: [id])
+
+  @@unique([publicId, tenantId]) // PublicID fabrika bazında unique olmalı
+}
+
+enum ServiceType {
+  PERCENTAGE // Yağdan Pay
+  CASH_PER_KG // Para (Kg başı)
+}
+
+model ProductionBatch {
+  id           String  @id @default(cuid())
+  publicId     String? // Hibrit ID: 26-0001-A7Z
+  totalOliveKg Int
+  totalOilKg   Float
+  acidRatio    Float? // Asit oranı
+  yieldRatio   Float  // Randıman 1/X
+  status       ProductionStatus @default(COMPLETED)
+
+  // Financial / Service Data
+  serviceType   ServiceType @default(PERCENTAGE)
+  serviceAmount Float       @default(0) // %10 veya 2.5 TL
+  totalPrice    Float       @default(0) // Nakit ise toplam tutar
+
+  // Process Data
+  processTemp Int? // Sıkım Sıcaklığı
+  lineId      Int? // Hat No
+  filtration  Boolean @default(false)
+
+  factoryShareKg  Float
+  customerShareKg Float
+  tankId          String? // Hangi tanka aktarıldı
+  tenantId        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  tickets         WeighingTicket[]
+  transactions    Transaction[] // Bu üretimden kaynaklı işlemler
+  drums           Drum[]         @relation("BatchDrums")
+
+  tenant Tenant?    @relation(fields: [tenantId], references: [id])
+  tank   StockTank? @relation(fields: [tankId], references: [id])
+
+  @@unique([publicId, tenantId])
+}
+
+enum OilType {
+  ACID_03
+  ACID_05
+  ACID_08
+  VIRGIN
+  LAMPANTE
+}
+
+model StockTank {
+  id           String            @id @default(cuid())
+  name         String            
+  capacity     Int
+  currentLevel Float             @default(0)
+  type         OilType           @default(ACID_05)
+  acidRatio    Float?            // İçindeki yağın asit oranı (opsiyonel)
+  tenantId     String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  batches      ProductionBatch[]
+  transactions Transaction[]
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([name, tenantId]) // Tank ismi fabrika bazında unique
+}
+
+model Drum {
+  id              String      @id @default(cuid())
+  code            String
+  type            DrumType
+  capacity        Float
+  status          DrumStatus  @default(AVAILABLE)
+  tenantId        String
+  currentHolderId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  currentHolder Customer? @relation("DrumHolder", fields: [currentHolderId], references: [id])
+  productions   ProductionBatch[] @relation("BatchDrums")
+
+  @@unique([code, tenantId])
+}
+
+enum TransactionType {
+  OIL_IN // Üretimden gelen
+  OIL_OUT // Yağ teslimatı
+  LIQUIDATION // Yağ bozdurma
+  PAYMENT // Ödeme alma
+  SERVICE_FEE // Hizmet bedeli (Para olarak borç)
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  customerId  String
+  type        TransactionType
+  amountKg    Float? // Yağ hareketi ise miktar
+  amountTL    Float? // Para hareketi ise tutar
+  unitPrice   Float? // Bozdurma birim fiyatı
+  tankId      String? // Eğer fiziksel stoktan düşülecekse
+  batchId     String? // Hangi üretimden kaynaklandığı
+  description String?
+  tenantId    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  tenant   Tenant?          @relation(fields: [tenantId], references: [id])
+  customer Customer         @relation(fields: [customerId], references: [id])
+  tank     StockTank?       @relation(fields: [tankId], references: [id])
+  batch    ProductionBatch? @relation(fields: [batchId], references: [id])
+}
