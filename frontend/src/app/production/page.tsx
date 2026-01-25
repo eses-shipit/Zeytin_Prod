@@ -684,7 +684,7 @@ export default function ProductionPage() {
       setStatus({ 
         type: "success", 
         message: res.data.smsSent 
-          ? "Üretim başarıyla tamamlandı! Müşteriye bilgilendirme SMS&apos;i gönderildi." 
+          ? "Üretim başarıyla tamamlandı! Müşteriye bilgilendirme SMS'i gönderildi." 
           : "Üretim başarıyla tamamlandı. (SMS gönderilemedi: Telefon no eksik)"
       });
       
