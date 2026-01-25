@@ -17,9 +17,14 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://zeytin-psi.vercel.app", // Vercel adresim
+      "https://zeytin-saas.vercel.app", // Yedek (proje adı)
+    ],
     credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   });
 
   // Strict Validation
