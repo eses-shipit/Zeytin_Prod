@@ -114,8 +114,8 @@ export function Navbar() {
   const links = isSuperAdminPage ? adminLinks : tenantLinks;
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white overflow-x-hidden">
-      <div className="mx-auto flex h-16 min-w-0 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
+    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white">
+      <div className="mx-auto flex h-16 min-w-0 max-w-7xl items-center justify-between gap-4 overflow-x-hidden px-4 md:px-6">
         {/* Logo */}
         <Link
           href={isSuperAdminPage ? "/admin" : "/dashboard"}
