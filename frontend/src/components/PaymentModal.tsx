@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { X, Loader2, Banknote } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,16 +24,10 @@ export function PaymentModal({ isOpen, onClose, customerId, customerName, onSucc
 
     setLoading(true);
     try {
-      await axios.post(
-        `http://localhost:3001/transactions/${customerId}/payment`,
-        {
-          amountTL: Number(amount),
-          description: description || undefined,
-        },
-        {
-          headers: { "X-Tenant-ID": "tenant_demo" },
-        }
-      );
+      await axios.post(`/transactions/${customerId}/payment`, {
+        amountTL: Number(amount),
+        description: description || undefined,
+      });
       toast.success("Tahsilat başarıyla kaydedildi.");
       onSuccess();
       onClose();

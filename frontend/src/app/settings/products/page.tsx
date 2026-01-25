@@ -20,9 +20,7 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/products", {
-        headers: { "X-Tenant-ID": "tenant_demo" },
-      });
+      const res = await axios.get("/products");
       setProducts(res.data);
     } catch (err) {
       toast.error("Ürünler yüklenemedi");
@@ -41,11 +39,7 @@ export default function ProductsPage() {
 
     setSubmitting(true);
     try {
-      await axios.post(
-        "http://localhost:3001/products",
-        { name: newName, isActive: true },
-        { headers: { "X-Tenant-ID": "tenant_demo" } }
-      );
+      await axios.post("/products", { name: newName, isActive: true });
       toast.success("Ürün eklendi");
       setNewName("");
       fetchProducts();
@@ -59,9 +53,7 @@ export default function ProductsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
     try {
-      await axios.delete(`http://localhost:3001/products/${id}`, {
-        headers: { "X-Tenant-ID": "tenant_demo" },
-      });
+      await axios.delete(`/products/${id}`);
       toast.success("Ürün silindi");
       fetchProducts();
     } catch (err) {

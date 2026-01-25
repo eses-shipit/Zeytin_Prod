@@ -26,6 +26,8 @@ export default function LoginPage() {
         // Token ve user bilgilerini kaydet
         localStorage.setItem("user", JSON.stringify(res.data.user));
         localStorage.setItem("token", res.data.token);
+        // Middleware'in okuyabilmesi için cookie'ye de yaz (path=/, 7 gün)
+        document.cookie = `token=${res.data.token}; path=/; max-age=604800; SameSite=Lax`;
         
         // Debug: Token'ın kaydedildiğini kontrol et
         console.log("✅ Login successful. Token saved:", res.data.token ? "Yes" : "No");

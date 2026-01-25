@@ -70,6 +70,8 @@ export function Navbar() {
   const handleLogout = () => {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
+      // Middleware için token cookie'sini de sil
+      document.cookie = "token=; path=/; max-age=0";
       // Impersonate verilerini de temizle
       localStorage.removeItem("superAdminSession");
       localStorage.removeItem("superAdminToken");

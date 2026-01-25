@@ -37,6 +37,7 @@ export default function ImpersonateBanner() {
           // Restore Super Admin
           localStorage.setItem("user", superAdminSession);
           localStorage.setItem("token", superAdminToken);
+          document.cookie = `token=${superAdminToken}; path=/; max-age=604800; SameSite=Lax`;
           
           localStorage.removeItem("superAdminSession");
           localStorage.removeItem("superAdminToken");
@@ -46,6 +47,7 @@ export default function ImpersonateBanner() {
       } else {
           // Fallback: Logout
           localStorage.clear();
+          document.cookie = "token=; path=/; max-age=0";
           window.location.href = "/auth/login";
       }
   };
