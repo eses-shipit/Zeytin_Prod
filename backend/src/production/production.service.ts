@@ -554,13 +554,14 @@ export class ProductionService {
     }
 
     try {
-      // PrismaService içindeki middleware tenantId'yi otomatik ekleyecek
+      // tenantId Drum modelinde zorunlu alan, bu yüzden relation üzerinden bağlıyoruz
       return await this.prisma.drum.create({
         data: {
           code: data.code,
           type: data.type,
           capacity: data.capacity,
           status: "AVAILABLE",
+          tenant: { connect: { id: tenantId } },
         },
       });
     } catch (error: any) {
