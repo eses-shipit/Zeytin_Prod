@@ -95,18 +95,22 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
                   // Array ise (createMany)
                   if (Array.isArray(params.args.data)) {
                       params.args.data.forEach((item: any) => {
-                          if (!item.tenantId) {
-                              item.tenantId = tenantId;
-                              console.log(`[PrismaService] Added tenantId to createMany item:`, tenantId);
+                          // Eğer relation üzerinden tenant zaten ayarlanmışsa (tenant: { connect: ... })
+                          // ekstra tenantId eklemeyelim; yoksa Prisma "Unknown argument tenantId" hatası verebiliyor.
+                          if (item.tenant || item.tenantId) {
+                              return;
                           }
+                          item.tenantId = tenantId;
+                          console.log(`[PrismaService] Added tenantId to createMany item:`, tenantId);
                       });
                   } else {
-                      // Tekil ise
-                      if (!params.args.data.tenantId) {
-                          params.args.data.tenantId = tenantId;
+                      const data = params.args.data as any;
+                      // Relation üzerinden tenant verildiyse tenantId eklemeyi atla
+                      if (!data.tenant && !data.tenantId) {
+                          data.tenantId = tenantId;
                           console.log(`[PrismaService] Added tenantId to create data:`, tenantId);
-                      } else {
-                          console.log(`[PrismaService] tenantId already in create data:`, params.args.data.tenantId);
+                      } else if (data.tenantId) {
+                          console.log(`[PrismaService] tenantId already in create data:`, data.tenantId);
                       }
                   }
               }
