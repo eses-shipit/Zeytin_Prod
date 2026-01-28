@@ -47,7 +47,8 @@ export class ProductionController {
 
   @Post("drums")
   async createDrum(@Body() body: { code: string; type: "PLASTIC" | "CHROME" | "TIN"; capacity: number }) {
-    return this.productionService.createDrum(body);
+    const tenantId = this.contextService.get("TENANT_ID") || "";
+    return this.productionService.createDrum(tenantId, body);
   }
 
   @Post("deliver-drums")

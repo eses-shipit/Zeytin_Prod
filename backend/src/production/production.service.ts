@@ -541,20 +541,19 @@ export class ProductionService {
     });
   }
 
-  async createDrum(data: { code: string; type: "PLASTIC" | "CHROME" | "TIN"; capacity: number }) {
+  async createDrum(
+    tenantId: string,
+    data: { code: string; type: "PLASTIC" | "CHROME" | "TIN"; capacity: number },
+  ) {
     if (!data.code || !data.type || !data.capacity) {
       throw new BadRequestException("Kod, tür ve kapasite zorunludur.");
     }
 
-    const tenantId = this.contextService.get("TENANT_ID");
     if (!tenantId) {
-      // Bu aşamada tenantId yoksa büyük ihtimalle kullanıcı oturumu veya fabrika seçimi yoktur
-      // Bunu 400 olarak döndürüp frontend'de anlamlı mesaj gösterelim
       throw new BadRequestException("Fabrika bilgisi bulunamadı. Lütfen giriş yapıp bir fabrika seçin.");
     }
 
     try {
-      // tenantId Drum modelinde zorunlu alan, bu yüzden relation üzerinden bağlıyoruz
       return await this.prisma.drum.create({
         data: {
           code: data.code,
@@ -565,7 +564,6 @@ export class ProductionService {
         },
       });
     } catch (error: any) {
-      // Aynı kodla ikinci kez bidon eklenirse daha anlaşılır bir hata döndür
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         throw new BadRequestException("Bu kodla kayıtlı bir bidon zaten var.");
       }
