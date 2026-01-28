@@ -19,6 +19,7 @@ import {
   FileSpreadsheet,
   Search,
   CalendarDays,
+  User,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/lib/cn";
@@ -1163,7 +1164,16 @@ export default function ProductionPage() {
                         </td>
                       </tr>
                     ) : (
-                      completedBatches.map((batch) => (
+                      completedBatches.map((batch) => {
+                        const customerNames = Array.from(
+                          new Set(
+                            batch.tickets
+                              .map((t) => t.customer?.name)
+                              .filter((name): name is string => Boolean(name)),
+                          ),
+                        );
+
+                        return (
                         <tr key={batch.id} className="hover:bg-slate-50 transition-colors group">
                           <td className="px-6 py-4">
                             <div className="font-medium text-slate-900">
@@ -1172,6 +1182,14 @@ export default function ProductionPage() {
                             <div className="text-xs text-slate-400 font-mono mt-1">
                                {batch.publicId || `#${batch.id.slice(-6)}`}
                             </div>
+                            {customerNames.length > 0 && (
+                              <div className="mt-1 flex items-center gap-1 text-xs text-slate-600">
+                                <User className="h-3 w-3 text-slate-400" />
+                                <span className="truncate max-w-[220px] md:max-w-xs lg:max-w-sm">
+                                  {customerNames.join(", ")}
+                                </span>
+                              </div>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-slate-900 font-medium">
                             {batch.totalOliveKg} kg
@@ -1303,7 +1321,8 @@ export default function ProductionPage() {
                             </button>
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

@@ -43,6 +43,7 @@ type DashboardStats = {
     yieldByOrigin: { name: string; yield: number }[];
     qualityDistribution: { name: string; value: number }[];
     revenueByProduct: { name: string; value: number }[];
+    customersByVillage: { name: string; value: number }[];
   };
 };
 
@@ -280,6 +281,28 @@ export default function DashboardPage() {
                 <Tooltip />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Müşterilerin Köy Dağılımı */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-lg font-semibold mb-6 text-gray-700 flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            Müşterilerin Köy Dağılımı
+          </h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.charts.customersByVillage}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                  cursor={{ fill: "#f3f4f6" }}
+                />
+                <Bar dataKey="value" fill="#6366F1" radius={[4, 4, 0, 0]} name="Müşteri Sayısı" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

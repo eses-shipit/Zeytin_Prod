@@ -117,6 +117,17 @@ export class ReportsService {
       value: g._sum.netKg || 0,
     }));
 
+    // Grafik 3: Müşterilerin Köy Dağılımı
+    const customersByVillageGroups = await this.prisma.customer.groupBy({
+      by: ["village"],
+      _count: { _all: true },
+    });
+
+    const customersByVillage = customersByVillageGroups.map((g) => ({
+      name: g.village || "Belirsiz",
+      value: g._count._all,
+    }));
+
     return {
       kpis: {
         dailyOliveKg: dailyOlive._sum.netKg || 0,
@@ -132,6 +143,7 @@ export class ReportsService {
         yieldByOrigin,
         qualityDistribution,
         revenueByProduct, // New Chart Data
+        customersByVillage,
       },
     };
   }

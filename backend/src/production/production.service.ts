@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
+import { Prisma, } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProductionBatchDto, ServiceType } from "./dto/create-production-batch.dto";
 import { SmsService } from "../sms/sms.service";
@@ -544,19 +545,31 @@ export class ProductionService {
     if (!data.code || !data.type || !data.capacity) {
       throw new BadRequestException("Kod, tür ve kapasite zorunludur.");
     }
+
     const tenantId = this.contextService.get("TENANT_ID");
     if (!tenantId) {
-      throw new BadRequestException("Tenant bağlamı bulunamadı.");
+      // Bu aşamada tenantId yoksa büyük ihtimalle kullanıcı oturumu veya fabrika seçimi yoktur
+      // Bunu 400 olarak döndürüp frontend'de anlamlı mesaj gösterelim
+      throw new BadRequestException("Fabrika bilgisi bulunamadı. Lütfen giriş yapıp bir fabrika seçin.");
     }
-    return this.prisma.drum.create({
-      data: {
-        code: data.code,
-        type: data.type,
-        capacity: data.capacity,
-        status: "AVAILABLE",
-        tenant: { connect: { id: tenantId } },
-      },
-    });
+
+    try {
+      // PrismaService içindeki middleware tenantId'yi otomatik ekleyecek
+      return await this.prisma.drum.create({
+        data: {
+          code: data.code,
+          type: data.type,
+          capacity: data.capacity,
+          status: "AVAILABLE",
+        },
+      });
+    } catch (error: any) {
+      // Aynı kodla ikinci kez bidon eklenirse daha anlaşılır bir hata döndür
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new BadRequestException("Bu kodla kayıtlı bir bidon zaten var.");
+      }
+      throw error;
+    }
   }
 
   private calculateServiceFee(type: ServiceType, amount: number, totalOliveKg: number, totalOilKg: number) {
