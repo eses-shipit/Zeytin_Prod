@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import axios from "@/lib/axios"; // Use configured axios instance
-import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+// DİKKAT: `next/navigation` değil. Dil prefix'ini koruyan sarmalayıcı.
+import { useRouter } from "@/i18n/navigation";
 import {
   BarChart,
   Bar,
@@ -28,6 +30,19 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { formatCurrency, formatKg, formatNumber } from "@/lib/format";
+import { useTenantCurrency } from "@/hooks/useTenantCurrency";
+import type { Locale } from "@/i18n/routing";
+
+/**
+ * REFERANS MİGRASYON — diğer sayfalar bu deseni takip etmeli (bkz. I18N.md).
+ *
+ * Bu dosyada gösterilen 4 şey:
+ *  1. `useTranslations("dashboard")` ile namespace'e bağlanma
+ *  2. `@/i18n/navigation` üzerinden dil-korumalı yönlendirme
+ *  3. `@/lib/format` ile dil-farkında sayı/para/kg biçimlendirme
+ *  4. Para biriminin tenant'tan gelmesi — `₺` sabiti YOK
+ */
 
 type DashboardStats = {
   kpis: {
@@ -50,10 +65,12 @@ type DashboardStats = {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard");
+  const locale = useLocale() as Locale;
+  const currency = useTenantCurrency();
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [range, setRange] = useState<"all" | "today" | "week">("all");
 
   useEffect(() => {
@@ -86,15 +103,15 @@ export default function DashboardPage() {
   if (!stats) {
     return (
       <div className="p-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-700">Hoş Geldiniz!</h2>
-        <p className="text-gray-500 mt-2">Henüz veri girişi yapılmamış. Yeni tartım yaparak başlayabilirsiniz.</p>
+        <h2 className="text-xl font-semibold text-gray-700">{t("empty.title")}</h2>
+        <p className="text-gray-500 mt-2">{t("empty.description")}</p>
         <div className="mt-6 flex justify-center gap-4">
-             <button 
+             <button
                 onClick={() => router.push("/")}
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
              >
                 <Scale className="h-4 w-4" />
-                İlk Tartımı Yap
+                {t("firstWeighing")}
             </button>
         </div>
       </div>
@@ -106,35 +123,31 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 className="text-2xl font-bold text-gray-900">Fabrika Paneli</h1>
-            <p className="text-gray-500 text-sm mt-1">Operasyonel özet ve metrikler (varsayılan: Tüm Zamanlar).</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+            <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
             <div className="flex bg-slate-100 rounded-xl p-1 text-sm">
-              {[
-                { key: "today", label: "Bugün" },
-                { key: "week", label: "Bu Hafta" },
-                { key: "all", label: "Tüm Zamanlar" },
-              ].map((opt) => (
+              {(["today", "week", "all"] as const).map((key) => (
                 <button
-                  key={opt.key}
-                  onClick={() => setRange(opt.key as any)}
+                  key={key}
+                  onClick={() => setRange(key)}
                   className={cn(
                     "px-3 py-1.5 rounded-lg transition",
-                    range === opt.key ? "bg-white shadow-sm text-slate-900" : "text-slate-600"
+                    range === key ? "bg-white shadow-sm text-slate-900" : "text-slate-600"
                   )}
                 >
-                  {opt.label}
+                  {t(`range.${key}`)}
                 </button>
               ))}
             </div>
-            <button 
+            <button
                 onClick={() => router.push("/")}
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
             >
                 <Scale className="h-4 w-4" />
-                İlk Tartımı Yap
+                {t("firstWeighing")}
             </button>
         </div>
       </div>
@@ -142,28 +155,33 @@ export default function DashboardPage() {
       {/* KPI Kartları - Üst Sıra (Operasyonel) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KpiCard
-          title="Giren Zeytin"
-          value={`${stats.kpis.dailyOliveKg.toLocaleString("tr-TR")} kg`}
+          title={t("kpi.oliveIn.title")}
+          value={formatKg(stats.kpis.dailyOliveKg, locale)}
           icon={<Scale className="w-8 h-8 text-blue-600" />}
-          trend="Seçili aralık"
+          trend={t("kpi.oliveIn.trend")}
         />
         <KpiCard
-          title="Çıkan Yağ"
-          value={`${stats.kpis.dailyOilKg.toLocaleString("tr-TR")} kg`}
+          title={t("kpi.oilOut.title")}
+          value={formatKg(stats.kpis.dailyOilKg, locale)}
           icon={<Droplet className="w-8 h-8 text-green-600" />}
-          trend="Seçili aralık"
+          trend={t("kpi.oilOut.trend")}
         />
         <KpiCard
-          title="Ortalama Randıman"
-          value={`1/${stats.kpis.avgYield.toFixed(2)}`}
+          title={t("kpi.avgYield.title")}
+          // "1/5,32" — randıman oranı. Bölme çizgisi dile bağlı değil ama
+          // ondalık ayracı bağlı, o yüzden sayı kısmı formatNumber'dan geçiyor.
+          value={`1/${formatNumber(stats.kpis.avgYield, locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`}
           icon={<Activity className="w-8 h-8 text-purple-600" />}
-          trend="Genel Ort."
+          trend={t("kpi.avgYield.trend")}
         />
         <KpiCard
-          title="Bekleyen Fiş"
-          value={stats.kpis.pendingTicketsCount.toString()}
+          title={t("kpi.pendingTickets.title")}
+          value={formatNumber(stats.kpis.pendingTicketsCount, locale)}
           icon={<Ticket className="w-8 h-8 text-orange-600" />}
-          trend="Sırada Bekleyen"
+          trend={t("kpi.pendingTickets.trend")}
         />
       </div>
 
@@ -173,10 +191,12 @@ export default function DashboardPage() {
               <AlertTriangle className="h-6 w-6 text-amber-600" />
               <div>
                   <p className="font-bold text-amber-800 text-lg">
-                      ⚠️ Sıkım Bekleyen {stats.kpis.pendingTicketsCount} Fiş Var!
+                      {/* Emoji kasıtlı olarak JSX'te: çeviri dosyasına girerse
+                          her dilde tekrar edilmesi/kaybolması gerekir. */}
+                      ⚠️ {t("alert.title", { count: stats.kpis.pendingTicketsCount })}
                   </p>
                   <p className="text-sm text-amber-700">
-                      Operasyonel verimlilik için hemen üretime alın.
+                      {t("alert.description")}
                   </p>
               </div>
           </div>
@@ -185,49 +205,61 @@ export default function DashboardPage() {
       {/* KPI Kartları - Alt Sıra (Finansal & İdari) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <KpiCard
-            title="Toplam Alacak (Para)"
-            value={`₺${stats.kpis.totalReceivable.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            title={t("kpi.receivable.title")}
+            // Para birimi tenant'tan (GET /policy). "₺" sabiti YOK.
+            value={formatCurrency(stats.kpis.totalReceivable, currency, locale)}
             icon={<Banknote className="w-8 h-8 text-emerald-600" />}
-            trend="Müşteri Bakiyesi"
+            trend={t("kpi.receivable.trend")}
           />
           <KpiCard
-            title="Fabrika Hakkı (Yağ)"
-            value={`${stats.kpis.totalFactoryShareOil.toFixed(1)} kg`}
+            title={t("kpi.factoryShareOil.title")}
+            value={formatKg(stats.kpis.totalFactoryShareOil, locale, { digits: 1 })}
             icon={<Droplet className="w-8 h-8 text-amber-500" />}
-            trend="Toplam Birikmiş"
+            trend={t("kpi.factoryShareOil.trend")}
           />
           <KpiCard
-            title="İçerideki Kaplar"
-            value={`${stats.kpis.pendingContainerTickets} Parti`}
+            title={t("kpi.containers.title")}
+            value={t("kpi.containers.value", {
+              count: stats.kpis.pendingContainerTickets,
+            })}
             icon={<Package className="w-8 h-8 text-slate-600" />}
-            trend="Teslim Bekleyen"
+            trend={t("kpi.containers.trend")}
           />
       </div>
 
       {/* Grafikler */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {/* Ürün Bazlı Fabrika Payı (kg) */}
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 col-span-1 lg:col-span-2">
             <h3 className="text-lg font-semibold mb-6 text-gray-700 flex items-center gap-2">
                 <Droplet className="w-5 h-5 text-emerald-600" />
-                Ürün Bazlı Fabrika Payı (kg)
+                {t("charts.factoryShareByProduct.title")}
             </h3>
             <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.charts.revenueByProduct}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" />
-                        <YAxis 
-                            tickFormatter={(val) => `${val} kg`} 
+                        <YAxis
+                            tickFormatter={(val) => formatKg(val, locale)}
                             width={80}
                         />
-                        <Tooltip 
-                            formatter={(value: number) => [`${value.toFixed(2)} kg`, "Fabrika Payı"]}
+                        <Tooltip
+                            formatter={(value: number) => [
+                              formatKg(value, locale, { digits: 2 }),
+                              t("charts.factoryShareByProduct.series"),
+                            ]}
                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                             cursor={{ fill: '#f3f4f6' }}
                         />
-                        <Bar dataKey="value" fill="#059669" radius={[4, 4, 0, 0]} name="Fabrika Payı (kg)" barSize={60} />
+                        <Bar
+                          dataKey="value"
+                          fill="#059669"
+                          radius={[4, 4, 0, 0]}
+                          name={t("charts.factoryShareByProduct.title")}
+                          barSize={60}
+                        />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -237,7 +269,7 @@ export default function DashboardPage() {
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
           <h3 className="text-lg font-semibold mb-6 text-gray-700 flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            Köylere Göre Randıman Analizi
+            {t("charts.yieldByVillage.title")}
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -245,11 +277,16 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" />
                 <YAxis unit="%" />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   cursor={{ fill: '#f3f4f6' }}
                 />
-                <Bar dataKey="yield" fill="#3B82F6" radius={[4, 4, 0, 0]} name="Randıman" />
+                <Bar
+                  dataKey="yield"
+                  fill="#3B82F6"
+                  radius={[4, 4, 0, 0]}
+                  name={t("charts.yieldByVillage.series")}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -259,7 +296,7 @@ export default function DashboardPage() {
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
           <h3 className="text-lg font-semibold mb-6 text-gray-700 flex items-center gap-2">
             <Scale className="w-5 h-5" />
-            Zeytin Kalite Dağılımı
+            {t("charts.qualityDistribution.title")}
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -269,7 +306,12 @@ export default function DashboardPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} (%${(percent * 100).toFixed(0)})`}
+                  label={({ name, percent }) =>
+                    `${name} (${formatNumber(percent * 100, locale, {
+                      style: "percent",
+                      maximumFractionDigits: 0,
+                    })})`
+                  }
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -289,7 +331,7 @@ export default function DashboardPage() {
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
           <h3 className="text-lg font-semibold mb-6 text-gray-700 flex items-center gap-2">
             <Package className="w-5 h-5" />
-            Müşterilerin Köy Dağılımı
+            {t("charts.customersByVillage.title")}
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -301,7 +343,12 @@ export default function DashboardPage() {
                   contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
                   cursor={{ fill: "#f3f4f6" }}
                 />
-                <Bar dataKey="value" fill="#6366F1" radius={[4, 4, 0, 0]} name="Müşteri Sayısı" />
+                <Bar
+                  dataKey="value"
+                  fill="#6366F1"
+                  radius={[4, 4, 0, 0]}
+                  name={t("charts.customersByVillage.series")}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

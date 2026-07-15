@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "search": "Pesquisar",
+    "loading": "A carregar…",
+    "error": "Ocorreu um erro.",
+    "retry": "Tentar novamente",
+    "noData": "Não foram encontrados registos.",
+    "back": "Voltar",
+    "actions": "Ações",
+    "yes": "Sim",
+    "no": "Não",
+    "total": "Total"
+  },
+  "dashboard": {
+    "meta": {
+      "title": "Painel do lagar",
+      "description": "Vista geral do lagar e estatísticas resumidas."
+    },
+    "title": "Painel do lagar",
+    "subtitle": "Resumo operacional e métricas (predefinição: sempre).",
+    "firstWeighing": "Efetuar a primeira pesagem",
+    "empty": {
+      "title": "Bem-vindo!",
+      "description": "Ainda não foram introduzidos dados. Pode começar por efetuar uma nova pesagem."
+    },
+    "range": {
+      "today": "Hoje",
+      "week": "Esta semana",
+      "all": "Sempre"
+    },
+    "kpi": {
+      "oliveIn": {
+        "title": "Azeitona recebida",
+        "trend": "Intervalo selecionado"
+      },
+      "oilOut": {
+        "title": "Azeite produzido",
+        "trend": "Intervalo selecionado"
+      },
+      "avgYield": {
+        "title": "Rendimento médio",
+        "trend": "Média geral"
+      },
+      "pendingTickets": {
+        "title": "Talões pendentes",
+        "trend": "Em fila"
+      },
+      "receivable": {
+        "title": "Total a receber",
+        "trend": "Saldo de clientes"
+      },
+      "factoryShareOil": {
+        "title": "Quota do lagar (azeite)",
+        "trend": "Total acumulado"
+      },
+      "containers": {
+        "title": "Recipientes nas instalações",
+        "value": "{count, plural, one {# lote} other {# lotes}}",
+        "trend": "À espera de entrega"
+      }
+    },
+    "alert": {
+      "title": "{count, plural, one {Existe # talão à espera de moenda!} other {Existem # talões à espera de moenda!}}",
+      "description": "Encaminhe-os já para produção para não perder eficiência."
+    },
+    "charts": {
+      "factoryShareByProduct": {
+        "title": "Quota do lagar por produto (kg)",
+        "series": "Quota do lagar"
+      },
+      "yieldByVillage": {
+        "title": "Análise de rendimento por aldeia",
+        "series": "Rendimento"
+      },
+      "qualityDistribution": {
+        "title": "Distribuição da qualidade da azeitona"
+      },
+      "customersByVillage": {
+        "title": "Distribuição de clientes por aldeia",
+        "series": "Número de clientes"
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "loading": "Cargando…",
+    "error": "Se ha producido un error.",
+    "retry": "Reintentar",
+    "noData": "No se han encontrado registros.",
+    "back": "Atrás",
+    "actions": "Acciones",
+    "yes": "Sí",
+    "no": "No",
+    "total": "Total"
+  },
+  "dashboard": {
+    "meta": {
+      "title": "Panel de la almazara",
+      "description": "Vista general de la almazara y estadísticas resumidas."
+    },
+    "title": "Panel de la almazara",
+    "subtitle": "Resumen operativo y métricas (por defecto: todo el periodo).",
+    "firstWeighing": "Realizar la primera pesada",
+    "empty": {
+      "title": "¡Bienvenido!",
+      "description": "Aún no se han introducido datos. Puede empezar realizando una nueva pesada."
+    },
+    "range": {
+      "today": "Hoy",
+      "week": "Esta semana",
+      "all": "Todo el periodo"
+    },
+    "kpi": {
+      "oliveIn": {
+        "title": "Aceituna entrante",
+        "trend": "Intervalo seleccionado"
+      },
+      "oilOut": {
+        "title": "Aceite producido",
+        "trend": "Intervalo seleccionado"
+      },
+      "avgYield": {
+        "title": "Rendimiento medio",
+        "trend": "Media general"
+      },
+      "pendingTickets": {
+        "title": "Tickets pendientes",
+        "trend": "En cola"
+      },
+      "receivable": {
+        "title": "Total por cobrar",
+        "trend": "Saldo de clientes"
+      },
+      "factoryShareOil": {
+        "title": "Cuota de la almazara (aceite)",
+        "trend": "Total acumulado"
+      },
+      "containers": {
+        "title": "Envases en planta",
+        "value": "{count, plural, one {# lote} other {# lotes}}",
+        "trend": "Pendientes de entrega"
+      }
+    },
+    "alert": {
+      "title": "{count, plural, one {¡Hay # ticket pendiente de molienda!} other {¡Hay # tickets pendientes de molienda!}}",
+      "description": "Páselos a producción cuanto antes para no perder eficiencia."
+    },
+    "charts": {
+      "factoryShareByProduct": {
+        "title": "Cuota de la almazara por producto (kg)",
+        "series": "Cuota de la almazara"
+      },
+      "yieldByVillage": {
+        "title": "Análisis de rendimiento por pueblo",
+        "series": "Rendimiento"
+      },
+      "qualityDistribution": {
+        "title": "Distribución de calidad de la aceituna"
+      },
+      "customersByVillage": {
+        "title": "Distribución de clientes por pueblo",
+        "series": "Número de clientes"
+      }
+    }
+  }
+}

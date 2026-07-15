@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "confirm": "Conferma",
+    "search": "Cerca",
+    "loading": "Caricamento…",
+    "error": "Si è verificato un errore.",
+    "retry": "Riprova",
+    "noData": "Nessun record trovato.",
+    "back": "Indietro",
+    "actions": "Azioni",
+    "yes": "Sì",
+    "no": "No",
+    "total": "Totale"
+  },
+  "dashboard": {
+    "meta": {
+      "title": "Pannello del frantoio",
+      "description": "Panoramica del frantoio e statistiche riepilogative."
+    },
+    "title": "Pannello del frantoio",
+    "subtitle": "Riepilogo operativo e metriche (predefinito: sempre).",
+    "firstWeighing": "Effettua la prima pesata",
+    "empty": {
+      "title": "Benvenuto!",
+      "description": "Non è ancora stato inserito alcun dato. Puoi iniziare effettuando una nuova pesata."
+    },
+    "range": {
+      "today": "Oggi",
+      "week": "Questa settimana",
+      "all": "Sempre"
+    },
+    "kpi": {
+      "oliveIn": {
+        "title": "Olive in entrata",
+        "trend": "Intervallo selezionato"
+      },
+      "oilOut": {
+        "title": "Olio prodotto",
+        "trend": "Intervallo selezionato"
+      },
+      "avgYield": {
+        "title": "Resa media",
+        "trend": "Media generale"
+      },
+      "pendingTickets": {
+        "title": "Scontrini in attesa",
+        "trend": "In coda"
+      },
+      "receivable": {
+        "title": "Totale crediti",
+        "trend": "Saldo clienti"
+      },
+      "factoryShareOil": {
+        "title": "Quota del frantoio (olio)",
+        "trend": "Totale accumulato"
+      },
+      "containers": {
+        "title": "Contenitori in sede",
+        "value": "{count, plural, one {# lotto} other {# lotti}}",
+        "trend": "In attesa di consegna"
+      }
+    },
+    "alert": {
+      "title": "{count, plural, one {C'è # scontrino in attesa di molitura!} other {Ci sono # scontrini in attesa di molitura!}}",
+      "description": "Portali subito in produzione per non perdere efficienza."
+    },
+    "charts": {
+      "factoryShareByProduct": {
+        "title": "Quota del frantoio per prodotto (kg)",
+        "series": "Quota del frantoio"
+      },
+      "yieldByVillage": {
+        "title": "Analisi della resa per paese",
+        "series": "Resa"
+      },
+      "qualityDistribution": {
+        "title": "Distribuzione della qualità delle olive"
+      },
+      "customersByVillage": {
+        "title": "Distribuzione dei clienti per paese",
+        "series": "Numero di clienti"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WeighingTerminal } from "../components/WeighingTerminal";
+import { WeighingTerminal } from "@/components/WeighingTerminal";
 
 /**
  * `/` şu an kantar terminali — pazarlama/landing sayfası DEĞİL, kimlik

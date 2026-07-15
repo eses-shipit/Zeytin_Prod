@@ -1,3 +1,10 @@
+import { routing } from "@/i18n/routing";
+
+// Dil listesi tek kaynaktan gelsin: burada tekrar yazılırsa hreflang ile
+// gerçek routing zamanla birbirinden ayrılır.
+const SUPPORTED_LOCALES = routing.locales;
+const DEFAULT_LOCALE = routing.defaultLocale;
+
 /**
  * Tek kaynak: hangi rotalar gerçekten herkese açık?
  *
@@ -36,3 +43,37 @@ export const INDEXABLE = {
   index: true,
   follow: true,
 } as const;
+
+/**
+ * Belirli bir herkese açık sayfa için canonical + hreflang üretir.
+ *
+ * SADECE PUBLIC_PATHS içindeki sayfalarda kullan. Uygulama içi sayfalar
+ * noindex olduğu için hreflang oradaki hiçbir soruna çare olmaz; dahası
+ * `alternates.languages` vermek, indekslenmemesi gereken URL'leri arama
+ * motorlarına duyurmak anlamına gelir.
+ *
+ * URL şeması `routing.localePrefix: "as-needed"` ile birebir uyumlu olmalı:
+ *   tr (varsayılan) -> /auth/login        (prefix YOK)
+ *   diğer diller    -> /es/auth/login
+ * Aksi halde hreflang, redirect'e giden veya 404 olan adresleri gösterir.
+ *
+ * `x-default`: dil tercihi belirsiz olan botlara/kullanıcılara varsayılan
+ * (prefix'siz, Türkçe) sürümü işaret eder.
+ */
+export function localizedAlternates(path: string): {
+  canonical: string;
+  languages: Record<string, string>;
+} {
+  const canonicalFor = (locale: string) =>
+    locale === DEFAULT_LOCALE
+      ? `${siteUrl}${path}`
+      : `${siteUrl}/${locale}${path}`;
+
+  const languages: Record<string, string> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    languages[locale] = canonicalFor(locale);
+  }
+  languages["x-default"] = canonicalFor(DEFAULT_LOCALE);
+
+  return { canonical: canonicalFor(DEFAULT_LOCALE), languages };
+}

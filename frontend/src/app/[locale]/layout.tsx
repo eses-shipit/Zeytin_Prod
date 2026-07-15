@@ -1,11 +1,30 @@
-import "./globals.css";
+import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
+import { notFound } from "next/navigation";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { Navbar } from "@/components/Navbar";
 import { Toaster } from "sonner";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { OfflineSyncManager } from "@/components/OfflineSyncManager";
 import ImpersonateBanner from "@/components/ImpersonateBanner";
 import { siteUrl } from "@/lib/seo";
+import { routing, isLocale, localeToBcp47 } from "@/i18n/routing";
+
+/**
+ * Bu, uygulamanın ROOT layout'udur. `src/app/layout.tsx` artık YOK — çünkü
+ * `<html lang>` değerinin [locale] segmentine bağlı olması gerekiyor ve o
+ * segment ancak burada okunabiliyor. Next.js altındaki tüm sayfaları bu
+ * layout ile sarmaladığı için ayrıca bir üst layout'a ihtiyaç yok.
+ *
+ * robots.ts / sitemap.ts / manifest.ts bilinçli olarak `src/app/` altında
+ * kaldı: bunlar sayfa değil, dilden bağımsız metadata rotaları.
+ */
+
+/** Build sırasında 4 dilin de statik olarak üretilmesini sağlar. */
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -55,15 +74,28 @@ export const viewport: Viewport = {
   userScalable: false, // App-like feel, prevents zooming
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params: { locale },
 }: {
   children: React.ReactNode;
+  params: { locale: string };
 }) {
+  // Desteklenmeyen bir dil kodu ("/de/dashboard") 404 olmalı; sessizce tr'ye
+  // düşmek yanlış dilde içerik servis etmek demek olurdu.
+  if (!isLocale(locale)) {
+    notFound();
+  }
+
+  // Statik render sırasında aktif dili bildirir (generateStaticParams ile birlikte).
+  setRequestLocale(locale);
+
+  const messages = await getMessages();
+
   return (
-    // TODO(i18n): `lang` şimdilik sabit "tr". [locale] tabanlı routing fazında
-    // bu değer segment parametresinden dinamik olarak gelecek.
-    <html lang="tr">
+    // `lang` artık [locale] segmentinden geliyor. Bölgesel etiket kullanıyoruz
+    // ("tr-TR") çünkü ekran okuyucular ve tarayıcı çevirisi için daha spesifik.
+    <html lang={localeToBcp47[locale]}>
       <head>
         <style dangerouslySetInnerHTML={{__html: `
           @media print {
@@ -74,12 +106,19 @@ export default function RootLayout({
         `}} />
       </head>
       <body className="bg-slate-50 min-h-screen">
-        <ImpersonateBanner />
-        <OfflineBanner />
-        <OfflineSyncManager />
-        <Navbar />
-        <main>{children}</main>
-        <Toaster position="top-right" richColors />
+        {/*
+          Mesajları client component'lere taşır. Şu an TÜM sayfalar
+          "use client" olduğu için katalog bütün olarak gönderiliyor.
+          Katalog büyüdüğünde `pick()` ile sayfa bazlı daraltılmalı (bkz. I18N.md).
+        */}
+        <NextIntlClientProvider messages={messages}>
+          <ImpersonateBanner />
+          <OfflineBanner />
+          <OfflineSyncManager />
+          <Navbar />
+          <main>{children}</main>
+          <Toaster position="top-right" richColors />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

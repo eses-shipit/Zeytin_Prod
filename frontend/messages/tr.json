@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "close": "Kapat",
+    "confirm": "Onayla",
+    "search": "Ara",
+    "loading": "Yükleniyor…",
+    "error": "Bir hata oluştu.",
+    "retry": "Tekrar dene",
+    "noData": "Kayıt bulunamadı.",
+    "back": "Geri",
+    "actions": "İşlemler",
+    "yes": "Evet",
+    "no": "Hayır",
+    "total": "Toplam"
+  },
+  "dashboard": {
+    "meta": {
+      "title": "Fabrika Paneli",
+      "description": "Fabrika genel bakış ve özet istatistikler."
+    },
+    "title": "Fabrika Paneli",
+    "subtitle": "Operasyonel özet ve metrikler (varsayılan: Tüm Zamanlar).",
+    "firstWeighing": "İlk Tartımı Yap",
+    "empty": {
+      "title": "Hoş Geldiniz!",
+      "description": "Henüz veri girişi yapılmamış. Yeni tartım yaparak başlayabilirsiniz."
+    },
+    "range": {
+      "today": "Bugün",
+      "week": "Bu Hafta",
+      "all": "Tüm Zamanlar"
+    },
+    "kpi": {
+      "oliveIn": {
+        "title": "Giren Zeytin",
+        "trend": "Seçili aralık"
+      },
+      "oilOut": {
+        "title": "Çıkan Yağ",
+        "trend": "Seçili aralık"
+      },
+      "avgYield": {
+        "title": "Ortalama Randıman",
+        "trend": "Genel Ort."
+      },
+      "pendingTickets": {
+        "title": "Bekleyen Fiş",
+        "trend": "Sırada Bekleyen"
+      },
+      "receivable": {
+        "title": "Toplam Alacak (Para)",
+        "trend": "Müşteri Bakiyesi"
+      },
+      "factoryShareOil": {
+        "title": "Fabrika Hakkı (Yağ)",
+        "trend": "Toplam Birikmiş"
+      },
+      "containers": {
+        "title": "İçerideki Kaplar",
+        "value": "{count} Parti",
+        "trend": "Teslim Bekleyen"
+      }
+    },
+    "alert": {
+      "title": "Sıkım Bekleyen {count} Fiş Var!",
+      "description": "Operasyonel verimlilik için hemen üretime alın."
+    },
+    "charts": {
+      "factoryShareByProduct": {
+        "title": "Ürün Bazlı Fabrika Payı (kg)",
+        "series": "Fabrika Payı"
+      },
+      "yieldByVillage": {
+        "title": "Köylere Göre Randıman Analizi",
+        "series": "Randıman"
+      },
+      "qualityDistribution": {
+        "title": "Zeytin Kalite Dağılımı"
+      },
+      "customersByVillage": {
+        "title": "Müşterilerin Köy Dağılımı",
+        "series": "Müşteri Sayısı"
+      }
+    }
+  }
+}
