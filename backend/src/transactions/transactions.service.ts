@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { PolicyService } from "../policy/policy.service";
 import { CreateDeliveryDto, CreateLiquidationDto, CreatePaymentDto } from "./dto/transaction.dto";
 
 /**
@@ -19,11 +20,17 @@ import { CreateDeliveryDto, CreateLiquidationDto, CreatePaymentDto } from "./dto
  */
 @Injectable()
 export class TransactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly policyService: PolicyService,
+  ) {}
 
   // 1. Yağ Teslimatı (Delivery)
   async createDelivery(customerId: string, dto: CreateDeliveryDto) {
     const amountKg = this.toKg(dto.amountKg);
+
+    const policy = await this.policyService.getActivePolicy();
+    this.policyService.assertWithdrawalAllowed(policy, amountKg);
 
     return this.prisma.$transaction(async (tx) => {
       if (dto.tankId) {
@@ -61,7 +68,10 @@ export class TransactionsService {
   // 2. Bozdurma (Liquidation)
   async createLiquidation(customerId: string, dto: CreateLiquidationDto) {
     const amountKg = this.toKg(dto.amountKg);
-    const unitPrice = new Prisma.Decimal(dto.unitPrice);
+
+    const policy = await this.policyService.getActivePolicy();
+    this.policyService.assertWithdrawalAllowed(policy, amountKg);
+    const unitPrice = await this.policyService.resolveLiquidationPrice(policy, dto.unitPrice);
     // Tutar kuruşa yuvarlanarak saklanır; aksi halde kayıtlı tutar ile
     // bakiyeye eklenen değer birbirini tutmaz.
     const totalTL = amountKg.mul(unitPrice).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP);
@@ -100,16 +110,29 @@ export class TransactionsService {
       Prisma.Decimal.ROUND_HALF_UP,
     );
 
+    const policy = await this.policyService.getActivePolicy();
+
     return this.prisma.$transaction(async (tx) => {
-      // Borçtan fazla tahsilat kasıtlı olarak engellenmiyor: negatif balanceTL
-      // avans/alacak demektir ve geçerli bir iş durumudur. Fabrikaların bir
-      // kısmı avans almak istemeyebilir — bu, Faz 3'teki tenant politikasına
-      // bağlanacak bir kural.
-      await tx.customer.updateMany({
-        where: { id: customerId },
-        data: { balanceTL: { decrement: amountTL } },
-      });
-      await this.assertCustomerExists(tx, customerId);
+      // Borçtan fazla tahsilat: negatif balanceTL avans/alacak demektir. Bazı
+      // fabrikalar bunu kabul eder, bazıları etmez — kural politikadan gelir.
+      if (!policy.allowNegativeBalance) {
+        const collected = await tx.customer.updateMany({
+          where: { id: customerId, balanceTL: { gte: amountTL } },
+          data: { balanceTL: { decrement: amountTL } },
+        });
+        if (collected.count === 0) {
+          await this.assertCustomerExists(tx, customerId);
+          throw new BadRequestException(
+            "Tahsilat tutarı borcu aşıyor. Bu fabrikada avans/alacak kaydı kapalı.",
+          );
+        }
+      } else {
+        await tx.customer.updateMany({
+          where: { id: customerId },
+          data: { balanceTL: { decrement: amountTL } },
+        });
+        await this.assertCustomerExists(tx, customerId);
+      }
 
       return tx.transaction.create({
         data: {

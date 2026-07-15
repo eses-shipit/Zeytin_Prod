@@ -39,6 +39,7 @@ model Tenant {
   drums               Drum[]
   policies            TenantPolicy[]
   drumSizes           DrumSize[]
+  dailyOilPrices      DailyOilPrice[]
 }
 
 // ... existing enums and models ...
@@ -315,6 +316,28 @@ model TenantPolicy {
 
   @@unique([tenantId, version])
   @@index([tenantId, isActive])
+}
+
+/// Fabrikanın o güne ait yağ alım fiyatı.
+///
+/// TenantPolicy.liquidationPriceSource = DAILY_TABLE seçildiğinde bozdurma
+/// bu tablodan fiyatlanır. PER_TRANSACTION modelinde operatör her işlemde
+/// fiyatı kendi yazar — bu, fiyatın tutarlılığını tamamen operatöre bırakır ve
+/// aynı gün iki müstahsile farklı kur uygulanabilir. Fabrikaların bir kısmı
+/// bunu istemez.
+model DailyOilPrice {
+  id         String   @id @default(cuid())
+  tenantId   String
+  /// Fiyatın geçerli olduğu gün (saat bileşeni yok).
+  date       DateTime @db.Date
+  pricePerKg Decimal  @db.Decimal(12, 4)
+  createdAt  DateTime @default(now())
+  createdBy  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  /// Gün başına tek fiyat: iki kayıt hangisinin geçerli olduğunu belirsiz bırakırdı.
+  @@unique([tenantId, date])
 }
 
 /// Fabrikanın kendi bidon tipleri.

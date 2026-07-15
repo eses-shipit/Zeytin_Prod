@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
-import { Prisma, TenantPolicy, ServiceType, FeeBasis } from "@prisma/client";
+import { Prisma, TenantPolicy, ServiceType, FeeBasis, PriceSource } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { ContextService } from "../common/context.service";
 import { UpdatePolicyDto } from "./dto/update-policy.dto";
@@ -152,6 +152,76 @@ export class PolicyService {
         `En az ${policy.minWithdrawalKg} kg çekebilirsiniz.`,
       );
     }
+  }
+
+  /**
+   * Bozdurma birim fiyatını belirler.
+   *
+   * PER_TRANSACTION: operatörün yazdığı fiyat. Aynı gün iki müstahsile farklı
+   * kur uygulanabilir; sorumluluk operatördedir.
+   * DAILY_TABLE: fabrikanın o gün için tanımladığı fiyat zorunludur ve
+   * operatörün yazdığı değer yok sayılmaz — çelişiyorsa reddedilir, çünkü
+   * sessizce ezmek operatöre uyguladığını sandığı fiyatı uygulatmaz.
+   */
+  async resolveLiquidationPrice(
+    policy: TenantPolicy,
+    requestedUnitPrice?: number,
+  ): Promise<Prisma.Decimal> {
+    if (policy.liquidationPriceSource === PriceSource.PER_TRANSACTION) {
+      if (requestedUnitPrice === undefined) {
+        throw new BadRequestException("Birim fiyat zorunludur.");
+      }
+      return new Prisma.Decimal(requestedUnitPrice);
+    }
+
+    // DAILY_TABLE
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const daily = await this.prisma.dailyOilPrice.findFirst({
+      where: { date: today },
+    });
+
+    if (!daily) {
+      throw new BadRequestException(
+        "Bugün için yağ fiyatı tanımlanmamış. Bozdurma yapmadan önce günün fiyatını girin.",
+      );
+    }
+
+    if (
+      requestedUnitPrice !== undefined &&
+      !daily.pricePerKg.equals(new Prisma.Decimal(requestedUnitPrice))
+    ) {
+      throw new BadRequestException(
+        `Bu fabrikada bozdurma günün fiyatından yapılır (${daily.pricePerKg}). Farklı bir fiyat girilemez.`,
+      );
+    }
+
+    return daily.pricePerKg;
+  }
+
+  /** Günün yağ fiyatını belirler/günceller. */
+  async setDailyPrice(pricePerKg: number, date?: Date): Promise<{ date: Date; pricePerKg: Prisma.Decimal }> {
+    const tenantId = this.contextService.get("TENANT_ID");
+    const userId = this.contextService.get("USER_ID");
+    if (!tenantId) throw new BadRequestException("Fabrika bağlamı bulunamadı.");
+
+    const day = date ? new Date(date) : new Date();
+    day.setUTCHours(0, 0, 0, 0);
+
+    return this.prisma.dailyOilPrice.upsert({
+      where: { tenantId_date: { tenantId, date: day } },
+      create: { tenantId, date: day, pricePerKg, createdBy: userId ?? null },
+      update: { pricePerKg, createdBy: userId ?? null },
+    });
+  }
+
+  /** Son N günün fiyat geçmişi. */
+  async getDailyPrices(take = 30) {
+    return this.prisma.dailyOilPrice.findMany({
+      orderBy: { date: "desc" },
+      take: Math.min(take, 365),
+    });
   }
 
   /**
