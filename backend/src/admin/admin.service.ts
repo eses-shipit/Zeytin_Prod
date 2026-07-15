@@ -40,7 +40,9 @@ export class AdminService {
         });
 
         globalOliveKg += olive._sum.totalOliveKg || 0;
-        globalOilKg += oil._sum.totalOilKg || 0;
+        // totalOilKg artık Decimal; platform geneli gösterim toplamı için
+        // number'a çevriliyor (kesin aritmetik gerektiren bir yer değil).
+        globalOilKg += Number(oil._sum.totalOilKg ?? 0);
       } catch (e) {
         // console.error(`Error aggregating for tenant ${t.id}`, e);
       }

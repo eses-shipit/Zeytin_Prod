@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTicketDto } from "./dto/create-ticket.dto";
 import { TicketStatus } from "@prisma/client";
@@ -12,12 +12,23 @@ export class TicketsService {
   ) {}
 
   async create(tenantId: string, dto: CreateTicketDto) {
+    // Net, istemciden gelmez; burada hesaplanır. Bütün pay dağıtımının tek
+    // girdisi olduğu için istemciye bırakılamaz.
+    if (dto.tareKg > dto.grossKg) {
+      throw new BadRequestException("Dara, brüt ağırlıktan büyük olamaz.");
+    }
+    const netKg = dto.grossKg - dto.tareKg;
+    if (netKg === 0) {
+      throw new BadRequestException("Net ağırlık 0 olamaz.");
+    }
+
     // Generate Hybrid ID
     const publicId = await this.idGenerator.generate(tenantId, "WeighingTicket");
 
     return await this.prisma.weighingTicket.create({
       data: {
         ...dto,
+        netKg,
         publicId,
         status: "PENDING",
       },

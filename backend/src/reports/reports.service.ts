@@ -1,22 +1,37 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { ReportRange } from "./dto/dashboard-query.dto";
+
+/**
+ * Randıman (yieldRatio) bir orandır: girilen zeytin / çıkan yağ ("1/X").
+ *
+ * Oranların aritmetik ortalaması matematiksel olarak yanlıştır ve parti
+ * büyüklüğüne göre ağırlıklandırılmaz: 10 ton zeytinlik bir parti ile 100 kg'lık
+ * bir parti sonuca eşit ağırlıkta girerdi. Doğrusu toplamların oranıdır
+ * (toplam zeytin / toplam yağ) — bu, partileri büyüklüklerine göre kendiliğinden
+ * ağırlıklandırır.
+ */
+function aggregateYield(totalOliveKg: number, totalOilKg: number): number {
+  if (totalOilKg <= 0) return 0; // Yağ yoksa oran tanımsız; 0 döneriz (Infinity/NaN değil).
+  return parseFloat((totalOliveKg / totalOilKg).toFixed(2));
+}
 
 @Injectable()
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDashboardStats(tenantId: string, range: "today" | "week" | "all" = "all") {
+  async getDashboardStats(tenantId: string, range: ReportRange = ReportRange.ALL) {
     // 1. KPI'lar
     const now = new Date();
     const start = new Date();
     start.setHours(0, 0, 0, 0);
 
-    if (range === "week") {
+    if (range === ReportRange.WEEK) {
       const day = start.getDay() || 7; // Pazar=0 -> 7
       start.setDate(start.getDate() - (day - 1));
     }
 
-    const dateFilter = range === "all" ? undefined : { gte: start, lte: now };
+    const dateFilter = range === ReportRange.ALL ? undefined : { gte: start, lte: now };
 
     // Günlük Gelen Zeytin
     const dailyOlive = await this.prisma.weighingTicket.aggregate({
@@ -35,9 +50,10 @@ export class ReportsService {
       where: { status: "PENDING" },
     });
 
-    // Genel Ortalama Randıman
-    const avgYield = await this.prisma.productionBatch.aggregate({
-      _avg: { yieldRatio: true },
+    // Genel Randıman: _avg(yieldRatio) DEĞİL, toplamların oranı. Gerekçe için
+    // aggregateYield'e bakınız.
+    const yieldTotals = await this.prisma.productionBatch.aggregate({
+      _sum: { totalOliveKg: true, totalOilKg: true },
     });
 
     // --- YENİ KPI'lar ---
@@ -75,22 +91,23 @@ export class ReportsService {
       },
     });
 
-    const yieldByOriginMap = new Map<string, { totalYield: number; count: number }>();
+    // Köy bazında da oranların ortalaması değil, toplamların oranı tutulur.
+    const yieldByOriginMap = new Map<string, { totalOliveKg: number; totalOilKg: number }>();
     // YENİ: Ürün Bazlı Kazanç
     const revenueByProductMap = new Map<string, number>();
 
     batches.forEach((batch) => {
       // Yield by Origin Logic
       const origin = batch.tickets[0]?.origin || "Belirsiz";
-      const currentOrigin = yieldByOriginMap.get(origin) || { totalYield: 0, count: 0 };
+      const currentOrigin = yieldByOriginMap.get(origin) || { totalOliveKg: 0, totalOilKg: 0 };
       yieldByOriginMap.set(origin, {
-        totalYield: currentOrigin.totalYield + batch.yieldRatio,
-        count: currentOrigin.count + 1,
+        totalOliveKg: currentOrigin.totalOliveKg + batch.totalOliveKg,
+        totalOilKg: currentOrigin.totalOilKg + Number(batch.totalOilKg),
       });
 
       // Ürün Bazlı Fabrika Payı (kg olarak)
       const productName = batch.tickets[0]?.product?.name || batch.tickets[0]?.variety || "Diğer";
-      const factoryShareKg = batch.factoryShareKg;
+      const factoryShareKg = Number(batch.factoryShareKg);
 
       const currentShare = revenueByProductMap.get(productName) || 0;
       revenueByProductMap.set(productName, currentShare + factoryShareKg);
@@ -98,7 +115,7 @@ export class ReportsService {
 
     const yieldByOrigin = Array.from(yieldByOriginMap.entries()).map(([origin, data]) => ({
       name: origin,
-      yield: parseFloat((data.totalYield / data.count).toFixed(2)),
+      yield: aggregateYield(data.totalOliveKg, data.totalOilKg),
     }));
 
     const revenueByProduct = Array.from(revenueByProductMap.entries()).map(([name, value]) => ({
@@ -133,7 +150,10 @@ export class ReportsService {
         dailyOliveKg: dailyOlive._sum.netKg || 0,
         dailyOilKg: dailyOil._sum.totalOilKg || 0,
         pendingTicketsCount: pendingTickets,
-        avgYield: avgYield._avg.yieldRatio || 0,
+        avgYield: aggregateYield(
+          Number(yieldTotals._sum.totalOliveKg ?? 0),
+          Number(yieldTotals._sum.totalOilKg ?? 0),
+        ),
         // New Financial KPIs
         totalReceivable: totalReceivable._sum.balanceTL || 0,
         totalFactoryShareOil: totalFactoryShareOil._sum.factoryShareKg || 0,

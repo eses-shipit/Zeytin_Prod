@@ -5,11 +5,38 @@ import { Toaster } from "sonner";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { OfflineSyncManager } from "@/components/OfflineSyncManager";
 import ImpersonateBanner from "@/components/ImpersonateBanner";
+import { siteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Zeytin Fabrika Yönetim",
-  description: "Zeytinyağı Fabrikası Yönetim Platformu",
+  metadataBase: new URL(siteUrl),
+  title: {
+    // Alt sayfalar sadece kendi başlıklarını verir: "Müşteriler" -> "Müşteriler | ZeytinSaaS"
+    template: "%s | ZeytinSaaS",
+    default: "ZeytinSaaS | Zeytinyağı Fabrikası Yönetim Platformu",
+  },
+  description: "Zeytinyağı fabrikaları için kantar, üretim ve müşteri yönetim platformu.",
   manifest: "/manifest.webmanifest", // Next.js generates this from manifest.ts
+  applicationName: "ZeytinSaaS",
+  /**
+   * VARSAYILAN OLARAK İNDEKSLEME YOK.
+   *
+   * Burası kimlik doğrulamalı bir CRM; sayfalar çiftçi isimleri, TCKN ve cari
+   * bakiye içeriyor. Backend'deki auth guard ile aynı prensip: default-deny.
+   * Sadece `src/lib/seo.ts` -> PUBLIC_PATHS içindeki sayfalar kendi
+   * layout'larında `robots: INDEXABLE` ile bunu geçersiz kılar.
+   *
+   * Yeni sayfa eklerken hiçbir şey yapmana gerek yok: otomatik noindex.
+   */
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -34,6 +61,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    // TODO(i18n): `lang` şimdilik sabit "tr". [locale] tabanlı routing fazında
+    // bu değer segment parametresinden dinamik olarak gelecek.
     <html lang="tr">
       <head>
         <style dangerouslySetInnerHTML={{__html: `

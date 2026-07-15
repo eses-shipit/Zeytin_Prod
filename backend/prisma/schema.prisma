@@ -22,7 +22,7 @@ model Tenant {
   code                String?      @unique // Örn: 'AYD' - Fabrika kısa kodu
   status              TenantStatus @default(ACTIVE)
   subscriptionEndDate DateTime?
-  defaultDrumWeight   Float        @default(50.0) // Varsayılan bidon ağırlığı (kg)
+  defaultDrumWeight   Decimal      @default(50) @db.Decimal(8, 3) // Varsayılan bidon ağırlığı (kg)
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
   users               User[]
@@ -168,8 +168,11 @@ model Customer {
   phone           String?
   tckn            String?
   village         String?
-  oliveOilBalance Float            @default(0) // Kg cinsinden yağ bakiyesi
-  balanceTL       Float            @default(0) // TL cinsinden borç/alacak
+  // Para ve yağ alanları Decimal'dir. Float (double precision) ikili kayan
+  // nokta hatası biriktirir: bakiyeler sürekli artırılıp azaltıldığı için
+  // hata kalıcıdır ve müstahsil makbuzu ile veritabanı zamanla ayrışır.
+  oliveOilBalance Decimal          @default(0) @db.Decimal(12, 3) // Kg cinsinden yağ bakiyesi
+  balanceTL       Decimal          @default(0) @db.Decimal(14, 2) // TL cinsinden borç/alacak
   tenantId        String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -231,23 +234,33 @@ model ProductionBatch {
   id           String  @id @default(cuid())
   publicId     String? // Hibrit ID: 26-0001-A7Z
   totalOliveKg Int
-  totalOilKg   Float
-  acidRatio    Float? // Asit oranı
-  yieldRatio   Float  // Randıman 1/X
+  totalOilKg   Decimal @db.Decimal(12, 3)
+  acidRatio    Decimal? @db.Decimal(5, 2) // Asit oranı
+  yieldRatio   Decimal @db.Decimal(8, 3) // Randıman 1/X
   status       ProductionStatus @default(COMPLETED)
 
   // Financial / Service Data
   serviceType   ServiceType @default(PERCENTAGE)
-  serviceAmount Float       @default(0) // %10 veya 2.5 TL
-  totalPrice    Float       @default(0) // Nakit ise toplam tutar
+  serviceAmount Decimal     @default(0) @db.Decimal(10, 3) // %10 veya 2.5 TL
+  totalPrice    Decimal     @default(0) @db.Decimal(14, 2) // Nakit ise toplam tutar
 
   // Process Data
   processTemp Int? // Sıkım Sıcaklığı
   lineId      Int? // Hat No
   filtration  Boolean @default(false)
 
-  factoryShareKg  Float
-  customerShareKg Float
+  // Müşterinin payı emanete mi bırakıldı, yoksa üretim sonunda bidonla hemen
+  // teslim mi edildi?
+  //
+  // Bu bilgi daha önce yalnızca istek gövdesinde (storeCustomerOil) vardı ve
+  // hiçbir yere yazılmıyordu. Sonuç: deliverDrums, yağın zaten teslim edilmiş
+  // olduğunu anlayamıyor ve bakiyeden İKİNCİ kez düşüyordu. Emanet, yağın
+  // fabrikada beklediği anlamına geldiği için bu bir muhasebe gerçeğidir ve
+  // partiyle birlikte saklanmalıdır.
+  storedInEscrow Boolean @default(false)
+
+  factoryShareKg  Decimal @db.Decimal(12, 3)
+  customerShareKg Decimal @db.Decimal(12, 3)
   tankId          String? // Hangi tanka aktarıldı
   tenantId        String?
   createdAt       DateTime         @default(now())
@@ -272,11 +285,11 @@ enum OilType {
 
 model StockTank {
   id           String            @id @default(cuid())
-  name         String            
+  name         String
   capacity     Int
-  currentLevel Float             @default(0)
+  currentLevel Decimal           @default(0) @db.Decimal(12, 3)
   type         OilType           @default(ACID_05)
-  acidRatio    Float?            // İçindeki yağın asit oranı (opsiyonel)
+  acidRatio    Decimal?          @db.Decimal(5, 2) // İçindeki yağın asit oranı (opsiyonel)
   tenantId     String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
@@ -292,7 +305,7 @@ model Drum {
   id              String      @id @default(cuid())
   code            String
   type            DrumType
-  capacity        Float
+  capacity        Decimal     @db.Decimal(8, 3)
   status          DrumStatus  @default(AVAILABLE)
   tenantId        String
   currentHolderId String?
@@ -318,9 +331,11 @@ model Transaction {
   id          String          @id @default(cuid())
   customerId  String
   type        TransactionType
-  amountKg    Float? // Yağ hareketi ise miktar
-  amountTL    Float? // Para hareketi ise tutar
-  unitPrice   Float? // Bozdurma birim fiyatı
+  amountKg    Decimal?        @db.Decimal(12, 3) // Yağ hareketi ise miktar
+  amountTL    Decimal?        @db.Decimal(14, 2) // Para hareketi ise tutar
+  // Birim fiyat 4 haneli: kg başına kuruş altı fiyatlar toplamda yuvarlama
+  // farkı yaratmasın.
+  unitPrice   Decimal?        @db.Decimal(12, 4) // Bozdurma birim fiyatı
   tankId      String? // Eğer fiziksel stoktan düşülecekse
   batchId     String? // Hangi üretimden kaynaklandığı
   description String?

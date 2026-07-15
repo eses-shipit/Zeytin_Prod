@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from "@nestjs/common";
 import { Prisma, } from "@prisma/client";
+import { kg, tl, splitProportionally, KG_DP, TL_DP, ROUND } from "../common/money";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProductionBatchDto, ServiceType } from "./dto/create-production-batch.dto";
 import { SmsService } from "../sms/sms.service";
@@ -52,14 +53,28 @@ export class ProductionService {
     if (dto.totalOilKg <= 0) {
         throw new BadRequestException("Çıkan yağ 0 olamaz.");
     }
-    const yieldRatio = totalOliveKg / dto.totalOilKg; // 1/X formatı
+
+    const totalOliveKgD = kg(totalOliveKg);
+    const totalOilKgD = kg(dto.totalOilKg);
+    const serviceAmountD = new Prisma.Decimal(dto.serviceAmount);
+
+    // Çıkan yağ, giren zeytinden fazla olamaz: fiziksel olarak imkânsız ve
+    // pratikte hep veri giriş hatasıdır. Kontrol yokken 100 kg zeytine 10000 kg
+    // yağ girilebiliyor ve bakiyeye o şekilde yazılıyordu.
+    if (totalOilKgD.gt(totalOliveKgD)) {
+        throw new BadRequestException(
+            "Çıkan yağ, giren zeytinden fazla olamaz. Girilen değerleri kontrol edin.",
+        );
+    }
+
+    const yieldRatio = totalOliveKgD.div(totalOilKgD).toDecimalPlaces(3, ROUND); // 1/X formatı
 
     // 2. Calculate Shares/Fees
     const { factoryShareKg, customerShareKg, totalPrice } = this.calculateServiceFee(
         dto.serviceType,
-        dto.serviceAmount,
-        totalOliveKg,
-        dto.totalOilKg
+        serviceAmountD,
+        totalOliveKgD,
+        totalOilKgD
     );
 
     // Bidon seçimi sadece müşteri yağı emanete bırakılmadığında zorunlu
@@ -92,7 +107,7 @@ export class ProductionService {
         data: {
           publicId,
           totalOliveKg,
-          totalOilKg: dto.totalOilKg,
+          totalOilKg: totalOilKgD,
           yieldRatio,
           acidRatio: dto.acidRatio,
           factoryShareKg,
@@ -102,8 +117,9 @@ export class ProductionService {
           lineId: dto.lineId,
           filtration: dto.filtration ?? false,
           serviceType: dto.serviceType,
-          serviceAmount: dto.serviceAmount,
+          serviceAmount: serviceAmountD,
           totalPrice: totalPrice,
+          storedInEscrow: dto.storeCustomerOil ?? false,
           tankId: dto.tankId,
           tickets: {
             connect: tickets.map((t) => ({ id: t.id })),
@@ -124,7 +140,9 @@ export class ProductionService {
 
       // Update Tank Stock (If selected)
       if (dto.tankId) {
-          const amountToAdd = dto.storeCustomerOil ? dto.totalOilKg : factoryShareKg;
+          // Emanette müşterinin payı da tankta bekler; peşin teslimde yalnızca
+          // fabrikanın hak yağı tanka girer.
+          const amountToAdd = dto.storeCustomerOil ? totalOilKgD : factoryShareKg;
 
           await tx.stockTank.update({
               where: { id: dto.tankId },
@@ -135,12 +153,21 @@ export class ProductionService {
       }
 
       // Financial Transactions & Balances
-      for (const ticket of tickets) {
-        const ratio = ticket.netKg / totalOliveKg;
-        const ticketOil = dto.totalOilKg * ratio;
-        const ticketCustomerOil = customerShareKg * ratio;
-        const ticketFactoryOil = factoryShareKg * ratio;
-        const ticketCost = totalPrice * ratio;
+      //
+      // Paylar tek tek `toplam * (netKg / totalOliveKg)` ile değil, kalanı son
+      // fişe veren bir dağıtımla hesaplanır: aksi halde her pay ayrı yuvarlandığı
+      // için payların toplamı partinin toplamına eşit çıkmıyordu.
+      const weights = tickets.map((t) => t.netKg);
+      const oilParts = splitProportionally(totalOilKgD, weights, KG_DP);
+      const customerOilParts = splitProportionally(customerShareKg, weights, KG_DP);
+      const factoryOilParts = splitProportionally(factoryShareKg, weights, KG_DP);
+      const costParts = splitProportionally(totalPrice, weights, TL_DP);
+
+      for (const [index, ticket] of tickets.entries()) {
+        const ticketOil = oilParts[index];
+        const ticketCustomerOil = customerOilParts[index];
+        const ticketFactoryOil = factoryOilParts[index];
+        const ticketCost = costParts[index];
 
         // A. Add Oil to Customer Balance (Virtual)
         await tx.customer.update({
@@ -233,8 +260,10 @@ export class ProductionService {
 
         for (const customer of uniqueCustomers.values()) {
             const customerTotalOlive = tickets.filter(t => t.customerId === customer.id).reduce((s, t) => s + t.netKg, 0);
-            const customerRatio = customerTotalOlive / totalOliveKg;
-            const customerSpecificOil = customerShareKg * customerRatio;
+            const customerSpecificOil = customerShareKg
+                .mul(customerTotalOlive)
+                .div(totalOliveKgD)
+                .toDecimalPlaces(KG_DP, ROUND);
 
             const message = `Sn. ${customer.name}, uretim tamamlandi. Giren: ${customerTotalOlive}kg, Cikan: ${customerSpecificOil.toFixed(1)}kg, Randiman: 1/${yieldRatio.toFixed(1)}, Asit: ${dto.acidRatio ?? "-"} . Fabrika: ${tenantName}`;
              
@@ -283,16 +312,11 @@ export class ProductionService {
 
       if (!batch) throw new NotFoundException("Parti bulunamadı.");
 
-      // Re-calculate shares
-      const totalOliveKg = batch.totalOliveKg;
-      const totalOilKg = batch.totalOilKg;
-      
-      const { customerShareKg } = this.calculateServiceFee(
-          batch.serviceType as ServiceType,
-          batch.serviceAmount,
-          totalOliveKg,
-          totalOilKg
-      );
+      // Paylar partide saklı; yeniden hesaplanmıyor. Yeniden hesaplamak, o gün
+      // müşteriye bildirilen ve bakiyeye yazılan değerden farklı bir sonuç
+      // üretebilirdi (ör. hizmet bedeli kuralı sonradan değişirse).
+      const totalOliveKgD = kg(batch.totalOliveKg);
+      const customerShareKg = batch.customerShareKg;
 
       let sentCount = 0;
       const uniqueCustomers = new Map();
@@ -304,8 +328,10 @@ export class ProductionService {
 
       for (const customer of uniqueCustomers.values()) {
           const customerTotalOlive = batch.tickets.filter(t => t.customerId === customer.id).reduce((s, t) => s + t.netKg, 0);
-          const customerRatio = customerTotalOlive / totalOliveKg;
-          const customerSpecificOil = customerShareKg * customerRatio;
+          const customerSpecificOil = customerShareKg
+              .mul(customerTotalOlive)
+              .div(totalOliveKgD)
+              .toDecimalPlaces(KG_DP, ROUND);
           const message = `Sn. ${customer.name}, uretim tamamlandi. Giren: ${customerTotalOlive}kg, Cikan: ${customerSpecificOil.toFixed(1)}kg, Randiman: 1/${batch.yieldRatio.toFixed(1)}, Asit: ${batch.acidRatio ?? "-"}. Fabrika: ${tenantName}`;
            
            await this.smsService.queueSms(customer.phone, message);
@@ -411,6 +437,17 @@ export class ProductionService {
       throw new BadRequestException("Bu üretim zaten teslim edildi.");
     }
 
+    // Emanete bırakılmamış partide müşterinin yağı üretim sırasında zaten
+    // teslim edilmiş ve bakiyeden düşülmüştür (processBatch, D adımı). Burada
+    // ikinci kez düşmek müşterinin hiç sahip olmadığı yağı borç yazmak olur.
+    // Eski kodda tek koruma `status === "DELIVERED"` idi ama processBatch
+    // partiyi COMPLETED bırakıyordu, dolayısıyla bu çağrı geçiyordu.
+    if (!batch.storedInEscrow) {
+      throw new BadRequestException(
+        "Bu partinin yağı üretim sırasında peşin teslim edildi; tekrar teslim edilemez.",
+      );
+    }
+
     const primaryCustomerId = batch.tickets[0]?.customerId ?? null;
     const hasDrums = batch.drums && batch.drums.length > 0;
     const hasSelectedDrums = selectedDrumIds && selectedDrumIds.length > 0;
@@ -442,11 +479,18 @@ export class ProductionService {
     const factoryShareKg = batch.factoryShareKg;
 
     return await this.prisma.$transaction(async (tx) => {
-      // 1. Batch status'unu DELIVERED yap
-      await tx.productionBatch.update({
-        where: { id: productionId },
+      // 1. Partiyi teslim edilmiş olarak "sahiplen".
+      //
+      // Koşul WHERE içinde: yukarıdaki status kontrolü transaction'ın DIŞINDA
+      // kaldığı için eşzamanlı iki çağrı ikisi de geçip bakiyeyi iki kez
+      // düşürebiliyordu. Bu tek ifadeyle yalnızca biri kazanır.
+      const claimed = await tx.productionBatch.updateMany({
+        where: { id: productionId, status: { not: "DELIVERED" } },
         data: { status: "DELIVERED" },
       });
+      if (claimed.count === 0) {
+        throw new BadRequestException("Bu üretim zaten teslim edildi.");
+      }
 
       // 2. Bidonları batch'e bağla ve güncelle (eğer varsa)
       if (drumsToDeliver.length > 0) {
@@ -469,20 +513,28 @@ export class ProductionService {
         });
       }
 
-      // 3. Her müşteri için yağ stoğunu düş ve transaction kaydı oluştur
-      for (const ticket of batch.tickets) {
-        const ratio = ticket.netKg / totalOliveKg;
-        const ticketCustomerOil = customerShareKg * ratio;
+      // 3. Her müşteri için emanetteki yağı düş ve transaction kaydı oluştur
+      const customerOilParts = splitProportionally(
+        customerShareKg,
+        batch.tickets.map((t) => t.netKg),
+        KG_DP,
+      );
 
-        // Müşteri yağ stoğundan düş
-        await tx.customer.update({
-          where: { id: ticket.customerId },
-          data: {
-            oliveOilBalance: { decrement: ticketCustomerOil },
-          },
+      for (const [index, ticket] of batch.tickets.entries()) {
+        const ticketCustomerOil = customerOilParts[index];
+
+        // Müşteri yağ bakiyesinden düş. Koşul WHERE içinde: emanetteki yağ bu
+        // arada başka bir yoldan (bozdurma/teslimat) azalmış olabilir.
+        const debited = await tx.customer.updateMany({
+          where: { id: ticket.customerId, oliveOilBalance: { gte: ticketCustomerOil } },
+          data: { oliveOilBalance: { decrement: ticketCustomerOil } },
         });
+        if (debited.count === 0) {
+          throw new BadRequestException(
+            `Müşterinin emanet bakiyesi yetersiz (${ticketCustomerOil.toFixed(3)} kg gerekiyor).`,
+          );
+        }
 
-        // Transaction kaydı oluştur (OIL_OUT)
         await tx.transaction.create({
           data: {
             customerId: ticket.customerId,
@@ -490,9 +542,26 @@ export class ProductionService {
             amountKg: ticketCustomerOil,
             description: `Üretim Sonrası Teslimat - Parti #${batch.publicId || batch.id}`,
             batchId: batch.id,
-            tenantId: tenantId,
           },
         });
+      }
+
+      // 4. Fiziksel tank stoğundan da düş.
+      //
+      // Emanette müşterinin payı tanka giriyordu (processBatch) ama teslimatta
+      // buradan hiç düşülmüyordu: transactions.createDelivery düşerken bu yol
+      // düşmediği için emanetten teslim edilen yağ tank stoğunda sonsuza kadar
+      // sayılı kalıyordu. İki teslimat yolu artık aynı şeyi yapıyor.
+      if (batch.tankId) {
+        const tankDebited = await tx.stockTank.updateMany({
+          where: { id: batch.tankId, currentLevel: { gte: customerShareKg } },
+          data: { currentLevel: { decrement: customerShareKg } },
+        });
+        if (tankDebited.count === 0) {
+          throw new BadRequestException(
+            "Tankta yeterli yağ yok; teslimat kaydı stokla uyuşmuyor.",
+          );
+        }
       }
 
       // 4. Güncellenmiş bidon bilgilerini al
@@ -577,19 +646,37 @@ export class ProductionService {
     }
   }
 
-  private calculateServiceFee(type: ServiceType, amount: number, totalOliveKg: number, totalOilKg: number) {
-      let factoryShareKg = 0;
-      let totalPrice = 0;
+  /**
+   * Hizmet bedelini hesaplar.
+   *
+   * Dikkat — iki modelin matrahı farklıdır ve bu bilinçli bir iş kuralıdır:
+   *   PERCENTAGE  : ÇIKAN YAĞIN yüzdesi kadar yağ alınır (hak yağ).
+   *   CASH_PER_KG : GİREN ZEYTİNİN kilosu başına para alınır.
+   *
+   * Yani oran değişmese bile randıman düştüğünde yüzde modelinde fabrikanın
+   * geliri düşer, nakit modelinde düşmez. Fabrikalar arasındaki asıl tercih
+   * farkı burada; Faz 3'te tenant politikasına bağlanacak.
+   */
+  private calculateServiceFee(
+    type: ServiceType,
+    amount: Prisma.Decimal,
+    totalOliveKg: Prisma.Decimal,
+    totalOilKg: Prisma.Decimal,
+  ) {
+    let factoryShareKg = kg(0);
+    let totalPrice = tl(0);
 
-      if (type === ServiceType.PERCENTAGE) {
-          factoryShareKg = totalOilKg * (amount / 100);
-      } else {
-          // CASH_PER_KG
-          totalPrice = totalOliveKg * amount;
-      }
+    if (type === ServiceType.PERCENTAGE) {
+      factoryShareKg = kg(totalOilKg.mul(amount).div(100));
+    } else {
+      // CASH_PER_KG
+      totalPrice = tl(totalOliveKg.mul(amount));
+    }
 
-      const customerShareKg = totalOilKg - factoryShareKg;
+    // Çıkarma yuvarlanmış değer üzerinden: paylar toplamı her zaman
+    // totalOilKg'ye birebir eşit kalsın.
+    const customerShareKg = kg(totalOilKg.sub(factoryShareKg));
 
-      return { factoryShareKg, customerShareKg, totalPrice };
+    return { factoryShareKg, customerShareKg, totalPrice };
   }
 }

@@ -32,6 +32,33 @@ import { RolesGuard } from "./common/guards/roles.guard";
 })
 export class ContextModule {}
 
+/**
+ * FRONTEND_URL: tek origin ya da virgülle ayrılmış liste.
+ * Örn: "https://zeytin-psi.vercel.app,https://zeytin-saas.vercel.app"
+ * Her parça http/https mutlak URL olmalıdır; boot'ta doğrulanır.
+ */
+const frontendUrlSchema = Joi.string()
+  .default("http://localhost:3000")
+  .custom((value, helpers) => {
+    const origins = String(value)
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0);
+
+    if (origins.length === 0) return helpers.error("any.invalid");
+
+    const itemSchema = Joi.string().uri({ scheme: ["http", "https"] });
+    for (const origin of origins) {
+      if (itemSchema.validate(origin).error) return helpers.error("any.invalid");
+    }
+
+    return value;
+  }, "virgülle ayrılmış origin listesi")
+  .messages({
+    "any.invalid":
+      "FRONTEND_URL geçerli değil. Tek origin ya da virgülle ayrılmış http/https origin listesi olmalı.",
+  });
+
 @Module({
   imports: [
     ContextModule, // Global module import
@@ -43,7 +70,9 @@ export class ContextModule {}
         // için JWT_SECRET hiç tanımlanmamıştı ve kod içindeki sabit fallback
         // canlıda kullanılıyordu.
         JWT_SECRET: Joi.string().min(32).required().invalid("super-secret-key-change-in-prod"),
-        FRONTEND_URL: Joi.string().uri().default("http://localhost:3000"),
+        // Virgülle ayrılmış origin listesi olabilir; her parça tek tek doğrulanır.
+        // Düz `.uri()` çok parçalı değeri reddederdi.
+        FRONTEND_URL: frontendUrlSchema,
         NODE_ENV: Joi.string().valid("development", "test", "production").default("development"),
       }),
     }),
