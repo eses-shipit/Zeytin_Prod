@@ -12,6 +12,7 @@ import { LicenseStatus, TenantStatus, UserRole } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 import { TokenService } from "../common/token.service";
 import { AuditService } from "../audit/audit.service";
+import { PolicyService } from "../policy/policy.service";
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
     private readonly auditService: AuditService,
+    private readonly policyService: PolicyService,
   ) {}
 
   // KALDIRILDI: recoverPassword()
@@ -127,6 +129,11 @@ export class AuthService {
               tenantId: tenant.id,
             },
           });
+
+          // D. Fabrikanın ilk çalışma politikası (sürüm 1).
+          // Aynı transaction içinde: politikasız bir fabrika üretim yapamaz,
+          // dolayısıyla kaydın yarısı oluşup yarısı oluşmamalı.
+          await this.policyService.createInitialPolicy(tenant.id, tx);
 
           // Token Üret
           const token = this.generateToken(user, tenant.code);

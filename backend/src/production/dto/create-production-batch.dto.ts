@@ -14,11 +14,12 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from "class-validator";
+import { ServiceType } from "@prisma/client";
 
-export enum ServiceType {
-  PERCENTAGE = "PERCENTAGE",
-  CASH_PER_KG = "CASH_PER_KG",
-}
+// Şemadaki enum tek doğruluk kaynağı. Burada aynı isimle ikinci bir enum
+// tanımlıydı; tip olarak Prisma'nınkiyle uyuşmadığı için servis sınırında
+// dönüştürme gerekiyordu ve iki tanım sessizce ayrışabilirdi.
+export { ServiceType };
 
 /** Decimal(12,3) kolon genişliğinden gelen üst sınır. */
 const MAX_OIL_KG = 1_000_000;

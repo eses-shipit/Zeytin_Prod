@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from "@nestjs/common";
-import { Prisma, } from "@prisma/client";
+import { Prisma, FeeBasis } from "@prisma/client";
 import { kg, tl, splitProportionally, KG_DP, TL_DP, ROUND } from "../common/money";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProductionBatchDto, ServiceType } from "./dto/create-production-batch.dto";
@@ -7,6 +7,7 @@ import { SmsService } from "../sms/sms.service";
 import { IdGeneratorService } from "../common/id-generator.service";
 import { AuditService } from "../audit/audit.service";
 import { ContextService } from "../common/context.service";
+import { PolicyService } from "../policy/policy.service";
 
 @Injectable()
 export class ProductionService {
@@ -18,6 +19,7 @@ export class ProductionService {
     private readonly idGenerator: IdGeneratorService,
     private readonly auditService: AuditService,
     private readonly contextService: ContextService,
+    private readonly policyService: PolicyService,
   ) {}
 
   async processBatch(tenantId: string, dto: CreateProductionBatchDto) {
@@ -56,7 +58,17 @@ export class ProductionService {
 
     const totalOliveKgD = kg(totalOliveKg);
     const totalOilKgD = kg(dto.totalOilKg);
-    const serviceAmountD = new Prisma.Decimal(dto.serviceAmount);
+
+    // Fabrikanın yürürlükteki kuralları. serviceAmount eskiden her partide
+    // serbestçe yazılıyordu; artık fabrika varsayılanı, sınırları ve
+    // "operatör değiştirebilir mi" kuralı burada uygulanıyor.
+    const policy = await this.policyService.getActivePolicy();
+    const resolvedFee = this.policyService.resolveServiceFee(policy, {
+      serviceType: dto.serviceType,
+      serviceAmount: dto.serviceAmount,
+    });
+    const serviceAmountD = resolvedFee.serviceAmount;
+    const storeCustomerOil = this.policyService.resolveEscrow(policy, dto.storeCustomerOil);
 
     // Çıkan yağ, giren zeytinden fazla olamaz: fiziksel olarak imkânsız ve
     // pratikte hep veri giriş hatasıdır. Kontrol yokken 100 kg zeytine 10000 kg
@@ -71,16 +83,17 @@ export class ProductionService {
 
     // 2. Calculate Shares/Fees
     const { factoryShareKg, customerShareKg, totalPrice } = this.calculateServiceFee(
-        dto.serviceType,
+        resolvedFee.serviceType,
         serviceAmountD,
         totalOliveKgD,
-        totalOilKgD
+        totalOilKgD,
+        resolvedFee.basis
     );
 
     // Bidon seçimi sadece müşteri yağı emanete bırakılmadığında zorunlu
     // Çünkü emanete bırakıldığında yağ tanka gidiyor, bidon kullanılmıyor
     let availableDrums: any[] = [];
-    if (!dto.storeCustomerOil) {
+    if (!storeCustomerOil) {
       if (!dto.drumIds || dto.drumIds.length === 0) {
         throw new BadRequestException("Üretim tamamlanırken en az bir bidon seçilmelidir.");
       }
@@ -116,10 +129,13 @@ export class ProductionService {
           processTemp: dto.processTemp,
           lineId: dto.lineId,
           filtration: dto.filtration ?? false,
-          serviceType: dto.serviceType,
+          serviceType: resolvedFee.serviceType,
           serviceAmount: serviceAmountD,
           totalPrice: totalPrice,
-          storedInEscrow: dto.storeCustomerOil ?? false,
+          storedInEscrow: storeCustomerOil,
+          // Hangi politika sürümüne göre hesaplandığını dondurur: fabrika
+          // oranını yarın değiştirse bile bu partinin makbuzu değişmez.
+          policyId: policy.id,
           tankId: dto.tankId,
           tickets: {
             connect: tickets.map((t) => ({ id: t.id })),
@@ -142,7 +158,7 @@ export class ProductionService {
       if (dto.tankId) {
           // Emanette müşterinin payı da tankta bekler; peşin teslimde yalnızca
           // fabrikanın hak yağı tanka girer.
-          const amountToAdd = dto.storeCustomerOil ? totalOilKgD : factoryShareKg;
+          const amountToAdd = storeCustomerOil ? totalOilKgD : factoryShareKg;
 
           await tx.stockTank.update({
               where: { id: dto.tankId },
@@ -220,7 +236,7 @@ export class ProductionService {
         }
         
         // D. If Customer did NOT leave oil in escrow
-        if (!dto.storeCustomerOil) {
+        if (!storeCustomerOil) {
             await tx.customer.update({
                 where: { id: ticket.customerId },
                 data: {
@@ -649,25 +665,37 @@ export class ProductionService {
   /**
    * Hizmet bedelini hesaplar.
    *
-   * Dikkat — iki modelin matrahı farklıdır ve bu bilinçli bir iş kuralıdır:
-   *   PERCENTAGE  : ÇIKAN YAĞIN yüzdesi kadar yağ alınır (hak yağ).
+   * İki modelin matrahı farklıdır ve bu bilinçli bir iş kuralıdır:
+   *   PERCENTAGE  : yağdan pay alınır (hak yağ).
    *   CASH_PER_KG : GİREN ZEYTİNİN kilosu başına para alınır.
    *
-   * Yani oran değişmese bile randıman düştüğünde yüzde modelinde fabrikanın
-   * geliri düşer, nakit modelinde düşmez. Fabrikalar arasındaki asıl tercih
-   * farkı burada; Faz 3'te tenant politikasına bağlanacak.
+   * Yüzde modelinde matrah artık fabrikanın politikasından gelir:
+   *   OIL_OUT  : çıkan yağın yüzdesi — randıman düşerse fabrikanın payı da
+   *              düşer, yani risk paylaşılır (kodun eski sabit varsayımı).
+   *   OLIVE_IN : giren zeytinin yüzdesi — fabrikanın payı randımandan
+   *              etkilenmez, risk tamamen müstahsilde kalır.
    */
   private calculateServiceFee(
     type: ServiceType,
     amount: Prisma.Decimal,
     totalOliveKg: Prisma.Decimal,
     totalOilKg: Prisma.Decimal,
+    basis: FeeBasis = FeeBasis.OIL_OUT,
   ) {
     let factoryShareKg = kg(0);
     let totalPrice = tl(0);
 
     if (type === ServiceType.PERCENTAGE) {
-      factoryShareKg = kg(totalOilKg.mul(amount).div(100));
+      const base = basis === FeeBasis.OLIVE_IN ? totalOliveKg : totalOilKg;
+      factoryShareKg = kg(base.mul(amount).div(100));
+
+      // OLIVE_IN matrahında hak yağ, çıkan yağdan fazla olabilir (düşük
+      // randıman). Fabrikaya olmayan yağı veremeyiz.
+      if (factoryShareKg.gt(totalOilKg)) {
+        throw new BadRequestException(
+          "Hesaplanan hak yağ, çıkan yağdan fazla. Randıman veya oran hatalı görünüyor.",
+        );
+      }
     } else {
       // CASH_PER_KG
       totalPrice = tl(totalOliveKg.mul(amount));

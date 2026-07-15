@@ -1,6 +1,5 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, FeeBasis, ServiceType } from "@prisma/client";
 import { ProductionService } from "./production.service";
-import { ServiceType } from "./dto/create-production-batch.dto";
 import { kg } from "../common/money";
 
 /**
@@ -10,14 +9,21 @@ import { kg } from "../common/money";
  */
 describe("calculateServiceFee", () => {
   const service = new ProductionService(
-    {} as any, {} as any, {} as any, {} as any, {} as any,
+    {} as any, {} as any, {} as any, {} as any, {} as any, {} as any,
   );
-  const calc = (type: ServiceType, amount: number, oliveKg: number, oilKg: number) =>
+  const calc = (
+    type: ServiceType,
+    amount: number,
+    oliveKg: number,
+    oilKg: number,
+    basis: FeeBasis = FeeBasis.OIL_OUT,
+  ) =>
     (service as any).calculateServiceFee(
       type,
       new Prisma.Decimal(amount),
       kg(oliveKg),
       kg(oilKg),
+      basis,
     );
 
   describe("PERCENTAGE (hak yağ) — matrah ÇIKAN YAĞ", () => {
@@ -83,6 +89,45 @@ describe("calculateServiceFee", () => {
       const { totalPrice } = calc(ServiceType.CASH_PER_KG, 2.333, 777, 150);
       // 777 * 2.333 = 1812.741 -> 1812.74
       expect(totalPrice.toString()).toBe("1812.74");
+    });
+  });
+
+  describe("percentageBasis (fabrika politikası)", () => {
+    it("OLIVE_IN matrahında hak yağ giren zeytin üzerinden hesaplanır", () => {
+      // %2 x 1000 kg zeytin = 20 kg, çıkan yağdan bağımsız.
+      const { factoryShareKg, customerShareKg } = calc(
+        ServiceType.PERCENTAGE, 2, 1000, 200, FeeBasis.OLIVE_IN,
+      );
+
+      expect(factoryShareKg.toString()).toBe("20");
+      expect(customerShareKg.toString()).toBe("180");
+    });
+
+    it("OLIVE_IN'de randıman düşse bile fabrikanın payı sabit kalır", () => {
+      // Riski müstahsile yıkan model: fabrika her hâlükârda 20 kg alır.
+      const iyi = calc(ServiceType.PERCENTAGE, 2, 1000, 250, FeeBasis.OLIVE_IN);
+      const kotu = calc(ServiceType.PERCENTAGE, 2, 1000, 150, FeeBasis.OLIVE_IN);
+
+      expect(iyi.factoryShareKg.toString()).toBe("20");
+      expect(kotu.factoryShareKg.toString()).toBe("20");
+      // Fark tamamen müstahsile yansır.
+      expect(iyi.customerShareKg.toString()).toBe("230");
+      expect(kotu.customerShareKg.toString()).toBe("130");
+    });
+
+    it("aynı oran iki matrahta farklı sonuç verir", () => {
+      const oilOut = calc(ServiceType.PERCENTAGE, 10, 1000, 200, FeeBasis.OIL_OUT);
+      const oliveIn = calc(ServiceType.PERCENTAGE, 10, 1000, 200, FeeBasis.OLIVE_IN);
+
+      expect(oilOut.factoryShareKg.toString()).toBe("20"); // 200'ün %10'u
+      expect(oliveIn.factoryShareKg.toString()).toBe("100"); // 1000'in %10'u
+    });
+
+    it("hak yağ çıkan yağı aşarsa reddeder (olmayan yağ dağıtılamaz)", () => {
+      // %30 x 1000 zeytin = 300 kg ama çıkan yağ yalnızca 200 kg.
+      expect(() =>
+        calc(ServiceType.PERCENTAGE, 30, 1000, 200, FeeBasis.OLIVE_IN),
+      ).toThrow(/çıkan yağdan fazla/);
     });
   });
 

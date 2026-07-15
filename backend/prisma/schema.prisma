@@ -13,18 +13,18 @@ enum TenantStatus {
 }
 
 model Tenant {
-  id                  String       @id @default(cuid())
+  id                  String            @id @default(cuid())
   name                String
-  officialName        String?      // Resmi Unvan
-  taxId               String?      // Vergi No
+  officialName        String? // Resmi Unvan
+  taxId               String? // Vergi No
   address             String?
   city                String?
-  code                String?      @unique // Örn: 'AYD' - Fabrika kısa kodu
-  status              TenantStatus @default(ACTIVE)
+  code                String?           @unique // Örn: 'AYD' - Fabrika kısa kodu
+  status              TenantStatus      @default(ACTIVE)
   subscriptionEndDate DateTime?
-  defaultDrumWeight   Decimal      @default(50) @db.Decimal(8, 3) // Varsayılan bidon ağırlığı (kg)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  defaultDrumWeight   Decimal           @default(50) @db.Decimal(8, 3) // Varsayılan bidon ağırlığı (kg)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   users               User[]
   licenses            License[]
   tickets             SupportTicket[]
@@ -37,6 +37,8 @@ model Tenant {
   transactions        Transaction[]
   auditLogs           AuditLog[]
   drums               Drum[]
+  policies            TenantPolicy[]
+  drumSizes           DrumSize[]
 }
 
 // ... existing enums and models ...
@@ -101,13 +103,13 @@ model AuditLog {
   id         String   @id @default(cuid())
   tenantId   String
   userId     String?
-  action     String   // 'DELETE_BATCH', 'LOGIN', etc.
-  resourceId String?  // ID of the affected resource
-  details    Json?    // Stores old/new values
+  action     String // 'DELETE_BATCH', 'LOGIN', etc.
+  resourceId String? // ID of the affected resource
+  details    Json? // Stores old/new values
   ipAddress  String?
   createdAt  DateTime @default(now())
 
-  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
 }
 
 enum UserRole {
@@ -163,7 +165,7 @@ model Product {
 }
 
 model Customer {
-  id              String           @id @default(cuid())
+  id              String   @id @default(cuid())
   name            String
   phone           String?
   tckn            String?
@@ -171,12 +173,12 @@ model Customer {
   // Para ve yağ alanları Decimal'dir. Float (double precision) ikili kayan
   // nokta hatası biriktirir: bakiyeler sürekli artırılıp azaltıldığı için
   // hata kalıcıdır ve müstahsil makbuzu ile veritabanı zamanla ayrışır.
-  oliveOilBalance Decimal          @default(0) @db.Decimal(12, 3) // Kg cinsinden yağ bakiyesi
-  balanceTL       Decimal          @default(0) @db.Decimal(14, 2) // TL cinsinden borç/alacak
+  oliveOilBalance Decimal  @default(0) @db.Decimal(12, 3) // Kg cinsinden yağ bakiyesi
+  balanceTL       Decimal  @default(0) @db.Decimal(14, 2) // TL cinsinden borç/alacak
   tenantId        String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
   tenant       Tenant?          @relation(fields: [tenantId], references: [id])
   tickets      WeighingTicket[]
   transactions Transaction[]
@@ -230,13 +232,123 @@ enum ServiceType {
   CASH_PER_KG // Para (Kg başı)
 }
 
+/// Yüzde modelinde hak yağın matrahı.
+enum FeeBasis {
+  OIL_OUT // Çıkan yağın yüzdesi (yaygın: randıman riski paylaşılır)
+  OLIVE_IN // Giren zeytinin yüzdesi (randıman riski müstahsilde)
+}
+
+/// Bozdurma biriminin fiyatı nereden gelir?
+enum PriceSource {
+  PER_TRANSACTION // Operatör her işlemde yazar (mevcut davranış)
+  DAILY_TABLE // Fabrikanın o gün için tanımladığı fiyat zorunlu
+}
+
+/// Emanetteki yağın nasıl takip edildiği.
+enum EscrowModel {
+  FUNGIBLE // Tankta havuzlanır; müşteri "X kg yağ" alacaklısıdır
+  LOT_TRACKED // Müşterinin partisi ayrı tutulur, kendi yağını geri alır
+}
+
+/// Fabrikanın çalışma kuralları. SÜRÜMLENİR — güncellenmez.
+///
+/// Bir kural değiştiğinde satır güncellenmez, yeni bir sürüm yazılır ve eski
+/// sürüm olduğu gibi kalır. ProductionBatch, hesaplandığı sürüme (policyId) bağlanır.
+///
+/// Neden: fabrika hak yağ oranını sezon ortasında %10'dan %12'ye çıkardığında,
+/// geçen ayki partilerin makbuzu değişmemelidir. Kural tek satırda tutulup
+/// güncellenseydi, eski bir makbuzu yeniden hesaplayan her rapor (ve her
+/// anlaşmazlıkta müstahsile gösterilen belge) yanlış sonuç verirdi. Bu bir
+/// muhasebe/ispat gereğidir, konfor değil.
+model TenantPolicy {
+  id            String   @id @default(cuid())
+  tenantId      String
+  version       Int // Fabrika içinde artan
+  effectiveFrom DateTime @default(now())
+  /// Yeni parti hesaplarında kullanılan sürüm. Fabrika başına tek bir aktif
+  /// sürüm olur; eskiler tarihsel kayıt olarak durur.
+  isActive      Boolean  @default(true)
+
+  // --- Hizmet bedeli (hak yağ / sıkım bedeli) ---
+  defaultServiceType   ServiceType @default(PERCENTAGE)
+  defaultServiceAmount Decimal     @default(10) @db.Decimal(10, 3)
+  /// PERCENTAGE modelinde matrah. Kod bugüne kadar bunu OIL_OUT olarak
+  /// sabit varsayıyordu; artık fabrika seçebiliyor.
+  percentageBasis      FeeBasis    @default(OIL_OUT)
+  /// Operatörün parti bazında girebileceği aralık. Sınır yokken %100 girmek
+  /// müstahsilin payının tamamını siliyordu.
+  minServiceAmount     Decimal?    @db.Decimal(10, 3)
+  maxServiceAmount     Decimal?    @db.Decimal(10, 3)
+  /// Operatör parti bazında hiç değiştiremesin isteyen fabrikalar için.
+  allowServiceOverride Boolean     @default(true)
+
+  // --- Emanet (yağı fabrikada bırakma) ---
+  escrowEnabled                 Boolean     @default(true)
+  /// Yeni partide "emanete bırak" kutusunun varsayılanı.
+  escrowDefault                 Boolean     @default(true)
+  escrowModel                   EscrowModel @default(FUNGIBLE)
+  /// Aylık depolama ücreti (kg başına). null = ücretsiz saklama.
+  escrowStorageFeePerKgPerMonth Decimal?    @db.Decimal(10, 4)
+  /// Bu süre sonunda emanet yağ için uyarı üretilir. null = süresiz.
+  escrowExpiryDays              Int?
+  /// Tek seferde çekilebilecek en az miktar. null = sınır yok.
+  minWithdrawalKg               Decimal?    @db.Decimal(12, 3)
+
+  // --- Ödeme / tahsilat ---
+  /// false ise borçtan fazla tahsilat reddedilir (avans kabul etmeyen fabrika).
+  allowNegativeBalance   Boolean     @default(true)
+  liquidationPriceSource PriceSource @default(PER_TRANSACTION)
+
+  // --- Birim ve yuvarlama ---
+  /// Çok ülkeli kurulum: TRY / EUR. "TL" arayüzde sabit yazılıydı.
+  currency        String  @default("TRY")
+  kgDecimalPlaces Int     @default(3)
+  tlDecimalPlaces Int     @default(2)
+  /// Randıman gösterimi: "1/X" (Türkiye'de yaygın) veya yüzde.
+  yieldAsRatio    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  createdBy String? // Değişikliği yapan kullanıcı
+
+  tenant  Tenant            @relation(fields: [tenantId], references: [id])
+  batches ProductionBatch[]
+
+  @@unique([tenantId, version])
+  @@index([tenantId, isActive])
+}
+
+/// Fabrikanın kendi bidon tipleri.
+///
+/// Tenant.defaultDrumWeight tek bir Float'tı ve hiçbir iş mantığı onu
+/// okumuyordu — yalnızca formda ön değer olarak görünüyordu (üstelik iki
+/// ekranda farklı varsayılanla: 50 ve 60). Fabrikalar farklı boyut ve
+/// malzemede bidon kullanıyor; her biri ayrı bir kayıt olmalı.
+model DrumSize {
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       String // "50'lik teneke", "Küçük bidon"
+  capacityKg Decimal  @db.Decimal(8, 3)
+  /// Boş bidonun kendi ağırlığı: doluyken tartılan bidondan düşülür.
+  tareKg     Decimal  @default(0) @db.Decimal(8, 3)
+  type       DrumType
+  isActive   Boolean  @default(true)
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  drums  Drum[]
+
+  @@unique([name, tenantId])
+}
+
 model ProductionBatch {
-  id           String  @id @default(cuid())
+  id           String           @id @default(cuid())
   publicId     String? // Hibrit ID: 26-0001-A7Z
   totalOliveKg Int
-  totalOilKg   Decimal @db.Decimal(12, 3)
-  acidRatio    Decimal? @db.Decimal(5, 2) // Asit oranı
-  yieldRatio   Decimal @db.Decimal(8, 3) // Randıman 1/X
+  totalOilKg   Decimal          @db.Decimal(12, 3)
+  acidRatio    Decimal?         @db.Decimal(5, 2) // Asit oranı
+  yieldRatio   Decimal          @db.Decimal(8, 3) // Randıman 1/X
   status       ProductionStatus @default(COMPLETED)
 
   // Financial / Service Data
@@ -261,16 +373,25 @@ model ProductionBatch {
 
   factoryShareKg  Decimal @db.Decimal(12, 3)
   customerShareKg Decimal @db.Decimal(12, 3)
-  tankId          String? // Hangi tanka aktarıldı
-  tenantId        String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  tickets         WeighingTicket[]
-  transactions    Transaction[] // Bu üretimden kaynaklı işlemler
-  drums           Drum[]         @relation("BatchDrums")
 
-  tenant Tenant?    @relation(fields: [tenantId], references: [id])
-  tank   StockTank? @relation(fields: [tankId], references: [id])
+  /// Bu parti hesaplanırken yürürlükte olan politika sürümü.
+  ///
+  /// Partinin "hangi kurallara göre" hesaplandığını dondurur. Fabrika oranını
+  /// sonradan değiştirse bile bu parti kendi sürümüne bağlı kalır; makbuz
+  /// yeniden üretildiğinde aynı sayılar çıkar.
+  policyId String?
+
+  tankId       String? // Hangi tanka aktarıldı
+  tenantId     String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  tickets      WeighingTicket[]
+  transactions Transaction[] // Bu üretimden kaynaklı işlemler
+  drums        Drum[]           @relation("BatchDrums")
+
+  tenant Tenant?       @relation(fields: [tenantId], references: [id])
+  tank   StockTank?    @relation(fields: [tankId], references: [id])
+  policy TenantPolicy? @relation(fields: [policyId], references: [id])
 
   @@unique([publicId, tenantId])
 }
@@ -302,18 +423,22 @@ model StockTank {
 }
 
 model Drum {
-  id              String      @id @default(cuid())
+  id              String     @id @default(cuid())
   code            String
   type            DrumType
-  capacity        Decimal     @db.Decimal(8, 3)
-  status          DrumStatus  @default(AVAILABLE)
+  capacity        Decimal    @db.Decimal(8, 3)
+  status          DrumStatus @default(AVAILABLE)
+  /// Fabrikanın bidon kataloğundaki tip. Katalog Faz 3'te eklendi; eski
+  /// bidonlarda null olabilir, o yüzden capacity/type alanları korunuyor.
+  drumSizeId      String?
   tenantId        String
   currentHolderId String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
-  tenant        Tenant    @relation(fields: [tenantId], references: [id])
-  currentHolder Customer? @relation("DrumHolder", fields: [currentHolderId], references: [id])
+  tenant        Tenant            @relation(fields: [tenantId], references: [id])
+  drumSize      DrumSize?         @relation(fields: [drumSizeId], references: [id])
+  currentHolder Customer?         @relation("DrumHolder", fields: [currentHolderId], references: [id])
   productions   ProductionBatch[] @relation("BatchDrums")
 
   @@unique([code, tenantId])
