@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query } from "@nestjs/common";
 import { ProductionService } from "./production.service";
 import { CreateProductionBatchDto } from "./dto/create-production-batch.dto";
+import { CreateDrumDto, DeliverDrumsDto, ReturnDrumsDto } from "./dto/drum.dto";
 import { ContextService } from "../common/context.service";
 
 @Controller("production")
@@ -46,19 +47,19 @@ export class ProductionController {
   }
 
   @Post("drums")
-  async createDrum(@Body() body: { code: string; type: "PLASTIC" | "CHROME" | "TIN"; capacity: number }) {
+  async createDrum(@Body() dto: CreateDrumDto) {
     const tenantId = this.contextService.get("TENANT_ID") || "";
-    return this.productionService.createDrum(tenantId, body);
+    return this.productionService.createDrum(tenantId, dto);
   }
 
   @Post("deliver-drums")
-  async deliverDrums(@Body() body: { productionId: string; drumIds?: string[] }) {
+  async deliverDrums(@Body() dto: DeliverDrumsDto) {
     const tenantId = this.contextService.get("TENANT_ID") || "";
-    return this.productionService.deliverDrums(tenantId, body.productionId, body.drumIds);
+    return this.productionService.deliverDrums(tenantId, dto.productionId, dto.drumIds);
   }
 
   @Post("return-drums")
-  async returnDrums(@Body() body: { drumIds: string[] }) {
-    return this.productionService.returnDrums(body.drumIds);
+  async returnDrums(@Body() dto: ReturnDrumsDto) {
+    return this.productionService.returnDrums(dto.drumIds);
   }
 }

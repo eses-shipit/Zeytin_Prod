@@ -8,8 +8,9 @@ import { kg } from "../common/money";
  * doğrudan test edilebilir.
  */
 describe("calculateServiceFee", () => {
+  // calculateServiceFee saf bir fonksiyon; bağımlılıkların hiçbirine dokunmuyor.
   const service = new ProductionService(
-    {} as any, {} as any, {} as any, {} as any, {} as any, {} as any,
+    {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any,
   );
   const calc = (
     type: ServiceType,

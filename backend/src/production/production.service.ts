@@ -8,6 +8,8 @@ import { IdGeneratorService } from "../common/id-generator.service";
 import { AuditService } from "../audit/audit.service";
 import { ContextService } from "../common/context.service";
 import { PolicyService } from "../policy/policy.service";
+import { DrumSizeService } from "../policy/drum-size.service";
+import { CreateDrumDto } from "./dto/drum.dto";
 
 @Injectable()
 export class ProductionService {
@@ -20,6 +22,7 @@ export class ProductionService {
     private readonly auditService: AuditService,
     private readonly contextService: ContextService,
     private readonly policyService: PolicyService,
+    private readonly drumSizeService: DrumSizeService,
   ) {}
 
   async processBatch(tenantId: string, dto: CreateProductionBatchDto) {
@@ -632,26 +635,37 @@ export class ProductionService {
     });
   }
 
-  async createDrum(
-    tenantId: string,
-    data: { code: string; type: "PLASTIC" | "CHROME" | "TIN"; capacity: number },
-  ) {
-    if (!data.code || !data.type || !data.capacity) {
-      throw new BadRequestException("Kod, tür ve kapasite zorunludur.");
-    }
-
+  async createDrum(tenantId: string, dto: CreateDrumDto) {
     if (!tenantId) {
       throw new BadRequestException("Fabrika bilgisi bulunamadı. Lütfen giriş yapıp bir fabrika seçin.");
     }
 
+    // Katalogdan bir tip seçildiyse kapasite ve tür oradan gelir: aynı tipteki
+    // iki bidonun farklı kapasiteyle kaydedilmesi, sonradan stok hesabını
+    // tutarsız yapardı.
+    let capacity = new Prisma.Decimal(dto.capacity);
+    let type = dto.type;
+
+    if (dto.drumSizeId) {
+      const size = await this.drumSizeService.findOne(dto.drumSizeId);
+      if (!size.isActive) {
+        throw new BadRequestException("Seçilen bidon tipi kullanım dışı.");
+      }
+      capacity = size.capacityKg;
+      type = size.type;
+    }
+
     try {
       return await this.prisma.drum.create({
+        // tenantId doğrudan veriliyor: Prisma `tenant: { connect }` ilişkisiyle
+        // `drumSizeId` skaler alanını aynı anda kabul etmiyor.
         data: {
-          code: data.code,
-          type: data.type,
-          capacity: data.capacity,
+          code: dto.code,
+          type,
+          capacity,
+          drumSizeId: dto.drumSizeId,
           status: "AVAILABLE",
-          tenant: { connect: { id: tenantId } },
+          tenantId,
         },
       });
     } catch (error: any) {
