@@ -2,75 +2,59 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCustomerDto } from "./dto/create-customer.dto";
 
+/**
+ * Tenant kapsamı PrismaService middleware'i tarafından uygulanır: her sorguya
+ * bağlamdaki tenantId eklenir, bağlam yoksa sorgu reddedilir. Bu yüzden
+ * servis metodları tenantId almaz.
+ */
 @Injectable()
 export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(tenantId: string) {
-    // tenantId parametresi artık kullanılmıyor (Context'ten alınıyor)
-    // ama imza uyumluluğu için tutuyoruz.
-    return await this.prisma.customer.findMany({
+  async findAll() {
+    return this.prisma.customer.findMany({
       orderBy: { name: "asc" },
     });
   }
 
-  async findOne(tenantId: string, id: string) {
-    return await this.prisma.customer.findFirst({
-      where: { id },
-    });
+  async findOne(id: string) {
+    const customer = await this.prisma.customer.findFirst({ where: { id } });
+    // Başka bir fabrikanın müşterisi de burada "bulunamadı" olur: middleware
+    // tenantId'yi eklediği için sorgu eşleşmez. Varlığını sızdırmamak için
+    // ayrı bir 403 üretmiyoruz.
+    if (!customer) throw new NotFoundException("Müşteri bulunamadı.");
+    return customer;
   }
 
   async getSummary(id: string) {
+    await this.findOne(id); // tenant kapsamı + varlık kontrolü
+
     const oliveSum = await this.prisma.weighingTicket.aggregate({
       where: { customerId: id },
       _sum: { netKg: true },
     });
+
     return {
       totalOliveKg: oliveSum._sum.netKg || 0,
     };
   }
 
-  async create(tenantId: string, dto: CreateCustomerDto) {
-    return await this.prisma.customer.create({
-      data: dto, // tenantId middleware tarafından otomatik eklenecek
+  async create(dto: CreateCustomerDto) {
+    return this.prisma.customer.create({
+      data: dto, // tenantId middleware tarafından eklenir
     });
   }
 
-  async update(tenantId: string, id: string, dto: CreateCustomerDto) {
-    // Middleware otomatik olarak where: { id, tenantId } ekleyecek
-    // Ama findUnique ID bazlı olduğu için PrismaService'de findUnique kontrolü 
-    // ID ile tenantId'yi birleştiremeyebilir (findFirst kullanmak daha güvenli olabilir context ile)
-    // Ancak PrismaService middleware'imiz "args.where.tenantId = tenantId" yapıyor.
-    // findUnique({ where: { id } }) -> findUnique({ where: { id, tenantId } }) olur mu? 
-    // Hayır, findUnique sadece unique alanlarla çalışır.
-    // Çözüm: Güvenlik için findFirst kullanmak veya PrismaService middleware'ini findUnique için id-tenantId unique index varsa ona çevirmek.
-    // Şimdilik en güvenlisi findFirst kullanmaktır ama ID zaten unique (CUID).
-    // Başka tenant'ın verisini silmemek için "önce bul sonra sil" yapısı güvenli.
-    
-    // NOT: PrismaService middleware'imiz findUnique'e de tenantId ekliyor.
-    // Eğer şemada @@unique([id, tenantId]) yoksa findUnique patlayabilir.
-    // Şemada ID zaten unique. Middleware findUnique'e tenantId eklerse Prisma hata verebilir.
-    // PrismaService'i kontrol edelim: "if (params.args.where.tenantId === undefined) params.args.where.tenantId = tenantId;"
-    // Bu findUnique için tehlikeli. findUnique sadece ID ister.
-    // Ama CUID olduğu için çakışma olmaz. Veri sızmaz.
-    
-    const exists = await this.prisma.customer.findUnique({ where: { id } });
-    // Burada aslında tenant kontrolü yapılmalı.
-    // Middleware findUnique'e tenantId eklerse hata alabiliriz.
-    // Bu yüzden findFirst kullanmak daha güvenli tenant izolasyonu için.
-    
-    if (!exists) throw new NotFoundException("Müşteri bulunamadı");
-       
-    return await this.prisma.customer.update({
-        where: { id },
-        data: dto,
+  async update(id: string, dto: CreateCustomerDto) {
+    await this.findOne(id);
+    return this.prisma.customer.update({
+      where: { id },
+      data: dto,
     });
   }
 
-  async remove(tenantId: string, id: string) {
-    const exists = await this.prisma.customer.findUnique({ where: { id } });
-    if (!exists) throw new NotFoundException("Müşteri bulunamadı");
-      
-    return await this.prisma.customer.delete({ where: { id } });
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.prisma.customer.delete({ where: { id } });
   }
 }

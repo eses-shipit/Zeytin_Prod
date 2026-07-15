@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException, Logger } from "@nestjs/common";
 import { Prisma, } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProductionBatchDto, ServiceType } from "./dto/create-production-batch.dto";
@@ -9,6 +9,8 @@ import { ContextService } from "../common/context.service";
 
 @Injectable()
 export class ProductionService {
+  private readonly logger = new Logger(ProductionService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly smsService: SmsService,
@@ -251,7 +253,11 @@ export class ProductionService {
              smsSent = true;
         }
       } catch (err) {
-          console.error("SMS sending failed inside transaction logic:", err);
+          this.logger.error(
+            `SMS kuyruğa alınamadı (batchId=${batch.id}): ${
+              err instanceof Error ? err.message : "bilinmeyen hata"
+            }`,
+          );
       }
 
       return { ...batch, customerShareKg, factoryShareKg, smsSent };

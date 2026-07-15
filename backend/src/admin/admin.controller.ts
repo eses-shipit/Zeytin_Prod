@@ -1,16 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
+import { UserRole } from "@prisma/client";
 import { AdminService } from "./admin.service";
 import { CreateLicenseDto } from "./dto/create-license.dto";
 import { UpdateTenantDto } from "./dto/update-tenant.dto";
 import { AuthService } from "../auth/auth.service";
-import { SuperAdminGuard } from "../common/guards/super-admin.guard";
+import { ContextService } from "../common/context.service";
+import { Roles } from "../common/decorators/roles.decorator";
 
 @Controller("admin")
-@UseGuards(SuperAdminGuard) // Tüm admin endpoint'leri Super Admin guard ile korunuyor
+@Roles(UserRole.SUPER_ADMIN) // Tüm admin endpoint'leri yalnızca platform sahibine açık
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly contextService: ContextService,
   ) {}
 
   @Get("stats")
@@ -19,11 +22,13 @@ export class AdminController {
   }
 
   @Post("impersonate/:tenantId")
-  async impersonateTenant(@Param("tenantId") tenantId: string, @Req() req: any) {
-      // In a real scenario, check req.user.role === 'SUPER_ADMIN'
-      // For MVP, we allow this endpoint to be called.
-      // Ideally we should pass the admin ID, but for now we skip that validation or pass a placeholder.
-      return this.authService.impersonate("super-admin-id", tenantId);
+  async impersonateTenant(@Param("tenantId") tenantId: string) {
+    // Çağıranın kimliği artık sabit "super-admin-id" yer tutucusu değil,
+    // doğrulanmış bağlamdan geliyor; üretilen token kimin adına açıldığını
+    // taşır ve işlem denetim kaydına yazılır.
+    const actorId = this.contextService.get("USER_ID");
+    if (!actorId) throw new UnauthorizedException("Kullanıcı kimliği bulunamadı.");
+    return this.authService.impersonate(actorId, tenantId);
   }
 
   @Get("tenants")

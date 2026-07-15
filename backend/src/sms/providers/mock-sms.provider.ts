@@ -1,6 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ISmsProvider } from "../interfaces/sms-provider.interface";
 
+/** Telefon numarasını loglanabilir hale getirir: 05551110000 -> 0555***0000 */
+function maskPhone(phone: string): string {
+  if (phone.length <= 7) return "***";
+  return `${phone.slice(0, 4)}***${phone.slice(-4)}`;
+}
+
 @Injectable()
 export class MockSmsProvider implements ISmsProvider {
   private readonly logger = new Logger(MockSmsProvider.name);
@@ -9,13 +15,13 @@ export class MockSmsProvider implements ISmsProvider {
     // Simülasyon gecikmesi
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Renkli log çıktısı
-    // ANSI renk kodları: \x1b[36m (Cyan), \x1b[32m (Green), \x1b[0m (Reset)
-    const logOutput = `\x1b[36m[SMS MOCK]\x1b[0m \x1b[33mTo:\x1b[0m ${to} | \x1b[33mSender:\x1b[0m ZEYTINSAAS | \x1b[32mMsg:\x1b[0m ${message}`;
-    
-    console.log(logOutput);
-    this.logger.log(`SMS Sent successfully to ${to}`);
-    
+    // Mesaj gövdesi yalnızca geliştirmede yazılır: içinde müşteri adı ve üretim
+    // rakamları var. Numara her koşulda maskelenir.
+    if (process.env.NODE_ENV !== "production") {
+      this.logger.debug(`[SMS MOCK] Alıcı: ${maskPhone(to)} | Mesaj: ${message}`);
+    }
+    this.logger.log(`SMS gönderildi: ${maskPhone(to)}`);
+
     return true;
   }
 }

@@ -1,5 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod, Global } from "@nestjs/common";
-import { TenantMiddleware } from "./common/tenant.middleware";
+import { ContextMiddleware } from "./common/context.middleware";
 import { PrismaService } from "./prisma/prisma.service";
 import { TicketsModule } from "./tickets/tickets.module";
 import { CustomersModule } from "./customers/customers.module";
@@ -21,11 +21,14 @@ import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 import * as Joi from "joi";
 import { ContextService } from "./common/context.service";
+import { TokenService } from "./common/token.service";
+import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
+import { RolesGuard } from "./common/guards/roles.guard";
 
-@Global() // ContextService'i global yapalım
+@Global() // ContextService ve TokenService'i global yapalım
 @Module({
-  providers: [ContextService],
-  exports: [ContextService],
+  providers: [ContextService, TokenService],
+  exports: [ContextService, TokenService],
 })
 export class ContextModule {}
 
@@ -36,8 +39,12 @@ export class ContextModule {}
       isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
-        // JWT_SECRET: Joi.string().min(32).required(), // Uncomment when auth is fully active
+        // Secret yoksa uygulama başlamaz. Bu doğrulama uzun süre yorumda kaldığı
+        // için JWT_SECRET hiç tanımlanmamıştı ve kod içindeki sabit fallback
+        // canlıda kullanılıyordu.
+        JWT_SECRET: Joi.string().min(32).required().invalid("super-secret-key-change-in-prod"),
         FRONTEND_URL: Joi.string().uri().default("http://localhost:3000"),
+        NODE_ENV: Joi.string().valid("development", "test", "production").default("development"),
       }),
     }),
     ThrottlerModule.forRoot([
@@ -67,18 +74,29 @@ export class ContextModule {}
     TenantModule,
   ],
   providers: [
-    PrismaService, 
+    PrismaService,
     IdGeneratorService,
+    // Guard sırası kayıt sırasıdır: önce hız limiti, sonra kimlik, sonra rol.
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    }
+    },
+    // Varsayılan olarak HER route korumalıdır. Muafiyet için @Public() gerekir.
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // @Roles() taşıyan route'ları uygular; taşımayanlara karışmaz.
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(TenantMiddleware)
+      .apply(ContextMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

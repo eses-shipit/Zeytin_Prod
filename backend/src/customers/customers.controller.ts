@@ -1,53 +1,40 @@
-import {
-  Controller,
-  Get,
-  Headers,
-  BadRequestException,
-  Post,
-  Body,
-  Put,
-  Param,
-  Delete,
-} from "@nestjs/common";
+import { Controller, Get, Post, Body, Put, Param, Delete } from "@nestjs/common";
 import { CustomersService } from "./customers.service";
 import { CreateCustomerDto } from "./dto/create-customer.dto";
 
+// Kimlik doğrulaması global JwtAuthGuard tarafından, tenant kapsamı
+// PrismaService middleware'i tarafından uygulanır.
 @Controller("customers")
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Get()
-  async findAll() {
-    // tenantId artık context'ten alınıyor (TenantMiddleware tarafından)
-    return this.customersService.findAll("");
+  findAll() {
+    return this.customersService.findAll();
   }
 
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    // tenantId artık context'ten alınıyor
-    return this.customersService.findOne("", id);
+  findOne(@Param("id") id: string) {
+    return this.customersService.findOne(id);
   }
 
   @Get(":id/summary")
-  async summary(@Param("id") id: string) {
+  summary(@Param("id") id: string) {
     return this.customersService.getSummary(id);
   }
 
   @Post()
-  async create(@Body() dto: CreateCustomerDto) {
-    // tenantId artık context'ten alınıyor ve Prisma middleware tarafından otomatik ekleniyor
-    return this.customersService.create("", dto);
+  create(@Body() dto: CreateCustomerDto) {
+    return this.customersService.create(dto);
   }
 
   @Put(":id")
-  async update(@Param("id") id: string, @Body() dto: CreateCustomerDto) {
-    // tenantId artık context'ten alınıyor
-    return this.customersService.update("", id, dto);
+  update(@Param("id") id: string, @Body() dto: CreateCustomerDto) {
+    return this.customersService.update(id, dto);
   }
 
   @Delete(":id")
-  async remove(@Param("id") id: string) {
-    // tenantId artık context'ten alınıyor
-    return this.customersService.remove("", id);
+  remove(@Param("id") id: string) {
+    return this.customersService.remove(id);
   }
 }

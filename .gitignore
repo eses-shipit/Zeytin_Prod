@@ -1,4 +1,13 @@
 node_modules
 dist
-.env
 .DS_Store
+
+# Ortam dosyaları. `.env` zaten yok sayılıyordu ama `.env.local` sayılmıyordu
+# ve git'e girmişti; şablon dışındaki tüm varyantlar kapsam dışı.
+.env
+.env.*
+!.env.example
+
+.next
+coverage
+*.log

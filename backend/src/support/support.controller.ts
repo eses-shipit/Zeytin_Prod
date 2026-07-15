@@ -1,63 +1,81 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
-import { Request } from "express";
+import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
+import { UserRole, SupportTicketStatus, TicketPriority } from "@prisma/client";
 import { SupportService } from "./support.service";
 import { CreateSupportTicketDto } from "./dto/create-support-ticket.dto";
 import { CreateTicketMessageDto } from "./dto/create-ticket-message.dto";
 import { UpdateTicketStatusDto } from "./dto/update-ticket-status.dto";
-import { SupportTicketStatus, TicketPriority } from "@prisma/client";
+import { ContextService } from "../common/context.service";
+import { Roles } from "../common/decorators/roles.decorator";
 
 @Controller("support")
 export class SupportController {
-  constructor(private readonly supportService: SupportService) {}
+  constructor(
+    private readonly supportService: SupportService,
+    private readonly contextService: ContextService,
+  ) {}
 
-  // Tenant Endpoints
+  // --- Fabrika (tenant) endpoint'leri ---
+  // tenantId artık doğrulanmış token'dan gelen bağlamdan okunur. Eskiden
+  // `req.tenantId` kullanılıyordu; onu eski TenantMiddleware yazıyordu.
+
   @Post()
-  create(@Req() req: Request, @Body() dto: CreateSupportTicketDto) {
-    return this.supportService.create(req.tenantId, dto);
+  create(@Body() dto: CreateSupportTicketDto) {
+    return this.supportService.create(this.tenantId(), dto);
   }
 
   @Get()
-  findAll(@Req() req: Request) {
-    // Normal users/admins are restricted to their tenant
-    return this.supportService.findAll({ tenantId: req.tenantId, role: 'USER' });
+  findAll() {
+    return this.supportService.findAll({ tenantId: this.tenantId(), role: UserRole.USER });
   }
 
   @Get(":id")
-  findOne(@Req() req: Request, @Param("id") id: string) {
-    return this.supportService.findOne(req.tenantId, id);
+  findOne(@Param("id") id: string) {
+    return this.supportService.findOne(this.tenantId(), id);
   }
 
   @Post(":id/messages")
-  addMessage(@Req() req: Request, @Param("id") id: string, @Body() dto: CreateTicketMessageDto) {
-    return this.supportService.addMessage(req.tenantId, id, dto, "CUSTOMER");
+  addMessage(@Param("id") id: string, @Body() dto: CreateTicketMessageDto) {
+    return this.supportService.addMessage(this.tenantId(), id, dto, "CUSTOMER");
   }
 
-  // Admin Endpoints (Should be protected by Role Guard in real app)
+  // --- Platform yöneticisi endpoint'leri ---
+  // Bu route'lar guard'sızdı ve servise sabit `role: 'SUPER_ADMIN'` geçiyordu:
+  // kimliği doğrulanmamış herhangi biri bütün fabrikaların destek taleplerini
+  // okuyabiliyor ve "ADMIN" adına mesaj yazabiliyordu.
+
+  @Roles(UserRole.SUPER_ADMIN)
   @Get("admin/all")
   findAllAdmin(
-      @Query('status') status?: SupportTicketStatus,
-      @Query('priority') priority?: TicketPriority
+    @Query("status") status?: SupportTicketStatus,
+    @Query("priority") priority?: TicketPriority,
   ) {
-    // Super Admin can see all tickets
-    return this.supportService.findAll({ role: 'SUPER_ADMIN' }, { status, priority });
-  }
-  
-  @Get("admin/stats")
-  getStats() {
-      return this.supportService.getDashboardStats();
+    return this.supportService.findAll({ role: this.role() }, { status, priority });
   }
 
+  @Roles(UserRole.SUPER_ADMIN)
+  @Get("admin/stats")
+  getStats() {
+    return this.supportService.getDashboardStats();
+  }
+
+  @Roles(UserRole.SUPER_ADMIN)
   @Put("admin/:id/status")
   updateStatus(@Param("id") id: string, @Body() dto: UpdateTicketStatusDto) {
     return this.supportService.updateStatus(id, dto.status);
   }
 
+  @Roles(UserRole.SUPER_ADMIN)
   @Post("admin/:id/messages")
   addAdminMessage(@Param("id") id: string, @Body() dto: CreateTicketMessageDto) {
-    // Admin sends message, tenantId is not strictly needed for message creation logic if not validating ownership strictness against request
-    // But for safety we might want to check existence. 
-    // Passing a dummy tenantId or fetching ticket first in service handles logic.
-    return this.supportService.addMessage("admin-override", id, dto, "ADMIN");
+    return this.supportService.addMessage(null, id, dto, "ADMIN");
+  }
+
+  /** Rol, sabit değil, doğrulanmış bağlamdan okunur. */
+  private role(): UserRole {
+    return this.contextService.get("USER_ROLE");
+  }
+
+  private tenantId(): string {
+    return this.contextService.get("TENANT_ID");
   }
 }
-

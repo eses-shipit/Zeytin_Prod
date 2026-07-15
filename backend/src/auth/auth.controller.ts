@@ -1,9 +1,13 @@
-import { Body, Controller, Post, Patch, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, Patch, UnauthorizedException } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { CheckLicenseDto } from "./dto/check-license.dto";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 import { ContextService } from "../common/context.service";
+import { Public } from "../common/decorators/public.decorator";
 
 @Controller("auth")
 @Throttle({ short: { limit: 10, ttl: 60000 } }) // Auth route'ları için 10 istek/60 saniye
@@ -13,47 +17,55 @@ export class AuthController {
     private readonly contextService: ContextService,
   ) {}
 
+  @Public()
   @Post("register")
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
-  @Post("recover-password")
-  recoverPassword(@Body() body: { email: string; licenseCode: string }) {
-    return this.authService.recoverPassword(body.email, body.licenseCode);
-  }
-
+  @Public()
   @Post("check-license")
-  checkLicense(@Body() body: { code: string }) {
-    return this.authService.checkLicense(body.code);
+  checkLicense(@Body() dto: CheckLicenseDto) {
+    return this.authService.checkLicense(dto.code);
   }
 
+  @Public()
   @Post("login")
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
-  @Post("create-super-admin")
-  async createSuperAdmin(@Body() body: { email: string; password: string; name?: string }) {
-    return this.authService.createSuperAdmin(body.email, body.password, body.name);
-  }
+  // KALDIRILDI: POST /auth/recover-password
+  // Kullanıcının saklanan parolasını HTTP yanıtında dönüyordu ve tek koşulu
+  // lisans kodu bilmekti — lisans kodu ise fabrikadaki herkesçe bilinir.
+  // Yerine imzalı, tek kullanımlık, kısa ömürlü sıfırlama token'ı gelecek.
+
+  // KALDIRILDI: POST /auth/create-super-admin
+  // Kimlik doğrulaması olmayan bir platform sahibi oluşturma yolu HTTP
+  // yüzeyinde durmamalı. Yerine: `npm run seed:super-admin`.
 
   @Patch("profile")
-  async updateProfile(@Body() dto: { name?: string; email?: string; phone?: string }) {
-    const userId = this.contextService.get("USER_ID");
-    if (!userId) {
-      throw new Error("Kullanıcı kimliği bulunamadı.");
-    }
-    return this.authService.updateProfile(userId, dto);
+  async updateProfile(@Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(this.requireUserId(), dto);
   }
 
   @Patch("change-password")
-  async changePassword(@Body() body: { oldPassword: string; newPassword: string }) {
+  async changePassword(@Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(
+      this.requireUserId(),
+      dto.oldPassword,
+      dto.newPassword,
+    );
+  }
+
+  /**
+   * JwtAuthGuard bu route'lara token'sız erişime zaten izin vermez; bu kontrol
+   * yalnızca bağlamın beklendiği gibi dolu olduğunu doğrular. Eskiden burada
+   * çıplak `throw new Error(...)` vardı ve istemciye 401 yerine 500 dönüyordu.
+   */
+  private requireUserId(): string {
     const userId = this.contextService.get("USER_ID");
-    if (!userId) {
-      throw new Error("Kullanıcı kimliği bulunamadı.");
-    }
-    return this.authService.changePassword(userId, body.oldPassword, body.newPassword);
+    if (!userId) throw new UnauthorizedException("Kullanıcı kimliği bulunamadı.");
+    return userId;
   }
 }
-

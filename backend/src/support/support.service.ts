@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateSupportTicketDto } from "./dto/create-support-ticket.dto";
 import { CreateTicketMessageDto } from "./dto/create-ticket-message.dto";
-import { TicketPriority, SupportTicketStatus } from "@prisma/client";
+import { TicketPriority, SupportTicketStatus, UserRole } from "@prisma/client";
 
 @Injectable()
 export class SupportService {
@@ -24,12 +24,14 @@ export class SupportService {
     });
   }
 
-  async findAll(user: { tenantId?: string; role?: string }, filters?: { status?: SupportTicketStatus; priority?: TicketPriority }) {
-    // DATA ISOLATION RULE:
-    // 1. If SUPER_ADMIN -> No tenant filter (can see all)
-    // 2. If Regular User/Admin -> Must filter by user.tenantId
-    
-    if (user.role === 'SUPER_ADMIN') {
+  async findAll(user: { tenantId?: string; role?: UserRole }, filters?: { status?: SupportTicketStatus; priority?: TicketPriority }) {
+    // VERİ İZOLASYONU:
+    // 1. SUPER_ADMIN -> tenant filtresi yok (hepsini görür)
+    // 2. Normal kullanıcı/admin -> user.tenantId ile filtrelenir
+    //
+    // Rol artık çağıran taraftan sabit olarak değil, doğrulanmış bağlamdan
+    // gelir; bu dalın açılması RolesGuard ile kısıtlıdır.
+    if (user.role === UserRole.SUPER_ADMIN) {
         return this.prisma.supportTicket.findMany({
             where: {
                 ...(filters?.status && { status: filters.status }),
@@ -84,10 +86,11 @@ export class SupportService {
     return ticket;
   }
 
-  async addMessage(tenantId: string, ticketId: string, dto: CreateTicketMessageDto, sender: "CUSTOMER" | "ADMIN") {
-    // Verify ticket ownership for customer
+  /** ADMIN gönderiminde tenantId null'dır: talep, sahibi fabrikadan bağımsız yanıtlanır. */
+  async addMessage(tenantId: string | null, ticketId: string, dto: CreateTicketMessageDto, sender: "CUSTOMER" | "ADMIN") {
+    // Müşteri gönderiminde talebin sahipliği doğrulanır
     if (sender === "CUSTOMER") {
-      const ticket = await this.findOne(tenantId, ticketId);
+      const ticket = await this.findOne(tenantId!, ticketId);
       if (!ticket) throw new NotFoundException("Ticket not found");
       
       // Re-open ticket if closed and customer replies

@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateLicenseDto } from "./dto/create-license.dto";
 import { LicenseStatus, TenantStatus, UserRole } from "@prisma/client";
 import * as crypto from "crypto";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AdminService {
@@ -318,11 +319,13 @@ export class AdminService {
       throw new BadRequestException("Geçersiz kullanıcı rolü.");
     }
 
+    const passwordHash = await bcrypt.hash(data.password, 12);
+
     return await this.prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
-        password: data.password, // In production, hash this!
+        password: passwordHash,
         phone: data.phone,
         role: data.role as any,
         tenantId: tenantId,

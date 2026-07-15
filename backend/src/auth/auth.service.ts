@@ -3,47 +3,31 @@ import {
   BadRequestException,
   UnauthorizedException,
   NotFoundException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { LicenseStatus, TenantStatus, UserRole } from "@prisma/client";
-import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcryptjs";
+import { TokenService } from "../common/token.service";
+import { AuditService } from "../audit/audit.service";
 
 @Injectable()
 export class AuthService {
-  private readonly JWT_SECRET = process.env.JWT_SECRET || "super-secret-key-change-in-prod";
+  private readonly logger = new Logger(AuthService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tokenService: TokenService,
+    private readonly auditService: AuditService,
+  ) {}
 
-  async recoverPassword(email: string, licenseCode: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: { tenant: true }
-    });
-
-    if (!user || !user.tenantId) {
-      throw new NotFoundException("Kullanıcı bulunamadı.");
-    }
-
-    const license = await this.prisma.license.findFirst({
-        where: {
-            code: licenseCode,
-            tenantId: user.tenantId,
-            status: LicenseStatus.USED
-        }
-    });
-
-    if (!license) {
-        throw new BadRequestException("Lisans kodu bu kullanıcıyla eşleşmiyor.");
-    }
-
-    return {
-        success: true,
-        password: user.password 
-    };
-  }
+  // KALDIRILDI: recoverPassword()
+  // Saklanan parolayı doğrudan HTTP yanıtında döndürüyordu ve tek koşulu lisans
+  // kodunu bilmekti. Parolalar artık hash'lendiği için zaten geri döndürülemez.
+  // Yerine imzalı, tek kullanımlık, kısa ömürlü sıfırlama token'ı gelecek
+  // (Faz 5). Frontend'deki /auth/forgot-password sayfası bu akışı bekliyor.
 
   async checkLicense(code: string) {
     const license = await this.prisma.license.findUnique({
@@ -122,7 +106,7 @@ export class AuthService {
             throw new BadRequestException("Kullanım koşullarını ve Aydınlatma metnini onaylamanız gerekmektedir.");
           }
 
-          const passwordHash = await bcrypt.hash(dto.password, 10);
+          const passwordHash = await bcrypt.hash(dto.password, 12);
           const user = await tx.user.create({
             data: {
               name: dto.userName,
@@ -160,7 +144,8 @@ export class AuthService {
           };
         });
     } catch (error: any) {
-        console.error("Register Transaction Error:", error);
+        // Kayıt gövdesi (şifre/PII içerir) loglanmaz; sadece hata bilgisi.
+        this.logger.error(`Register transaction failed: ${error?.code ?? "UNKNOWN"} - ${error?.message}`, error?.stack);
         if (error.code === 'P2002') {
             const target = error.meta?.target;
             if (target?.includes('email')) {
@@ -175,34 +160,19 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    console.log("[AuthService] Login attempt for email:", dto.email);
-    
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
       include: { tenant: true }
     });
 
-    console.log("[AuthService] User found:", user ? "Yes" : "No");
-    if (user) {
-      console.log("[AuthService] User details:", {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        passwordMatch: user.password === dto.password
-      });
-    }
-
     if (!user) {
-      console.error("[AuthService] ❌ Login failed: Invalid credentials");
       throw new UnauthorizedException("E-posta veya şifre hatalı.");
     }
 
-    // Password check: support both legacy plaintext and bcrypt hashes
-    const isBcryptHash = typeof user.password === "string" && user.password.startsWith("$2");
-    const passwordOk = isBcryptHash ? await bcrypt.compare(dto.password, user.password) : user.password === dto.password;
+    // Sadece bcrypt karşılaştırması: düz metin kayıtlı şifre hiçbir zaman eşleşmez.
+    const passwordOk = await bcrypt.compare(dto.password, user.password);
 
     if (!passwordOk) {
-      console.error("[AuthService] ❌ Login failed: Invalid credentials");
       throw new UnauthorizedException("E-posta veya şifre hatalı.");
     }
 
@@ -213,14 +183,6 @@ export class AuthService {
 
     // Token Üret
     const token = this.generateToken(user, user.tenant?.code);
-    
-    console.log("[AuthService] Login successful for user:", {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      tenantId: user.tenantId
-    });
-    console.log("[AuthService] Token generated:", token ? "Yes" : "No");
 
     return {
       success: true,
@@ -244,48 +206,9 @@ export class AuthService {
     };
   }
 
-  async createSuperAdmin(email: string, password: string, name?: string) {
-    // Sadece hiç Super Admin yoksa oluştur
-    const existingSuperAdmin = await this.prisma.user.findFirst({
-      where: { role: UserRole.SUPER_ADMIN },
-    });
-
-    if (existingSuperAdmin) {
-      throw new BadRequestException("Super Admin zaten mevcut. Yeni Super Admin oluşturulamaz.");
-    }
-
-    // Email kontrolü
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new BadRequestException("Bu e-posta adresi zaten kayıtlı.");
-    }
-
-    // Super Admin oluştur
-    const passwordHash = await bcrypt.hash(password, 10);
-    const superAdmin = await this.prisma.user.create({
-      data: {
-        email,
-        name: name || "Super Admin",
-        password: passwordHash,
-        role: UserRole.SUPER_ADMIN,
-        tenantId: null,
-      },
-    });
-
-    return {
-      success: true,
-      message: "Super Admin başarıyla oluşturuldu.",
-      user: {
-        id: superAdmin.id,
-        email: superAdmin.email,
-        name: superAdmin.name,
-        role: superAdmin.role,
-      },
-    };
-  }
+  // KALDIRILDI: createSuperAdmin()
+  // Platform sahibi oluşturmak kimlik doğrulaması olmayan bir HTTP yüzeyinde
+  // durmamalı. Yerine CLI: `npm run seed:super-admin`.
 
   async impersonate(adminId: string, tenantId: string) {
     const targetUser = await this.prisma.user.findFirst({
@@ -305,7 +228,19 @@ export class AuthService {
     // Ancak Super Admin kendi oturumunu (token'ını) localStorage'da yedekliyor.
     // Impersonate bitince yedeği geri yüklüyor.
     // Bu yüzden burada targetUser için token üretmek mantıklı.
-    const token = this.generateToken(targetUser, targetUser.tenant?.code);
+    //
+    // Token, kimin adına açıldığını (impersonatedBy) taşır: aksi halde
+    // simüle edilmiş oturumda yapılan işlem gerçek yöneticininkinden
+    // ayırt edilemez.
+    const token = this.generateToken(targetUser, targetUser.tenant?.code, adminId);
+
+    await this.auditService.logAction(
+      tenantId,
+      adminId,
+      "IMPERSONATE",
+      targetUser.id,
+      { targetEmail: targetUser.email },
+    );
 
     return {
         success: true,
@@ -382,17 +317,8 @@ export class AuthService {
       throw new NotFoundException("Kullanıcı bulunamadı.");
     }
 
-    // Eski şifre kontrolü (bcrypt compare)
-    // Hem bcrypt hash'li hem de plain text şifreleri destekle (geçiş dönemi için)
-    let isOldPasswordValid = false;
-    
-    if (user.password.startsWith("$2")) {
-      // Bcrypt hash'li şifre
-      isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
-    } else {
-      // Plain text şifre (eski kayıtlar için)
-      isOldPasswordValid = user.password === oldPassword;
-    }
+    // Sadece bcrypt karşılaştırması: düz metin kayıtlı şifre hiçbir zaman eşleşmez.
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
 
     if (!isOldPasswordValid) {
       throw new UnauthorizedException("Eski şifre hatalı.");
@@ -404,7 +330,7 @@ export class AuthService {
     }
 
     // Yeni şifreyi hash'le ve güncelle
-    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
     await this.prisma.user.update({
       where: { id: userId },
       data: { password: newPasswordHash },
@@ -416,18 +342,18 @@ export class AuthService {
     };
   }
 
-  private generateToken(user: any, tenantCode?: string) {
-      const payload = {
+  /**
+   * @param impersonatedBy Token'ı bir SUPER_ADMIN başkası adına açtıysa onun id'si.
+   */
+  private generateToken(user: any, tenantCode?: string, impersonatedBy?: string) {
+      return this.tokenService.sign({
           sub: user.id,
           id: user.id, // Hem sub hem id ekle (uyumluluk için)
           email: user.email,
           role: user.role,
           tenantId: user.tenantId,
-          tenantCode: tenantCode
-      };
-      console.log("[AuthService] Generating token with payload:", payload);
-      const token = jwt.sign(payload, this.JWT_SECRET, { expiresIn: '7d' });
-      console.log("[AuthService] Token generated successfully, length:", token.length);
-      return token;
+          tenantCode,
+          ...(impersonatedBy && { impersonatedBy }),
+      });
   }
 }

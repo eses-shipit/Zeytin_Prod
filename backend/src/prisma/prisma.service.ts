@@ -1,132 +1,193 @@
-import { Injectable, OnModuleDestroy, OnModuleInit, Logger, BadRequestException } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
+import {
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+  Logger,
+  BadRequestException,
+  ForbiddenException,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { PrismaClient, Prisma, UserRole } from "@prisma/client";
 import { ContextService } from "../common/context.service";
+
+/**
+ * `tenantId` alanı olan modeller DMMF'ten türetilir; elle liste tutulmaz.
+ * Şemaya yeni bir tenant modeli eklendiğinde otomatik kapsama girer — eski elle
+ * yazılan liste model eklemeyi unutmaya açıktı.
+ */
+function deriveTenantModels(): Set<string> {
+  return new Set(
+    Prisma.dmmf.datamodel.models
+      .filter((m) => m.fields.some((f) => f.name === "tenantId"))
+      .map((m) => m.name),
+  );
+}
+
+/**
+ * Tenant kapsamı DIŞINDA bırakılan modeller.
+ *
+ * `User` ve `License` şemada `tenantId` taşır ama global erişim gerektirir:
+ * login e-postayla kullanıcı arar ve o noktada henüz tenant bağlamı yoktur;
+ * kayıt akışı da lisans kodunu global arar. İkisine yalnızca @Public auth
+ * route'ları veya SUPER_ADMIN korumalı route'lar üzerinden erişilir.
+ *
+ * TODO: auth.service'teki global aramaları `runAsSystem` ile sarmalayıp bu iki
+ * modeli de kapsama al.
+ */
+const UNSCOPED_MODELS = new Set<string>(["User", "License"]);
+
+/** `where` enjekte edilerek kapsanan operasyonlar. */
+const FILTER_ACTIONS: ReadonlySet<string> = new Set([
+  "findUnique",
+  "findUniqueOrThrow",
+  "findFirst",
+  "findFirstOrThrow",
+  "findMany",
+  "count",
+  // aggregate/groupBy eski allowlist'te YOKTU: her fabrikanın panosu diğer
+  // fabrikaların ciro ve alacak toplamlarını görüyordu.
+  "aggregate",
+  "groupBy",
+  "update",
+  "updateMany",
+  "delete",
+  "deleteMany",
+]);
+
+/** `data` enjekte edilerek kapsanan operasyonlar. */
+const CREATE_ACTIONS: ReadonlySet<string> = new Set([
+  "create",
+  "createMany",
+  "createManyAndReturn",
+]);
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
-
-  // TenantId içeren modellerin listesi (Bunlara otomatik filtre uygulanacak)
-  private readonly TENANT_MODELS = [
-    'Product',
-    'Customer',
-    'WeighingTicket',
-    'ProductionBatch',
-    'StockTank',
-    'Transaction',
-    'SupportTicket',
-    'AuditLog', // AuditLog da tenant bazlı
-    'Drum',
-  ];
+  private readonly tenantModels: Set<string>;
 
   constructor(private readonly contextService: ContextService) {
     super();
+    this.tenantModels = deriveTenantModels();
+    for (const excluded of UNSCOPED_MODELS) this.tenantModels.delete(excluded);
+
+    // Middleware constructor'da kurulur. Daha önce onModuleInit içindeki
+    // try/catch'in içindeydi: $connect() hata verirse middleware hiç kurulmuyor,
+    // hata da yutulduğu için uygulama yine ayağa kalkıyor ve tenant izolasyonu
+    // tamamen devre dışı kalıyordu.
+    this.$use(async (params, next) => this.scopeToTenant(params, next));
   }
 
   async onModuleInit() {
-    try {
-      await this.$connect();
-      this.logger.log('Veritabanı bağlantısı başarılı.');
-
-      // GLOBAL QUERY MIDDLEWARE
-      this.$use(async (params, next) => {
-        const tenantId = this.contextService.get("TENANT_ID");
-        const isTenantModel = params.model && this.TENANT_MODELS.includes(params.model);
-        
-        // Debug log for Customer operations
-        if (params.model === 'Customer') {
-          console.log(`[PrismaService] Customer ${params.action} - tenantId in context:`, tenantId);
-          if (params.action === 'create') {
-            console.log(`[PrismaService] Customer create - data before middleware:`, JSON.stringify(params.args?.data, null, 2));
-          }
-          if (params.action === 'findMany') {
-            console.log(`[PrismaService] Customer findMany - where clause:`, JSON.stringify(params.args?.where, null, 2));
-          }
-        }
-
-        // --- GÜVENLİK KURALI: Tenant Modeli Oluşturulurken Tenant ID Zorunluluğu ---
-        // Eğer bir Tenant Modeli oluşturuluyorsa (create/createMany)
-        // VE Context'te tenantId YOKSA
-        // VE Argümanlarda da manuel olarak verilmemişse
-        // -> HATA FIRLAT (Bu işlem Global/Bilinmeyen bir kayıt yaratır ve veri sızmasına yol açar)
-        
-        if (isTenantModel && (params.action === 'create' || params.action === 'createMany')) {
-            // Argümanlarda var mı kontrol et
-            let hasManualTenantId = false;
-            if (params.action === 'create' && params.args.data && params.args.data.tenantId) hasManualTenantId = true;
-            if (params.action === 'createMany' && params.args.data && Array.isArray(params.args.data)) {
-                // Hepsinin tenantId'si olmalı veya hiçbiri olmamalı (Context dolduracak)
-                // Ama Context yoksa, hepsinde olmak zorunda.
-                hasManualTenantId = params.args.data.every((d: any) => !!d.tenantId);
-            }
-
-            if (!tenantId && !hasManualTenantId) {
-                // Ne Context'te ne de manuel olarak verilmiş. Bu bir güvenlik ihlali veya bug.
-                // Super Admin bile olsa, bir Tenant modeli (Product/Customer) oluşturuyorsa bir sahip belirtmek zorunda.
-                throw new BadRequestException(`Güvenlik Uyarısı: ${params.model} oluşturulurken Fabrika ID (Tenant ID) belirtilmedi. Lütfen bir fabrika seçtiğinizden emin olun.`);
-            }
-        }
-
-        // --- OTOMATİK ENJEKSİYON (Context varsa) ---
-        if (tenantId && isTenantModel) {
-          
-          // 2. Find, Count, Update, Delete gibi operasyonları yakala
-          if (
-            ['findUnique', 'findFirst', 'findMany', 'count', 'update', 'updateMany', 'delete', 'deleteMany'].includes(params.action)
-          ) {
-            // Args yoksa oluştur
-            if (!params.args) {
-              params.args = {};
-            }
-            if (!params.args.where) {
-              params.args.where = {};
-            }
-
-            // 3. Where tenantId ekle (Eğer zaten varsa elleme - Super Admin override edebilir)
-            if (params.args.where.tenantId === undefined) {
-              params.args.where.tenantId = tenantId;
-            }
-          }
-
-          // 4. Create işlemlerinde de tenantId'yi otomatik ekle
-          if (params.action === 'create' || params.action === 'createMany') {
-              if (!params.args) params.args = {};
-              if (params.args.data) {
-                  // Array ise (createMany)
-                  if (Array.isArray(params.args.data)) {
-                      params.args.data.forEach((item: any) => {
-                          // Eğer relation üzerinden tenant zaten ayarlanmışsa (tenant: { connect: ... })
-                          // ekstra tenantId eklemeyelim; yoksa Prisma "Unknown argument tenantId" hatası verebiliyor.
-                          if (item.tenant || item.tenantId) {
-                              return;
-                          }
-                          item.tenantId = tenantId;
-                          console.log(`[PrismaService] Added tenantId to createMany item:`, tenantId);
-                      });
-                  } else {
-                      const data = params.args.data as any;
-                      // Relation üzerinden tenant verildiyse tenantId eklemeyi atla
-                      if (!data.tenant && !data.tenantId) {
-                          data.tenantId = tenantId;
-                          console.log(`[PrismaService] Added tenantId to create data:`, tenantId);
-                      } else if (data.tenantId) {
-                          console.log(`[PrismaService] tenantId already in create data:`, data.tenantId);
-                      }
-                  }
-              }
-          }
-        }
-
-        return next(params);
-      });
-
-    } catch (error) {
-      this.logger.error('Veritabanına bağlanılamadı!', error);
-    }
+    // Bağlantı hatası artık yutulmuyor: izolasyonsuz bir uygulamanın ayakta
+    // kalmasındansa hiç başlamaması gerekir.
+    await this.$connect();
+    this.logger.log("Veritabanı bağlantısı başarılı.");
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
-    this.logger.log('Veritabanı bağlantısı kapatıldı.');
+  }
+
+  private async scopeToTenant(
+    params: Prisma.MiddlewareParams,
+    next: (params: Prisma.MiddlewareParams) => Promise<unknown>,
+  ): Promise<unknown> {
+    if (!params.model || !this.tenantModels.has(params.model)) {
+      return next(params);
+    }
+
+    // HTTP isteği dışındaki işler (seed, bakım görevleri) için açık kaçış yolu.
+    if (this.contextService.get("SYSTEM_TASK") === true) {
+      return next(params);
+    }
+
+    const tenantId = this.contextService.get("TENANT_ID") as string | undefined;
+    const userRole = this.contextService.get("USER_ROLE") as UserRole | undefined;
+
+    if (tenantId) {
+      this.injectTenant(params, tenantId);
+      return next(params);
+    }
+
+    // --- Buradan aşağısı: tenant bağlamı YOK ---
+
+    if (userRole === UserRole.SUPER_ADMIN) {
+      // Platform operatörünün global paneli. Kimliği JwtAuthGuard doğruladı,
+      // rolü RolesGuard kontrol etti; bu bilinçli bir yetkidir. Yazma yine de
+      // sahipsiz kayıt üretemez: tenantId ya bağlamdan ya da açıkça gelmeli.
+      if (CREATE_ACTIONS.has(params.action) && !this.createDataCarriesTenant(params)) {
+        throw new BadRequestException(
+          `${params.model} oluşturulurken Fabrika (Tenant) belirtilmedi. Lütfen bir fabrika seçin.`,
+        );
+      }
+      return next(params);
+    }
+
+    // Fail-closed. Eski kod burada `if (tenantId && ...)` ile hiçbir filtre
+    // uygulamadan sorguyu geçiriyordu; token'sız `GET /customers` bütün
+    // fabrikaların müşterilerini döndürüyordu.
+    throw new ForbiddenException("Tenant bağlamı olmadan veri erişimi reddedildi.");
+  }
+
+  /**
+   * Bağlamda tenant yokken (SUPER_ADMIN) yazma isteğinin sahibini açıkça
+   * belirtip belirtmediğini söyler. Boş string sahip sayılmaz.
+   */
+  private createDataCarriesTenant(params: Prisma.MiddlewareParams): boolean {
+    const data = params.args?.data;
+    if (!data) return false;
+
+    const owned = (item: any) => Boolean(item?.tenantId) || Boolean(item?.tenant);
+    return Array.isArray(data) ? data.length > 0 && data.every(owned) : owned(data);
+  }
+
+  private injectTenant(params: Prisma.MiddlewareParams, tenantId: string): void {
+    params.args ??= {};
+
+    if (FILTER_ACTIONS.has(params.action)) {
+      params.args.where = { ...(params.args.where ?? {}), tenantId };
+      return;
+    }
+
+    if (CREATE_ACTIONS.has(params.action)) {
+      const data = params.args.data;
+      if (data) {
+        params.args.data = Array.isArray(data)
+          ? data.map((item) => this.withTenant(item, tenantId))
+          : this.withTenant(data, tenantId);
+      }
+      return;
+    }
+
+    if (params.action === "upsert") {
+      params.args.where = { ...(params.args.where ?? {}), tenantId };
+      if (params.args.create) {
+        params.args.create = this.withTenant(params.args.create, tenantId);
+      }
+      return;
+    }
+
+    // Tanımadığımız bir operasyonu kapsayamayız, o yüzden geçirmiyoruz. Eski
+    // allowlist yaklaşımı bilinmeyen operasyonları sessizce filtresiz
+    // geçiriyordu — aggregate/groupBy sızıntısı tam olarak böyle oluştu.
+    throw new InternalServerErrorException(
+      `Tenant kapsamı uygulanamayan Prisma operasyonu: ${params.model}.${params.action}`,
+    );
+  }
+
+  /**
+   * `tenantId`'yi koşulsuz yazar.
+   *
+   * Eski kod yalnızca alan tanımsızsa yazıyordu ("Super Admin override
+   * edebilsin" gerekçesiyle); istemciden gelen bir `tenantId` olduğu gibi
+   * korunuyordu. Bağlam tek doğruluk kaynağıdır.
+   *
+   * `tenant: { connect: ... }` verilmişse Prisma ikisini birlikte kabul etmez;
+   * o durumda ilişkiye dokunmayız.
+   */
+  private withTenant(data: Record<string, unknown>, tenantId: string): Record<string, unknown> {
+    if (data.tenant) return data;
+    return { ...data, tenantId };
   }
 }
