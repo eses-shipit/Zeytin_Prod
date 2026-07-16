@@ -119,6 +119,43 @@ enum UserRole {
   USER
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  REJECTED
+}
+
+/// Landing page'deki "lisans al / demo iste" formundan gelen talepler.
+///
+/// Bu bir tenant modeli DEĞİL: kayıt öncesi, henüz fabrikası olmayan
+/// ziyaretçilerden gelir. tenantId taşımaz, bu yüzden fail-closed Prisma
+/// katmanı onu kapsamaz (bkz. prisma.service UNSCOPED mantığı — tenantId
+/// alanı olmayan modeller zaten kapsanmıyor).
+///
+/// E-posta gönderimi için harici bir servis (SMTP/Resend) kurulu olmadığından
+/// talepler burada saklanır ve süper admin panelinden görülür. Servis
+/// eklenince bildirim buradan tetiklenebilir.
+model Lead {
+  id          String     @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  factoryName String?
+  city        String?
+  message     String?
+  /// Talebin geldiği plan (STANDARD / PRO / DEMO) — pazarlama takibi için.
+  interest    String?
+  /// Formu hangi dilde doldurdu (tr/es/it/pt).
+  locale      String     @default("tr")
+  status      LeadStatus @default(NEW)
+  note        String? // Süper admin'in iç notu
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([status, createdAt])
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique

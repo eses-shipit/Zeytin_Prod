@@ -15,6 +15,7 @@ import { AuthModule } from "./auth/auth.module";
 import { SupportModule } from "./support/support.module";
 import { TenantModule } from "./tenant/tenant.module";
 import { PolicyModule } from "./policy/policy.module";
+import { LeadsModule } from "./leads/leads.module";
 import { ConfigModule } from "@nestjs/config";
 
 import { AuditModule } from "./audit/audit.module";
@@ -103,6 +104,7 @@ const frontendUrlSchema = Joi.string()
     SupportModule,
     TenantModule,
     PolicyModule,
+    LeadsModule,
   ],
   providers: [
     PrismaService,

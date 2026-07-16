@@ -22,6 +22,7 @@ const DEFAULT_LOCALE = routing.defaultLocale;
  * hiçbir veri render edilmediğinden emin ol.
  */
 export const PUBLIC_PATHS = [
+  "/", // Pazarlama/landing sayfası — indekslenmesi İSTENEN tek asıl sayfa.
   "/auth/login",
   "/auth/register",
   "/legal/privacy",

@@ -86,5 +86,117 @@
         "series": "Numero di clienti"
       }
     }
+  },
+  "landing": {
+    "nav": {
+      "product": "ZeytinSaaS",
+      "login": "Accedi",
+      "getStarted": "Richiedi demo"
+    },
+    "hero": {
+      "badge": "CRM per frantoi",
+      "title": "Dalla pesa alla ricevuta, tutto il frantoio in un pannello",
+      "subtitle": "Pesatura, molitura, deposito e quota d'olio; gestione dei conti dei conferitori e ricevute automatiche. Adattato alle regole di ogni frantoio.",
+      "ctaPrimary": "Richiedi demo gratuita",
+      "ctaSecondary": "Accedi"
+    },
+    "features": {
+      "title": "In base a come lavora il tuo frantoio",
+      "subtitle": "Non un gestionale generico, ma specifico per l'olio d'oliva.",
+      "weighing": {
+        "title": "Integrazione con la pesa",
+        "desc": "Leggi peso lordo/tara/netto dal browser e crea subito la ricevuta."
+      },
+      "production": {
+        "title": "Produzione e resa",
+        "desc": "Molitura per lotto, resa e acidità; gestione delle giacenze dei serbatoi."
+      },
+      "escrow": {
+        "title": "Olio in deposito",
+        "desc": "L'olio del conferitore resta nel serbatoio; contabilizzato in kg come saldo virtuale."
+      },
+      "fee": {
+        "title": "Quota in olio o contanti",
+        "desc": "Parte dell'olio o contanti al chilo; imposti tu percentuale e base di calcolo."
+      },
+      "policy": {
+        "title": "Regole per frantoio",
+        "desc": "Regole di deposito, pagamento, fusti e prezzi versionate; le vecchie ricevute non cambiano."
+      },
+      "multilang": {
+        "title": "Multilingue",
+        "desc": "Turco, spagnolo, italiano e portoghese; valuta in base al frantoio."
+      }
+    },
+    "pricing": {
+      "title": "Licenza annuale semplice",
+      "subtitle": "Inizia con il periodo di prova e acquista la licenza quando sei pronto.",
+      "perYear": "/ anno",
+      "popular": "Il più scelto",
+      "cta": "Richiedi informazioni",
+      "demoCta": "Prova gratis",
+      "note": "Durante la prova l'invio automatico di messaggi (SMS) ai clienti è disattivato. Nel piano Pro i crediti SMS sono fatturati a parte. Prezzi IVA esclusa.",
+      "demo": {
+        "name": "Prova",
+        "price": "Gratis",
+        "period": "14 giorni",
+        "tagline": "Nessun rischio, senza carta",
+        "features": [
+          "Tutte le funzioni di base",
+          "Pesa, produzione, deposito",
+          "Automazione messaggi disattivata",
+          "Per 14 giorni"
+        ]
+      },
+      "standard": {
+        "name": "Standard",
+        "price": "14.900 ₺",
+        "tagline": "Un frantoio, CRM completo",
+        "features": [
+          "Conferitori e ticket illimitati",
+          "Produzione, deposito, quota olio",
+          "Regole per frantoio",
+          "Pannello multilingue",
+          "Senza automazione messaggi"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "24.900 ₺",
+        "tagline": "Con automazione messaggi",
+        "features": [
+          "Tutto del piano Standard",
+          "SMS/avvisi automatici ai clienti",
+          "Tabella prezzo giornaliero dell'olio",
+          "Supporto prioritario",
+          "Crediti SMS a parte"
+        ]
+      }
+    },
+    "contact": {
+      "title": "Scrivici per ottenere una licenza o avviare una demo",
+      "subtitle": "Compila il modulo e ti risponderemo al più presto. Il pagamento avviene tramite bonifico e creiamo la tua chiave di licenza.",
+      "name": "Nome e cognome",
+      "email": "Email",
+      "phone": "Telefono",
+      "factory": "Nome del frantoio",
+      "city": "Città",
+      "interest": "Piano di interesse",
+      "interestDemo": "Prova",
+      "interestStandard": "Standard",
+      "interestPro": "Pro",
+      "message": "Il tuo messaggio (facoltativo)",
+      "submit": "Invia richiesta",
+      "submitting": "Invio...",
+      "successTitle": "Richiesta ricevuta!",
+      "successMsg": "Ti contatteremo al più presto. Grazie.",
+      "error": "Si è verificato un errore. Riprova.",
+      "required": "Campo obbligatorio"
+    },
+    "footer": {
+      "tagline": "Piattaforma moderna di gestione per frantoi.",
+      "rights": "Tutti i diritti riservati.",
+      "toApp": "Vai al pannello"
+    }
   }
 }

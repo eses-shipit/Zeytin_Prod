@@ -25,8 +25,9 @@ import { routing, isLocale, type Locale } from "@/i18n/routing";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
+// "/" artık PUBLIC landing page. Kantar terminali "/terminal"e taşındı.
 const PROTECTED_PATHS = [
-  "/",
+  "/terminal",
   "/dashboard",
   "/inventory",
   "/production",
@@ -89,7 +90,8 @@ function isPublicPath(pathname: string): boolean {
 
 /** Korumalı sayfalar (dil prefix'i SOYULMUŞ path bekler). */
 function isProtectedPath(pathname: string): boolean {
-  if (pathname === "/") return true;
+  // "/" (landing) artık korumalı DEĞİL. Eskiden burada `pathname === "/"`
+  // koşulu vardı; kaldırıldı ki ziyaretçiler landing'i görebilsin.
   return PROTECTED_PATHS.some(
     (p) => pathname === p || pathname.startsWith(p + "/")
   );

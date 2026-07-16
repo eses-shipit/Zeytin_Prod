@@ -86,5 +86,117 @@
         "series": "Müşteri Sayısı"
       }
     }
+  },
+  "landing": {
+    "nav": {
+      "product": "ZeytinSaaS",
+      "login": "Giriş Yap",
+      "getStarted": "Demo İste"
+    },
+    "hero": {
+      "badge": "Zeytinyağı fabrikaları için CRM",
+      "title": "Kantardan makbuza, tüm fabrikanız tek panelde",
+      "subtitle": "Tartım, sıkım, emanet ve hak yağ hesapları; müstahsil cari takibi ve otomatik makbuz. Her fabrikanın kendi kurallarına uyarlanır.",
+      "ctaPrimary": "Ücretsiz Demo İste",
+      "ctaSecondary": "Giriş Yap"
+    },
+    "features": {
+      "title": "Fabrikanın işleyişine göre",
+      "subtitle": "Genel bir muhasebe programı değil; zeytinyağı işine özel.",
+      "weighing": {
+        "title": "Kantar entegrasyonu",
+        "desc": "Brüt/dara/net tartımı tarayıcıdan okuyun, fişi anında oluşturun."
+      },
+      "production": {
+        "title": "Üretim & randıman",
+        "desc": "Parti bazlı sıkım, randıman ve asit takibi; tank stok yönetimi."
+      },
+      "escrow": {
+        "title": "Emanet yağ",
+        "desc": "Çiftçinin yağı tankta beklesin; sanal bakiye gibi kg cinsinden takip edin."
+      },
+      "fee": {
+        "title": "Hak yağ & hizmet bedeli",
+        "desc": "Yağdan pay ya da kilo başına nakit; oran ve matrahı siz belirleyin."
+      },
+      "policy": {
+        "title": "Fabrikaya özel kurallar",
+        "desc": "Emanet, ödeme, bidon ve fiyat kuralları sürümlenir; eski makbuzlar değişmez."
+      },
+      "multilang": {
+        "title": "Çok dilli",
+        "desc": "Türkçe, İspanyolca, İtalyanca ve Portekizce; para birimi fabrikaya göre."
+      }
+    },
+    "pricing": {
+      "title": "Basit, yıllık lisans",
+      "subtitle": "Deneme süresiyle başlayın, hazır olduğunuzda lisans alın.",
+      "perYear": "/ yıl",
+      "popular": "En çok tercih edilen",
+      "cta": "Bilgi & Teklif Al",
+      "demoCta": "Ücretsiz Dene",
+      "note": "Deneme sürümünde müşteriye otomatik mesaj (SMS) gönderimi kapalıdır. Pro pakette SMS kredisi ayrıca faturalandırılır. Fiyatlara KDV dahil değildir.",
+      "demo": {
+        "name": "Deneme",
+        "price": "Ücretsiz",
+        "period": "14 gün",
+        "tagline": "Riski yok, kartsız",
+        "features": [
+          "Tüm temel özellikler",
+          "Kantar, üretim, emanet",
+          "Mesaj otomasyonu kapalı",
+          "14 gün boyunca"
+        ]
+      },
+      "standard": {
+        "name": "Standart",
+        "price": "₺14.900",
+        "tagline": "Tek fabrika, tam CRM",
+        "features": [
+          "Sınırsız müstahsil & fiş",
+          "Üretim, emanet, hak yağ",
+          "Fabrikaya özel kurallar",
+          "Çok dilli panel",
+          "Mesaj otomasyonu hariç"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "₺24.900",
+        "tagline": "Mesaj otomasyonu dahil",
+        "features": [
+          "Standart'taki her şey",
+          "Müşteriye otomatik SMS/bilgilendirme",
+          "Günlük yağ fiyatı tablosu",
+          "Öncelikli destek",
+          "SMS kredisi ayrı"
+        ]
+      }
+    },
+    "contact": {
+      "title": "Lisans almak veya demo başlatmak için bize yazın",
+      "subtitle": "Formu doldurun, en kısa sürede size dönelim. Ödeme havale/EFT ile alınır, lisans anahtarınız tarafımızca oluşturulur.",
+      "name": "Ad Soyad",
+      "email": "E-posta",
+      "phone": "Telefon",
+      "factory": "Fabrika adı",
+      "city": "Şehir",
+      "interest": "İlgilendiğiniz paket",
+      "interestDemo": "Deneme",
+      "interestStandard": "Standart",
+      "interestPro": "Pro",
+      "message": "Mesajınız (opsiyonel)",
+      "submit": "Talep Gönder",
+      "submitting": "Gönderiliyor...",
+      "successTitle": "Talebiniz alındı!",
+      "successMsg": "En kısa sürede sizinle iletişime geçeceğiz. Teşekkürler.",
+      "error": "Bir hata oluştu. Lütfen tekrar deneyin.",
+      "required": "Zorunlu alan"
+    },
+    "footer": {
+      "tagline": "Zeytinyağı fabrikaları için modern yönetim platformu.",
+      "rights": "Tüm hakları saklıdır.",
+      "toApp": "Panele Git"
+    }
   }
 }

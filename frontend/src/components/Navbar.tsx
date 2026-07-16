@@ -86,15 +86,36 @@ export function Navbar() {
       router.push("/auth/login");
   };
 
-  // Show nothing on auth pages or print pages
-  if (pathname.startsWith("/auth") || pathname.startsWith("/print")) {
-      return null;
+  // Uygulama navbar'ının GÖSTERİLMEYECEĞİ sayfalar: giriş/kayıt, yazdırma,
+  // hukuki metinler ve herkese açık landing ("/").
+  //
+  // pathname next/navigation'dan geliyor, yani dil prefix'ini İÇERİR
+  // ("/es/dashboard"). Landing'i doğru yakalamak için önce prefix'i soyuyoruz;
+  // aksi halde "/es" landing'i navbar'lı açılırdı.
+  const LOCALES = ["tr", "es", "it", "pt"];
+  const stripped = (() => {
+    const seg = pathname.split("/");
+    if (LOCALES.includes(seg[1])) {
+      const rest = seg.slice(2).join("/");
+      return rest === "" ? "/" : `/${rest}`;
+    }
+    return pathname;
+  })();
+
+  const isPublicShell =
+    stripped === "/" ||
+    stripped.startsWith("/auth") ||
+    stripped.startsWith("/print") ||
+    stripped.startsWith("/legal");
+
+  if (isPublicShell) {
+    return null;
   }
 
   // Define Links based on Role
   const tenantLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/", label: "Kantar", icon: Scale },
+    { href: "/terminal", label: "Kantar", icon: Scale },
     { href: "/production", label: "Üretim", icon: Factory },
     { href: "/inventory", label: "Envanter", icon: Package },
     { href: "/customers", label: "Müşteriler", icon: Users },
