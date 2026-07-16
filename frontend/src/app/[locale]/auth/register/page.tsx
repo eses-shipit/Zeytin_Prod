@@ -3,26 +3,28 @@
 import { useState } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter, Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { 
-  Building2, 
-  MapPin, 
-  CreditCard, 
-  User, 
-  Mail, 
-  Lock, 
-  CheckCircle2, 
-  ArrowRight, 
-  ArrowLeft, 
-  KeyRound, 
+import {
+  Building2,
+  MapPin,
+  CreditCard,
+  User,
+  Mail,
+  Lock,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  KeyRound,
   Loader2,
   Phone
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export default function RegisterPage() {
+  const t = useTranslations("auth.register");
+  const tBrand = useTranslations("auth");
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -51,7 +53,7 @@ export default function RegisterPage() {
   const nextStep = async () => {
     // Basic validation per step
     if (step === 1 && !formData.licenseCode) {
-      toast.error("Lütfen lisans kodunu giriniz.");
+      toast.error(t("licenseRequired"));
       return;
     }
 
@@ -62,11 +64,11 @@ export default function RegisterPage() {
             const res = await axios.post(`${apiBase}/auth/check-license`, { code: formData.licenseCode });
             if (res.data.success) {
                 // Optional: You could show plan duration or details here
-                toast.success(`Lisans doğrulandı! (${res.data.planDurationDays} Günlük Plan)`);
+                toast.success(t("licenseValidated", { days: res.data.planDurationDays }));
                 setStep(step + 1);
             }
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Lisans kodu geçersiz.");
+            toast.error(err.response?.data?.message || t("licenseInvalid"));
             return; // Stop here
         } finally {
             setLoading(false);
@@ -75,7 +77,7 @@ export default function RegisterPage() {
     }
 
     if (step === 2 && (!formData.factoryName || !formData.factoryShortCode)) {
-      toast.error("Fabrika adı ve kısa kod zorunludur.");
+      toast.error(t("factoryRequired"));
       return;
     }
     setStep(step + 1);
@@ -90,15 +92,15 @@ export default function RegisterPage() {
     try {
       // Validate short code format (e.g., must be 3-5 chars uppercase)
       if (formData.factoryShortCode.length < 3) {
-          throw new Error("Fabrika kısa kodu en az 3 karakter olmalıdır.");
+          throw new Error(t("shortCodeMin"));
       }
 
       await axios.post(`${apiBase}/auth/register`, {
         ...formData,
         factoryShortCode: formData.factoryShortCode.toUpperCase(),
       });
-      
-      toast.success("Kayıt başarılı! Giriş yapabilirsiniz.");
+
+      toast.success(t("success"));
       router.push("/auth/login");
     } catch (err: any) {
       console.error("Registration error:", err);
@@ -109,9 +111,9 @@ export default function RegisterPage() {
           JSON.stringify(err.response?.data?.message).includes("email"))) {
           toast.error(
               <div className="flex flex-col gap-2">
-                  <span>Bu e-posta adresi zaten kayıtlı.</span>
+                  <span>{t("emailExists")}</span>
                   <Link href="/auth/forgot-password" className="text-indigo-200 hover:text-white underline text-sm font-medium">
-                      Şifrenizi mi unuttunuz?
+                      {t("forgotYourPassword")}
                   </Link>
               </div>,
               { duration: 5000 }
@@ -120,7 +122,7 @@ export default function RegisterPage() {
       }
 
       // 2. Generic Error Handling (Array or String)
-      let errorMessage = "Kayıt işlemi başarısız oldu.";
+      let errorMessage = t("genericError");
       const responseMsg = err.response?.data?.message;
 
       if (Array.isArray(responseMsg)) {
@@ -144,7 +146,7 @@ export default function RegisterPage() {
                 <Image src="/logo-512.png" alt="ZeytinSaaS" width={56} height={56} className="object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">ZeytinSaaS</h1>
-            <p className="mt-2 text-slate-500 font-medium">Zeytinyağı Fabrika Otomasyonu</p>
+            <p className="mt-2 text-slate-500 font-medium">{tBrand("tagline")}</p>
         </div>
 
         <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-xl border border-slate-100 animate-in zoom-in-95 duration-300">
@@ -170,13 +172,13 @@ export default function RegisterPage() {
                 {step === 1 && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
                         <div className="text-center mb-6">
-                            <h2 className="text-xl font-semibold text-slate-900">Lisans Aktivasyonu</h2>
-                            <p className="text-sm text-slate-500 mt-1">Size verilen lisans kodunu giriniz.</p>
+                            <h2 className="text-xl font-semibold text-slate-900">{t("step1Title")}</h2>
+                            <p className="text-sm text-slate-500 mt-1">{t("step1Subtitle")}</p>
                         </div>
-                        
+
                         <div>
                             <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                                Lisans Kodu
+                                {t("licenseCode")}
                             </label>
                             <div className="relative">
                                 <KeyRound className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -198,19 +200,19 @@ export default function RegisterPage() {
                 {step === 2 && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
                         <div className="text-center mb-6">
-                            <h2 className="text-xl font-semibold text-slate-900">Fabrika Bilgileri</h2>
-                            <p className="text-sm text-slate-500 mt-1">İşletmenizi sisteme kaydedelim.</p>
+                            <h2 className="text-xl font-semibold text-slate-900">{t("step2Title")}</h2>
+                            <p className="text-sm text-slate-500 mt-1">{t("step2Subtitle")}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2">
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Fabrika Adı (Tabela)</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("factoryName")}</label>
                                 <div className="relative">
                                     <Building2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                     <input
                                         name="factoryName"
                                         type="text"
-                                        placeholder="Örn: Aydın Yağ Fabrikası"
+                                        placeholder={t("factoryNamePlaceholder")}
                                         value={formData.factoryName}
                                         onChange={handleChange}
                                         className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -220,11 +222,11 @@ export default function RegisterPage() {
                             </div>
 
                             <div className="col-span-2">
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Resmi Unvan (Fatura)</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("officialName")}</label>
                                 <input
                                     name="officialName"
                                     type="text"
-                                    placeholder="Örn: Aydın Gıda San. Tic. Ltd. Şti."
+                                    placeholder={t("officialNamePlaceholder")}
                                     value={formData.officialName}
                                     onChange={handleChange}
                                     className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -232,7 +234,7 @@ export default function RegisterPage() {
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Kısa Kod</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("shortCode")}</label>
                                 <input
                                     name="factoryShortCode"
                                     type="text"
@@ -246,7 +248,7 @@ export default function RegisterPage() {
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Vergi No</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("taxId")}</label>
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                     <input
@@ -261,11 +263,11 @@ export default function RegisterPage() {
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Şehir</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("city")}</label>
                                 <input
                                     name="city"
                                     type="text"
-                                    placeholder="İzmir"
+                                    placeholder={t("cityPlaceholder")}
                                     value={formData.city}
                                     onChange={handleChange}
                                     className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -273,12 +275,12 @@ export default function RegisterPage() {
                             </div>
 
                             <div className="col-span-2">
-                                <label className="mb-1.5 block text-sm font-medium text-slate-700">Adres</label>
+                                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("address")}</label>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
                                     <input
                                         name="address"
-                                        placeholder="Mahalle, Cadde, No..."
+                                        placeholder={t("addressPlaceholder")}
                                         value={formData.address}
                                         onChange={handleChange}
                                         className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -293,18 +295,18 @@ export default function RegisterPage() {
                 {step === 3 && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
                         <div className="text-center mb-6">
-                            <h2 className="text-xl font-semibold text-slate-900">Yönetici Hesabı</h2>
-                            <p className="text-sm text-slate-500 mt-1">Sisteme giriş yapacak yetkili kişi.</p>
+                            <h2 className="text-xl font-semibold text-slate-900">{t("step3Title")}</h2>
+                            <p className="text-sm text-slate-500 mt-1">{t("step3Subtitle")}</p>
                         </div>
 
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-700">Ad Soyad</label>
+                            <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("fullName")}</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                 <input
                                     name="userName"
                                     type="text"
-                                    placeholder="Ahmet Yılmaz"
+                                    placeholder={t("fullNamePlaceholder")}
                                     value={formData.userName}
                                     onChange={handleChange}
                                     className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -314,13 +316,13 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-700">Telefon</label>
+                            <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("phone")}</label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                 <input
                                     name="phone"
                                     type="tel"
-                                    placeholder="0555 555 55 55"
+                                    placeholder={t("phonePlaceholder")}
                                     value={formData.phone}
                                     onChange={handleChange}
                                     className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -329,13 +331,13 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-700">E-posta</label>
+                            <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("email")}</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                 <input
                                     name="email"
                                     type="email"
-                                    placeholder="ahmet@ornek.com"
+                                    placeholder={t("emailPlaceholder")}
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -345,7 +347,7 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-700">Şifre</label>
+                            <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("password")}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                 <input
@@ -373,14 +375,18 @@ export default function RegisterPage() {
                                     required
                                 />
                                 <span className="text-sm text-slate-700 leading-relaxed">
-                                    <Link href="/legal/terms" target="_blank" className="text-indigo-600 hover:text-indigo-700 underline font-medium">
-                                        Kullanım koşullarını
-                                    </Link>
-                                    {" ve "}
-                                    <Link href="/legal/privacy" target="_blank" className="text-indigo-600 hover:text-indigo-700 underline font-medium">
-                                        Aydınlatma metnini
-                                    </Link>
-                                    {" okudum, onaylıyorum."}
+                                    {t.rich("terms", {
+                                        terms: (chunks) => (
+                                            <Link href="/legal/terms" target="_blank" className="text-indigo-600 hover:text-indigo-700 underline font-medium">
+                                                {chunks}
+                                            </Link>
+                                        ),
+                                        privacy: (chunks) => (
+                                            <Link href="/legal/privacy" target="_blank" className="text-indigo-600 hover:text-indigo-700 underline font-medium">
+                                                {chunks}
+                                            </Link>
+                                        ),
+                                    })}
                                 </span>
                             </label>
                         </div>
@@ -396,10 +402,10 @@ export default function RegisterPage() {
                             className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-6 py-3 font-medium text-slate-600 hover:bg-slate-50 transition-colors"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            Geri
+                            {t("back")}
                         </button>
                     )}
-                    
+
                         {step < 3 ? (
                             <button
                                 type="button"
@@ -407,7 +413,7 @@ export default function RegisterPage() {
                                 disabled={loading} // Disable while checking license
                                 className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Devam Et"}
+                                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("continue")}
                                 {!loading && <ArrowRight className="h-4 w-4" />}
                             </button>
                         ) : (
@@ -421,7 +427,7 @@ export default function RegisterPage() {
                             ) : (
                                 <CheckCircle2 className="h-5 w-5" />
                             )}
-                            Kaydı Tamamla
+                            {t("complete")}
                         </button>
                     )}
                 </div>
@@ -429,9 +435,9 @@ export default function RegisterPage() {
         </div>
 
         <div className="mt-8 text-center text-sm text-slate-500">
-            Zaten hesabınız var mı?{" "}
+            {t("haveAccount")}{" "}
             <Link href="/auth/login" className="font-semibold text-indigo-600 hover:text-indigo-500 underline decoration-indigo-200 underline-offset-4">
-                Giriş Yap
+                {t("login")}
             </Link>
         </div>
     </div>

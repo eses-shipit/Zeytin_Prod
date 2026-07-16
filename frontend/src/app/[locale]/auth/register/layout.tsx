@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { INDEXABLE, localizedAlternates } from "@/lib/seo";
 import { localeToOpenGraph, isLocale, routing } from "@/i18n/routing";
 
@@ -6,8 +7,6 @@ import { localeToOpenGraph, isLocale, routing } from "@/i18n/routing";
  * page.tsx client component olduğu için metadata burada tanımlanır.
  * Bu sayfa PUBLIC_PATHS içinde: root'taki noindex varsayılanı geçersiz kılınır.
  * Herkese açık olduğu için hreflang burada anlamlı.
- *
- * NOT: metinler halen Türkçe — string migrasyonu için bkz. I18N.md.
  */
 export async function generateMetadata({
   params: { locale },
@@ -16,11 +15,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const activeLocale = isLocale(locale) ? locale : routing.defaultLocale;
   const alternates = localizedAlternates("/auth/register");
+  const t = await getTranslations({ locale, namespace: "auth.register.meta" });
 
   return {
-    title: "Fabrika Kaydı Oluştur",
-    description:
-      "Zeytinyağı fabrikanızı ZeytinSaaS'e kaydedin. Kantar fişleri, üretim takibi ve müşteri cari hesapları tek platformda.",
+    title: t("title"),
+    description: t("description"),
     alternates,
     robots: INDEXABLE,
     openGraph: {
@@ -28,9 +27,8 @@ export async function generateMetadata({
       locale: localeToOpenGraph[activeLocale],
       siteName: "ZeytinSaaS",
       url: alternates.languages[activeLocale],
-      title: "Fabrika Kaydı Oluştur | ZeytinSaaS",
-      description:
-        "Zeytinyağı fabrikanızı ZeytinSaaS'e kaydedin ve tüm süreçlerinizi dijitalleştirin.",
+      title: t("ogTitle"),
+      description: t("ogDescription"),
     },
   };
 }
