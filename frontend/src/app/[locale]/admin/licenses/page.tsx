@@ -10,6 +10,9 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { formatDate } from "@/lib/format";
 
 type License = {
   id: string;
@@ -24,6 +27,8 @@ type License = {
 };
 
 export default function AdminLicensesPage() {
+  const t = useTranslations("admin.licenses");
+  const locale = useLocale() as Locale;
   const [licenses, setLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -37,7 +42,7 @@ export default function AdminLicensesPage() {
       setLicenses(res.data);
     } catch (err: any) {
       console.error("Fetch licenses error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Lisanslar yüklenemedi.";
+      const errorMessage = err.response?.data?.message || err.message || t("loadError");
       toast.error(errorMessage);
       
       // Eğer unauthorized hatası ise, login sayfasına yönlendir
@@ -59,30 +64,30 @@ export default function AdminLicensesPage() {
     setCreatingLicense(true);
     try {
       await axios.post("/admin/licenses", { days: licenseDays });
-      toast.success("Yeni lisans oluşturuldu");
+      toast.success(t("createSuccess"));
       fetchLicenses();
     } catch (err: any) {
       console.error("License creation error:", err);
-      toast.error(err.response?.data?.message || err.message || "Lisans oluşturulamadı");
+      toast.error(err.response?.data?.message || err.message || t("createError"));
     } finally {
       setCreatingLicense(false);
     }
   };
 
   const handleDeleteLicense = async (id: string) => {
-    if (!confirm("Bu lisansı silmek istediğinize emin misiniz?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     try {
         await axios.delete(`/admin/licenses/${id}`);
-        toast.success("Lisans silindi.");
+        toast.success(t("deleteSuccess"));
         fetchLicenses();
     } catch (err: any) {
-        toast.error(err.response?.data?.message || "Lisans silinemedi.");
+        toast.error(err.response?.data?.message || t("deleteError"));
     }
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Kopyalandı");
+    toast.success(t("copied"));
   };
 
   if (loading) {
@@ -99,15 +104,15 @@ export default function AdminLicensesPage() {
         <div className="space-y-6 animate-in fade-in">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Lisans Yönetimi</h1>
-                    <p className="text-slate-500 text-sm">Yeni lisans anahtarları oluşturun ve takibini yapın.</p>
+                    <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+                    <p className="text-slate-500 text-sm">{t("subtitle")}</p>
                 </div>
             </div>
 
             {/* Create Actions */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Lisans Süresi (Gün)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t("durationLabel")}</label>
                 <input
                   type="number"
                   value={licenseDays}
@@ -121,7 +126,7 @@ export default function AdminLicensesPage() {
                 className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {creatingLicense ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                Lisans Oluştur
+                {t("create")}
               </button>
             </div>
 
@@ -130,10 +135,10 @@ export default function AdminLicensesPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
                   <tr>
-                    <th className="px-6 py-4">Lisans Kodu</th>
-                    <th className="px-6 py-4">Kullanım Durumu</th>
-                    <th className="px-6 py-4">Tahmini Bitiş</th>
-                    <th className="px-6 py-4">İşlem</th>
+                    <th className="px-6 py-4">{t("colCode")}</th>
+                    <th className="px-6 py-4">{t("colUsage")}</th>
+                    <th className="px-6 py-4">{t("colEnd")}</th>
+                    <th className="px-6 py-4">{t("colAction")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -147,26 +152,26 @@ export default function AdminLicensesPage() {
                             <div className="flex flex-col">
                                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
                                     <CheckCircle2 className="h-3 w-3" />
-                                    KULLANILDI
+                                    {t("used")}
                                 </span>
                                 <span className="text-xs text-slate-500 mt-0.5">
-                                    {l.tenant?.name || "Bilinmeyen Fabrika"}
+                                    {l.tenant?.name || t("unknownFactory")}
                                 </span>
                             </div>
                         ) : (
                             <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                BOŞTA ({l.planDurationDays} Gün)
+                                {t("idle", { days: l.planDurationDays })}
                             </span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-slate-600 text-xs">
                         {l.status === "USED" && l.tenant?.subscriptionEndDate ? (
                             <span className="font-medium text-slate-900">
-                                {new Date(l.tenant.subscriptionEndDate).toLocaleDateString()}
+                                {formatDate(l.tenant.subscriptionEndDate, locale)}
                             </span>
                         ) : (
                             <span className="text-slate-400 italic">
-                                Aktif edilirse +{l.planDurationDays} gün
+                                {t("ifActivated", { days: l.planDurationDays })}
                             </span>
                         )}
                       </td>
@@ -176,20 +181,20 @@ export default function AdminLicensesPage() {
                             <button
                                 onClick={() => copyToClipboard(l.code)}
                                 className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                                title="Kopyala"
+                                title={t("copyTooltip")}
                             >
                                 <Copy className="h-4 w-4" />
                             </button>
                             <button
                                 onClick={() => handleDeleteLicense(l.id)}
                                 className="text-red-500 hover:text-red-700 flex items-center gap-1"
-                                title="Sil"
+                                title={t("deleteTooltip")}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </button>
                           </>
                         ) : (
-                            <span className="text-slate-300 text-xs italic">Değiştirilemez</span>
+                            <span className="text-slate-300 text-xs italic">{t("immutable")}</span>
                         )}
                       </td>
                     </tr>
@@ -197,7 +202,7 @@ export default function AdminLicensesPage() {
                   {licenses.length === 0 && (
                       <tr>
                           <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
-                              Henüz oluşturulmuş lisans yok.
+                              {t("empty")}
                           </td>
                       </tr>
                   )}
