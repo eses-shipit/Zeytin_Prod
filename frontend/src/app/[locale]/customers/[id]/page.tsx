@@ -19,7 +19,11 @@ import {
   FileText,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/cn";
+import { formatCurrency, formatKg, formatNumber, formatDate } from "@/lib/format";
+import { useTenantCurrency } from "@/hooks/useTenantCurrency";
+import type { Locale } from "@/i18n/routing";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 
@@ -79,6 +83,9 @@ type Tank = {
 };
 
 export default function CustomerDetailPage({ params }: { params: { id: string } }) {
+  const t = useTranslations("customers");
+  const locale = useLocale() as Locale;
+  const currency = useTenantCurrency();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tanks, setTanks] = useState<Tank[]>([]);
@@ -128,9 +135,9 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
     try {
       await axios.post(
         `/transactions/${params.id}/delivery`,
-        { amountKg, description: "Elden teslim", tankId: selectedTankId || undefined }
+        { amountKg, description: t("deliveryDefaultDesc"), tankId: selectedTankId || undefined }
       );
-      setStatus({ type: "success", message: "Teslimat başarılı!" });
+      setStatus({ type: "success", message: t("deliverySuccess") });
       fetchCustomerData();
       setTimeout(() => {
          setDeliveryModalOpen(false);
@@ -139,7 +146,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
          setSelectedTankId("");
       }, 1500);
     } catch (error) {
-      setStatus({ type: "error", message: "İşlem başarısız." });
+      setStatus({ type: "error", message: t("operationFailed") });
     } finally {
       setIsSubmitting(false);
     }
@@ -151,9 +158,9 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
     try {
       await axios.post(
         `/transactions/${params.id}/liquidation`,
-        { amountKg, unitPrice, description: "Yağ bozdurma" }
+        { amountKg, unitPrice, description: t("liquidationDefaultDesc") }
       );
-      setStatus({ type: "success", message: "Bozdurma başarılı!" });
+      setStatus({ type: "success", message: t("liquidationSuccess") });
       fetchCustomerData();
       setTimeout(() => {
          setLiquidationModalOpen(false);
@@ -162,14 +169,14 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
          setUnitPrice(0);
       }, 1500);
     } catch (error) {
-      setStatus({ type: "error", message: "İşlem başarısız." });
+      setStatus({ type: "error", message: t("operationFailed") });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-indigo-600" /></div>;
-  if (!customer) return <div className="p-8 text-center text-slate-500">Müşteri bulunamadı.</div>;
+  if (!customer) return <div className="p-8 text-center text-slate-500">{t("notFound")}</div>;
 
   return (
     <div className="mx-auto max-w-5xl p-6">
@@ -181,7 +188,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">{customer.name}</h1>
-            <p className="text-sm text-slate-500">Müşteri Detayı ve Cari Hareketler</p>
+            <p className="text-sm text-slate-500">{t("detailSubtitle")}</p>
           </div>
         </div>
         <button
@@ -189,18 +196,18 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
           className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition"
         >
           <Edit className="h-4 w-4" />
-          Düzenle
+          {t("edit")}
         </button>
       </div>
 
       {/* Customer Info Card */}
       <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold text-slate-900">Kişisel Bilgiler</h3>
+        <h3 className="mb-4 text-lg font-semibold text-slate-900">{t("personalInfo")}</h3>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex items-start gap-3">
             <User className="h-5 w-5 text-slate-400 mt-0.5" />
             <div>
-              <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Ad Soyad</div>
+              <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("fullName")}</div>
               <div className="mt-1 text-base font-semibold text-slate-900">{customer.name}</div>
             </div>
           </div>
@@ -208,7 +215,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
             <div className="flex items-start gap-3">
               <Phone className="h-5 w-5 text-slate-400 mt-0.5" />
               <div>
-                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Telefon</div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("phone")}</div>
                 <div className="mt-1 text-base text-slate-900">{customer.phone}</div>
               </div>
             </div>
@@ -217,7 +224,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
             <div className="flex items-start gap-3">
               <FileText className="h-5 w-5 text-slate-400 mt-0.5" />
               <div>
-                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">TCKN / Vergi No</div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("tckn")}</div>
                 <div className="mt-1 text-base text-slate-900">{customer.tckn}</div>
               </div>
             </div>
@@ -226,9 +233,9 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
             <div className="flex items-start gap-3">
               <div className="h-5 w-5 mt-0.5" />
               <div>
-                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Kayıt Tarihi</div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("registerDate")}</div>
                 <div className="mt-1 text-sm text-slate-600">
-                  {new Date(customer.createdAt).toLocaleDateString("tr-TR", {
+                  {formatDate(customer.createdAt, locale, {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -245,24 +252,24 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
         {/* Yağ Bakiyesi Kartı */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Emanet Yağ Stoğu</h3>
+            <h3 className="text-sm font-medium text-slate-500">{t("escrowOilStock")}</h3>
             <Droplet className="h-5 w-5 text-emerald-500" />
           </div>
           <div className="text-4xl font-bold text-slate-900 mb-6">
-            {customer.oliveOilBalance.toFixed(2)} <span className="text-xl font-medium text-slate-400">kg</span>
+            {formatKg(customer.oliveOilBalance, locale, { digits: 2 })}
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={() => setDeliveryModalOpen(true)}
               className="flex-1 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
             >
-              Yağ Teslim Et
+              {t("deliverOil")}
             </button>
-            <button 
+            <button
                onClick={() => setLiquidationModalOpen(true)}
                className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
-              Bozdur (TL)
+              {t("liquidateWithCurrency", { currency })}
             </button>
           </div>
         </div>
@@ -270,22 +277,22 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
         {/* TL Bakiyesi Kartı */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Cari Bakiye (TL)</h3>
+            <h3 className="text-sm font-medium text-slate-500">{t("currentBalanceWithCurrency", { currency })}</h3>
             <Banknote className="h-5 w-5 text-indigo-500" />
           </div>
           <div className="text-4xl font-bold text-slate-900 mb-6">
-            ₺{customer.balanceTL.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}
+            {formatCurrency(customer.balanceTL, currency, locale)}
           </div>
           <div className="flex justify-between items-end">
             <div className="text-sm text-slate-500">
-               {customer.balanceTL > 0 ? "Müşteri Alacaklı" : customer.balanceTL < 0 ? "Müşteri Borçlu" : "Bakiye Sıfır"}
+               {customer.balanceTL > 0 ? t("creditor") : customer.balanceTL < 0 ? t("debtor") : t("zeroBalance")}
             </div>
             <button
               onClick={() => setPaymentModalOpen(true)}
               className="rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-100 transition flex items-center gap-2"
             >
                <Coins className="h-4 w-4" />
-               Ödeme Al
+               {t("collectPayment")}
             </button>
           </div>
         </div>
@@ -293,13 +300,13 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
         {/* Toplam Getirdiği Zeytin */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Toplam Getirdiği Zeytin</h3>
+            <h3 className="text-sm font-medium text-slate-500">{t("totalOliveBrought")}</h3>
             <History className="h-5 w-5 text-amber-500" />
           </div>
           <div className="text-4xl font-bold text-slate-900 mb-2">
-            {(totalOliveKg / 1000).toFixed(2)} <span className="text-xl font-medium text-slate-400">ton</span>
+            {formatNumber(totalOliveKg / 1000, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xl font-medium text-slate-400">{t("ton")}</span>
           </div>
-          <p className="text-xs text-slate-500">Müşterinin teslim ettiği zeytin toplamı.</p>
+          <p className="text-xs text-slate-500">{t("totalOliveDesc")}</p>
         </div>
       </div>
 
@@ -307,41 +314,41 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="mb-6 flex items-center gap-2 text-lg font-semibold text-slate-900">
           <History className="h-5 w-5 text-slate-400" />
-          Hesap Ekstresi
+          {t("statement")}
         </h3>
         <div className="overflow-hidden rounded-xl border border-slate-100">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium">Tarih</th>
-                <th className="px-4 py-3 font-medium">İşlem Türü</th>
-                <th className="px-4 py-3 font-medium">Açıklama</th>
-                <th className="px-4 py-3 font-medium text-right">Miktar (kg)</th>
-                <th className="px-4 py-3 font-medium text-right">Tutar (TL)</th>
+                <th className="px-4 py-3 font-medium">{t("colDate")}</th>
+                <th className="px-4 py-3 font-medium">{t("colType")}</th>
+                <th className="px-4 py-3 font-medium">{t("colDescription")}</th>
+                <th className="px-4 py-3 font-medium text-right">{t("colAmountKg")}</th>
+                <th className="px-4 py-3 font-medium text-right">{t("colAmountCurrency", { currency })}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {transactions.length === 0 ? (
                 <tr>
-                   <td colSpan={5} className="p-8 text-center text-slate-400">Henüz işlem yok.</td>
+                   <td colSpan={5} className="p-8 text-center text-slate-400">{t("noTransactions")}</td>
                 </tr>
               ) : (
-                transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 text-slate-600">{new Date(t.createdAt).toLocaleDateString("tr-TR")}</td>
+                transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-slate-50">
+                    <td className="px-4 py-3 text-slate-600">{formatDate(tx.createdAt, locale)}</td>
                     <td className="px-4 py-3 font-medium">
-                      {t.type === "OIL_IN" && <span className="inline-flex items-center gap-1 text-emerald-600"><ArrowDownLeft className="h-3 w-3" /> Giriş</span>}
-                      {t.type === "OIL_OUT" && <span className="inline-flex items-center gap-1 text-amber-600"><ArrowUpRight className="h-3 w-3" /> Çıkış</span>}
-                      {t.type === "LIQUIDATION" && <span className="inline-flex items-center gap-1 text-indigo-600"><TrendingDown className="h-3 w-3" /> Bozdurma</span>}
-                      {t.type === "PAYMENT" && <span className="inline-flex items-center gap-1 text-emerald-600"><Coins className="h-3 w-3" /> Tahsilat</span>}
-                      {t.type === "SERVICE_FEE" && <span className="inline-flex items-center gap-1 text-rose-600"><Banknote className="h-3 w-3" /> Hizmet Bedeli</span>}
+                      {tx.type === "OIL_IN" && <span className="inline-flex items-center gap-1 text-emerald-600"><ArrowDownLeft className="h-3 w-3" /> {t("typeIn")}</span>}
+                      {tx.type === "OIL_OUT" && <span className="inline-flex items-center gap-1 text-amber-600"><ArrowUpRight className="h-3 w-3" /> {t("typeOut")}</span>}
+                      {tx.type === "LIQUIDATION" && <span className="inline-flex items-center gap-1 text-indigo-600"><TrendingDown className="h-3 w-3" /> {t("typeLiquidation")}</span>}
+                      {tx.type === "PAYMENT" && <span className="inline-flex items-center gap-1 text-emerald-600"><Coins className="h-3 w-3" /> {t("typePayment")}</span>}
+                      {tx.type === "SERVICE_FEE" && <span className="inline-flex items-center gap-1 text-rose-600"><Banknote className="h-3 w-3" /> {t("typeServiceFee")}</span>}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{t.description}</td>
+                    <td className="px-4 py-3 text-slate-600">{tx.description}</td>
                     <td className="px-4 py-3 text-right font-medium text-slate-900">
-                      {t.amountKg ? `${t.amountKg} kg` : "-"}
+                      {tx.amountKg ? formatKg(tx.amountKg, locale) : "-"}
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-slate-900">
-                      {t.amountTL ? `₺${t.amountTL.toLocaleString("tr-TR")}` : "-"}
+                      {tx.amountTL ? formatCurrency(tx.amountTL, currency, locale) : "-"}
                     </td>
                   </tr>
                 ))
@@ -352,10 +359,10 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
       </div>
 
       {/* Delivery Modal */}
-      <Modal isOpen={isDeliveryModalOpen} onClose={() => setDeliveryModalOpen(false)} title="Yağ Teslim Et">
+      <Modal isOpen={isDeliveryModalOpen} onClose={() => setDeliveryModalOpen(false)} title={t("deliverOil")}>
         <div className="space-y-4">
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Miktar (kg)</label>
+             <label className="block text-sm font-medium text-slate-700 mb-1">{t("colAmountKg")}</label>
              <input 
                type="number" 
                className="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -364,16 +371,16 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
              />
           </div>
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Hangi Tanktan?</label>
+             <label className="block text-sm font-medium text-slate-700 mb-1">{t("fromTank")}</label>
              <select
                value={selectedTankId}
                onChange={(e) => setSelectedTankId(e.target.value)}
                className="w-full rounded-lg border border-slate-300 px-3 py-2"
              >
-               <option value="">Seçiniz (Opsiyonel)</option>
+               <option value="">{t("selectOptional")}</option>
                {tanks.map((tank) => (
                  <option key={tank.id} value={tank.id}>
-                   {tank.name} ({tank.currentLevel} kg)
+                   {tank.name} ({formatKg(tank.currentLevel, locale)})
                  </option>
                ))}
              </select>
@@ -384,16 +391,16 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
              disabled={isSubmitting || amountKg <= 0}
              className="w-full rounded-lg bg-emerald-600 py-2 text-white font-medium hover:bg-emerald-700 disabled:opacity-50"
            >
-             {isSubmitting ? "İşleniyor..." : "Teslim Et"}
+             {isSubmitting ? t("processing") : t("deliver")}
           </button>
         </div>
       </Modal>
 
       {/* Liquidation Modal */}
-      <Modal isOpen={isLiquidationModalOpen} onClose={() => setLiquidationModalOpen(false)} title="Yağ Bozdur">
+      <Modal isOpen={isLiquidationModalOpen} onClose={() => setLiquidationModalOpen(false)} title={t("liquidateTitle")}>
         <div className="space-y-4">
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Satılacak Miktar (kg)</label>
+             <label className="block text-sm font-medium text-slate-700 mb-1">{t("sellAmountLabel")}</label>
              <input 
                type="number" 
                className="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -402,7 +409,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
              />
           </div>
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Birim Fiyat (TL/kg)</label>
+             <label className="block text-sm font-medium text-slate-700 mb-1">{t("unitPriceLabel", { currency })}</label>
              <input 
                type="number" 
                className="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -411,8 +418,8 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
              />
           </div>
           <div className="bg-slate-50 p-3 rounded-lg text-sm flex justify-between">
-             <span>Toplam Tutar:</span>
-             <span className="font-bold">₺{(amountKg * unitPrice).toLocaleString("tr-TR")}</span>
+             <span>{t("totalAmount")}</span>
+             <span className="font-bold">{formatCurrency(amountKg * unitPrice, currency, locale)}</span>
           </div>
           {status && <div className={cn("text-sm", status.type==="error" ? "text-red-600" : "text-green-600")}>{status.message}</div>}
           <button 
@@ -420,7 +427,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
              disabled={isSubmitting || amountKg <= 0 || unitPrice <= 0}
              className="w-full rounded-lg bg-indigo-600 py-2 text-white font-medium hover:bg-indigo-700 disabled:opacity-50"
           >
-             {isSubmitting ? "İşleniyor..." : "Bozdur ve TL'ye Çevir"}
+             {isSubmitting ? t("processing") : t("liquidateSubmit")}
           </button>
         </div>
       </Modal>
