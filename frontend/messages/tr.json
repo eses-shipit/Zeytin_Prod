@@ -439,5 +439,85 @@
       "login": "Giriş Yap",
       "backToLogin": "Giriş Ekranına Dön"
     }
+  },
+  "settings": {
+    "meta": {
+      "title": "Ayarlar",
+      "description": "Fabrika ve hesap ayarları."
+    },
+    "title": "Ayarlar",
+    "subtitle": "Uygulama ve hesap ayarlarını yönetin.",
+    "save": "Kaydet",
+    "tabs": {
+      "products": "Ürün & Fiyatlandırma",
+      "profile": "Profilim",
+      "security": "Güvenlik",
+      "factory": "Fabrika Bilgileri",
+      "production": "Üretim Ayarları"
+    },
+    "products": {
+      "addTitle": "Yeni Cins Ekle",
+      "namePlaceholder": "Örn: Domat, Trilye...",
+      "add": "Ekle",
+      "empty": "Henüz hiç ürün eklenmemiş.",
+      "colName": "Ürün Adı",
+      "colActions": "İşlemler",
+      "delete": "Sil",
+      "loadError": "Ürünler yüklenemedi",
+      "added": "Ürün eklendi",
+      "addError": "Ürün eklenirken hata oluştu",
+      "confirmDelete": "Bu ürünü silmek istediğinize emin misiniz?",
+      "deleted": "Ürün silindi",
+      "deleteError": "Ürün silinemedi (Kullanımda olabilir)"
+    },
+    "profile": {
+      "title": "Profil Bilgileri",
+      "name": "Ad Soyad",
+      "namePlaceholder": "Adınız ve soyadınız",
+      "email": "E-posta",
+      "emailPlaceholder": "ornek@email.com",
+      "phone": "Telefon",
+      "phonePlaceholder": "05XX XXX XX XX",
+      "updated": "Profil güncellendi",
+      "updateError": "Profil güncellenemedi"
+    },
+    "security": {
+      "title": "Şifre Değiştir",
+      "current": "Mevcut Şifre",
+      "currentPlaceholder": "Mevcut şifrenizi girin",
+      "new": "Yeni Şifre",
+      "newPlaceholder": "En az 6 karakter",
+      "confirm": "Yeni Şifre (Tekrar)",
+      "confirmPlaceholder": "Yeni şifrenizi tekrar girin",
+      "submit": "Şifreyi Değiştir",
+      "mismatch": "Yeni şifreler eşleşmiyor",
+      "minLength": "Şifre en az 6 karakter olmalıdır",
+      "changed": "Şifre başarıyla değiştirildi",
+      "changeError": "Şifre değiştirilemedi"
+    },
+    "factory": {
+      "licenseStatus": "Lisans Durumu",
+      "daysRemaining": "Kalan Süre: {days} Gün",
+      "expired": "Lisans Süresi Dolmuş",
+      "unlimited": "Sınırsız",
+      "endDate": "Bitiş Tarihi: {date}",
+      "title": "Fabrika Bilgileri",
+      "name": "Fabrika Adı",
+      "officialName": "Resmi Unvan",
+      "taxId": "Vergi No",
+      "address": "Adres",
+      "city": "Şehir",
+      "authorizedPerson": "Yetkili Kişi",
+      "loadError": "Fabrika bilgileri yüklenemedi",
+      "updated": "Fabrika bilgileri güncellendi",
+      "updateError": "Güncelleme başarısız"
+    },
+    "production": {
+      "title": "Üretim Ayarları",
+      "drumWeight": "Varsayılan Bidon Ağırlığı (kg)",
+      "drumWeightHint": "Bu değer, üretim ve teslimat ekranlarındaki bidon ağırlığı inputlarının varsayılan değeri olarak kullanılır.",
+      "updated": "Üretim ayarları güncellendi",
+      "updateError": "Güncelleme başarısız"
+    }
   }
 }

@@ -439,5 +439,85 @@
       "login": "Iniciar sessão",
       "backToLogin": "Voltar ao início de sessão"
     }
+  },
+  "settings": {
+    "meta": {
+      "title": "Definições",
+      "description": "Definições do lagar e da conta."
+    },
+    "title": "Definições",
+    "subtitle": "Faça a gestão das definições da aplicação e da conta.",
+    "save": "Guardar",
+    "tabs": {
+      "products": "Produtos e preços",
+      "profile": "O meu perfil",
+      "security": "Segurança",
+      "factory": "Dados do lagar",
+      "production": "Definições de produção"
+    },
+    "products": {
+      "addTitle": "Adicionar nova variedade",
+      "namePlaceholder": "Ex.: Galega, Cobrançosa...",
+      "add": "Adicionar",
+      "empty": "Ainda não foi adicionado nenhum produto.",
+      "colName": "Nome do produto",
+      "colActions": "Ações",
+      "delete": "Eliminar",
+      "loadError": "Não foi possível carregar os produtos",
+      "added": "Produto adicionado",
+      "addError": "Erro ao adicionar o produto",
+      "confirmDelete": "Tem a certeza de que pretende eliminar este produto?",
+      "deleted": "Produto eliminado",
+      "deleteError": "Não foi possível eliminar o produto (pode estar em utilização)"
+    },
+    "profile": {
+      "title": "Dados do perfil",
+      "name": "Nome completo",
+      "namePlaceholder": "O seu nome completo",
+      "email": "E-mail",
+      "emailPlaceholder": "exemplo@email.com",
+      "phone": "Telefone",
+      "phonePlaceholder": "910 000 000",
+      "updated": "Perfil atualizado",
+      "updateError": "Não foi possível atualizar o perfil"
+    },
+    "security": {
+      "title": "Alterar palavra-passe",
+      "current": "Palavra-passe atual",
+      "currentPlaceholder": "Introduza a sua palavra-passe atual",
+      "new": "Nova palavra-passe",
+      "newPlaceholder": "Pelo menos 6 caracteres",
+      "confirm": "Nova palavra-passe (repetir)",
+      "confirmPlaceholder": "Repita a sua nova palavra-passe",
+      "submit": "Alterar palavra-passe",
+      "mismatch": "As novas palavras-passe não coincidem",
+      "minLength": "A palavra-passe deve ter pelo menos 6 caracteres",
+      "changed": "Palavra-passe alterada com sucesso",
+      "changeError": "Não foi possível alterar a palavra-passe"
+    },
+    "factory": {
+      "licenseStatus": "Estado da licença",
+      "daysRemaining": "Tempo restante: {days} dias",
+      "expired": "Licença expirada",
+      "unlimited": "Ilimitada",
+      "endDate": "Data de fim: {date}",
+      "title": "Dados do lagar",
+      "name": "Nome do lagar",
+      "officialName": "Denominação oficial",
+      "taxId": "NIF",
+      "address": "Morada",
+      "city": "Cidade",
+      "authorizedPerson": "Pessoa autorizada",
+      "loadError": "Não foi possível carregar os dados do lagar",
+      "updated": "Dados do lagar atualizados",
+      "updateError": "Falha na atualização"
+    },
+    "production": {
+      "title": "Definições de produção",
+      "drumWeight": "Peso predefinido do bidão (kg)",
+      "drumWeightHint": "Este valor é usado como predefinição nos campos de peso do bidão nos ecrãs de produção e entrega.",
+      "updated": "Definições de produção atualizadas",
+      "updateError": "Falha na atualização"
+    }
   }
 }

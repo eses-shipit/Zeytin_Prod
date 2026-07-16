@@ -439,5 +439,85 @@
       "login": "Iniciar sesión",
       "backToLogin": "Volver al inicio de sesión"
     }
+  },
+  "settings": {
+    "meta": {
+      "title": "Ajustes",
+      "description": "Ajustes de la almazara y de la cuenta."
+    },
+    "title": "Ajustes",
+    "subtitle": "Gestione los ajustes de la aplicación y de la cuenta.",
+    "save": "Guardar",
+    "tabs": {
+      "products": "Productos y precios",
+      "profile": "Mi perfil",
+      "security": "Seguridad",
+      "factory": "Datos de la almazara",
+      "production": "Ajustes de producción"
+    },
+    "products": {
+      "addTitle": "Añadir nueva variedad",
+      "namePlaceholder": "Ej.: Picual, Arbequina...",
+      "add": "Añadir",
+      "empty": "Aún no se ha añadido ningún producto.",
+      "colName": "Nombre del producto",
+      "colActions": "Acciones",
+      "delete": "Eliminar",
+      "loadError": "No se han podido cargar los productos",
+      "added": "Producto añadido",
+      "addError": "Error al añadir el producto",
+      "confirmDelete": "¿Seguro que desea eliminar este producto?",
+      "deleted": "Producto eliminado",
+      "deleteError": "No se ha podido eliminar el producto (puede estar en uso)"
+    },
+    "profile": {
+      "title": "Datos del perfil",
+      "name": "Nombre y apellidos",
+      "namePlaceholder": "Su nombre y apellidos",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "ejemplo@email.com",
+      "phone": "Teléfono",
+      "phonePlaceholder": "600 000 000",
+      "updated": "Perfil actualizado",
+      "updateError": "No se ha podido actualizar el perfil"
+    },
+    "security": {
+      "title": "Cambiar contraseña",
+      "current": "Contraseña actual",
+      "currentPlaceholder": "Introduzca su contraseña actual",
+      "new": "Nueva contraseña",
+      "newPlaceholder": "Al menos 6 caracteres",
+      "confirm": "Nueva contraseña (repetir)",
+      "confirmPlaceholder": "Repita su nueva contraseña",
+      "submit": "Cambiar contraseña",
+      "mismatch": "Las contraseñas nuevas no coinciden",
+      "minLength": "La contraseña debe tener al menos 6 caracteres",
+      "changed": "Contraseña cambiada correctamente",
+      "changeError": "No se ha podido cambiar la contraseña"
+    },
+    "factory": {
+      "licenseStatus": "Estado de la licencia",
+      "daysRemaining": "Tiempo restante: {days} días",
+      "expired": "Licencia caducada",
+      "unlimited": "Ilimitada",
+      "endDate": "Fecha de fin: {date}",
+      "title": "Datos de la almazara",
+      "name": "Nombre de la almazara",
+      "officialName": "Razón social",
+      "taxId": "NIF / CIF",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "authorizedPerson": "Persona autorizada",
+      "loadError": "No se han podido cargar los datos de la almazara",
+      "updated": "Datos de la almazara actualizados",
+      "updateError": "Error al actualizar"
+    },
+    "production": {
+      "title": "Ajustes de producción",
+      "drumWeight": "Peso predeterminado del bidón (kg)",
+      "drumWeightHint": "Este valor se usa como predeterminado en los campos de peso del bidón de las pantallas de producción y entrega.",
+      "updated": "Ajustes de producción actualizados",
+      "updateError": "Error al actualizar"
+    }
   }
 }

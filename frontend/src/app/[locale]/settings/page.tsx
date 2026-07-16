@@ -5,8 +5,10 @@ import axios from "@/lib/axios";
 import { Plus, Trash2, Loader2, User, Lock, Building2, Package, Save, XCircle, Settings2, Calendar, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { formatDate } from "@/lib/format";
+import type { Locale } from "@/i18n/routing";
 
 /** Fabrika çalışma kuralları sayfasına yönlendiren kart (Faz 3 politika motoru). */
 function PolicyLink() {
@@ -64,6 +66,8 @@ type TenantSettings = {
 };
 
 export default function SettingsPage() {
+  const t = useTranslations("settings");
+  const locale = useLocale() as Locale;
   const [activeTab, setActiveTab] = useState<"products" | "profile" | "security" | "factory" | "production">("products");
   
   // Products State
@@ -112,7 +116,7 @@ export default function SettingsPage() {
       const res = await axios.get("/products");
       setProducts(res.data);
     } catch (err) {
-      toast.error("Ürünler yüklenemedi");
+      toast.error(t("products.loadError"));
     } finally {
       setLoading(false);
     }
@@ -147,24 +151,24 @@ export default function SettingsPage() {
     setSubmitting(true);
     try {
       await axios.post("/products", { name: newName, isActive: true });
-      toast.success("Ürün eklendi");
+      toast.success(t("products.added"));
       setNewName("");
       fetchProducts();
     } catch (err) {
-      toast.error("Ürün eklenirken hata oluştu");
+      toast.error(t("products.addError"));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
+    if (!confirm(t("products.confirmDelete"))) return;
     try {
       await axios.delete(`/products/${id}`);
-      toast.success("Ürün silindi");
+      toast.success(t("products.deleted"));
       fetchProducts();
     } catch (err) {
-      toast.error("Ürün silinemedi (Kullanımda olabilir)");
+      toast.error(t("products.deleteError"));
     }
   };
 
@@ -176,8 +180,8 @@ export default function SettingsPage() {
         email: profileForm.email,
         phone: profileForm.phone || undefined,
       });
-      toast.success("Profil güncellendi");
-      
+      toast.success(t("profile.updated"));
+
       // Update localStorage
       const userStr = localStorage.getItem("user");
       if (userStr) {
@@ -188,7 +192,7 @@ export default function SettingsPage() {
       
       fetchProfile();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Profil güncellenemedi");
+      toast.error(err.response?.data?.message || t("profile.updateError"));
     } finally {
       setProfileSubmitting(false);
     }
@@ -196,11 +200,11 @@ export default function SettingsPage() {
 
   const handleChangePassword = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("Yeni şifreler eşleşmiyor");
+      toast.error(t("security.mismatch"));
       return;
     }
     if (passwordForm.newPassword.length < 6) {
-      toast.error("Şifre en az 6 karakter olmalıdır");
+      toast.error(t("security.minLength"));
       return;
     }
 
@@ -210,10 +214,10 @@ export default function SettingsPage() {
         oldPassword: passwordForm.oldPassword,
         newPassword: passwordForm.newPassword,
       });
-      toast.success("Şifre başarıyla değiştirildi");
+      toast.success(t("security.changed"));
       setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Şifre değiştirilemedi");
+      toast.error(err.response?.data?.message || t("security.changeError"));
     } finally {
       setPasswordSubmitting(false);
     }
@@ -232,7 +236,7 @@ export default function SettingsPage() {
       });
       setDefaultDrumWeight(res.data.defaultDrumWeight || 50);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Fabrika bilgileri yüklenemedi");
+      toast.error(err.response?.data?.message || t("factory.loadError"));
     }
   };
 
@@ -240,10 +244,10 @@ export default function SettingsPage() {
     setFactorySubmitting(true);
     try {
       await axios.patch("/tenant/settings", factoryForm);
-      toast.success("Fabrika bilgileri güncellendi");
+      toast.success(t("factory.updated"));
       fetchFactorySettings();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Güncelleme başarısız");
+      toast.error(err.response?.data?.message || t("factory.updateError"));
     } finally {
       setFactorySubmitting(false);
     }
@@ -253,9 +257,9 @@ export default function SettingsPage() {
     setProductionSubmitting(true);
     try {
       await axios.patch("/tenant/settings", { defaultDrumWeight });
-      toast.success("Üretim ayarları güncellendi");
+      toast.success(t("production.updated"));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Güncelleme başarısız");
+      toast.error(err.response?.data?.message || t("production.updateError"));
     } finally {
       setProductionSubmitting(false);
     }
@@ -266,9 +270,9 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <Package className="h-6 w-6 text-indigo-600" />
-          Ayarlar
+          {t("title")}
         </h1>
-        <p className="text-sm text-slate-500 mt-1">Uygulama ve hesap ayarlarını yönetin.</p>
+        <p className="text-sm text-slate-500 mt-1">{t("subtitle")}</p>
       </div>
 
       {/* Fabrika çalışma kuralları (politika motoru) — ayrı sayfa */}
@@ -284,7 +288,7 @@ export default function SettingsPage() {
           )}
         >
           <Package className="h-4 w-4" />
-          Ürün & Fiyatlandırma
+          {t("tabs.products")}
         </button>
         <button
           onClick={() => setActiveTab("profile")}
@@ -294,7 +298,7 @@ export default function SettingsPage() {
           )}
         >
           <User className="h-4 w-4" />
-          Profilim
+          {t("tabs.profile")}
         </button>
         <button
           onClick={() => setActiveTab("security")}
@@ -304,7 +308,7 @@ export default function SettingsPage() {
           )}
         >
           <Lock className="h-4 w-4" />
-          Güvenlik
+          {t("tabs.security")}
         </button>
         <button
           onClick={() => setActiveTab("factory")}
@@ -314,7 +318,7 @@ export default function SettingsPage() {
           )}
         >
           <Building2 className="h-4 w-4" />
-          Fabrika Bilgileri
+          {t("tabs.factory")}
         </button>
         <button
           onClick={() => setActiveTab("production")}
@@ -324,7 +328,7 @@ export default function SettingsPage() {
           )}
         >
           <Settings2 className="h-4 w-4" />
-          Üretim Ayarları
+          {t("tabs.production")}
         </button>
       </div>
 
@@ -332,11 +336,11 @@ export default function SettingsPage() {
       {activeTab === "products" && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-sm font-semibold text-slate-900 mb-4">Yeni Cins Ekle</h2>
+            <h2 className="text-sm font-semibold text-slate-900 mb-4">{t("products.addTitle")}</h2>
             <form onSubmit={handleAddProduct} className="flex gap-4">
               <input
                 type="text"
-                placeholder="Örn: Domat, Trilye..."
+                placeholder={t("products.namePlaceholder")}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900"
@@ -347,7 +351,7 @@ export default function SettingsPage() {
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Ekle
+                {t("products.add")}
               </button>
             </form>
           </div>
@@ -358,13 +362,13 @@ export default function SettingsPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
               </div>
             ) : products.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">Henüz hiç ürün eklenmemiş.</div>
+              <div className="p-8 text-center text-slate-500">{t("products.empty")}</div>
             ) : (
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-3 font-semibold text-slate-900">Ürün Adı</th>
-                    <th className="px-6 py-3 font-semibold text-slate-900 text-right">İşlemler</th>
+                    <th className="px-6 py-3 font-semibold text-slate-900">{t("products.colName")}</th>
+                    <th className="px-6 py-3 font-semibold text-slate-900 text-right">{t("products.colActions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -375,7 +379,7 @@ export default function SettingsPage() {
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                          title="Sil"
+                          title={t("products.delete")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -391,36 +395,36 @@ export default function SettingsPage() {
 
       {activeTab === "profile" && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
-          <h2 className="text-lg font-semibold text-slate-900">Profil Bilgileri</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{t("profile.title")}</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Ad Soyad</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("profile.name")}</label>
               <input
                 type="text"
                 value={profileForm.name}
                 onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2"
-                placeholder="Adınız ve soyadınız"
+                placeholder={t("profile.namePlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">E-posta</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("profile.email")}</label>
               <input
                 type="email"
                 value={profileForm.email}
                 onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2"
-                placeholder="ornek@email.com"
+                placeholder={t("profile.emailPlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Telefon</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("profile.phone")}</label>
               <input
                 type="tel"
                 value={profileForm.phone}
                 onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2"
-                placeholder="05XX XXX XX XX"
+                placeholder={t("profile.phonePlaceholder")}
               />
             </div>
             <button
@@ -429,7 +433,7 @@ export default function SettingsPage() {
               className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {profileSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Kaydet
+              {t("save")}
             </button>
           </div>
         </div>
@@ -437,36 +441,36 @@ export default function SettingsPage() {
 
       {activeTab === "security" && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
-          <h2 className="text-lg font-semibold text-slate-900">Şifre Değiştir</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{t("security.title")}</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Mevcut Şifre</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("security.current")}</label>
               <input
                 type="password"
                 value={passwordForm.oldPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2"
-                placeholder="Mevcut şifrenizi girin"
+                placeholder={t("security.currentPlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Yeni Şifre</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("security.new")}</label>
               <input
                 type="password"
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2"
-                placeholder="En az 6 karakter"
+                placeholder={t("security.newPlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Yeni Şifre (Tekrar)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("security.confirm")}</label>
               <input
                 type="password"
                 value={passwordForm.confirmPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2"
-                placeholder="Yeni şifrenizi tekrar girin"
+                placeholder={t("security.confirmPlaceholder")}
               />
             </div>
             <button
@@ -475,7 +479,7 @@ export default function SettingsPage() {
               className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {passwordSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-              Şifreyi Değiştir
+              {t("security.submit")}
             </button>
           </div>
         </div>
@@ -494,7 +498,7 @@ export default function SettingsPage() {
           )}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-slate-700 mb-1">Lisans Durumu</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-1">{t("factory.licenseStatus")}</h3>
                 {factoryInfo.daysRemaining !== null ? (
                   <p className={cn(
                     "text-2xl font-bold",
@@ -502,17 +506,17 @@ export default function SettingsPage() {
                     factoryInfo.daysRemaining <= 90 ? "text-amber-700" : "text-indigo-700"
                   )}>
                     {factoryInfo.daysRemaining > 0 ? (
-                      <>Kalan Süre: {factoryInfo.daysRemaining} Gün</>
+                      t("factory.daysRemaining", { days: factoryInfo.daysRemaining })
                     ) : (
-                      <>Lisans Süresi Dolmuş</>
+                      t("factory.expired")
                     )}
                   </p>
                 ) : (
-                  <p className="text-slate-600">Sınırsız</p>
+                  <p className="text-slate-600">{t("factory.unlimited")}</p>
                 )}
                 {factoryInfo.subscriptionEndDate && (
                   <p className="text-xs text-slate-500 mt-1">
-                    Bitiş Tarihi: {new Date(factoryInfo.subscriptionEndDate).toLocaleDateString("tr-TR")}
+                    {t("factory.endDate", { date: formatDate(factoryInfo.subscriptionEndDate, locale) })}
                   </p>
                 )}
               </div>
@@ -529,10 +533,10 @@ export default function SettingsPage() {
 
           {/* Factory Info Form */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
-            <h2 className="text-lg font-semibold text-slate-900">Fabrika Bilgileri</h2>
+            <h2 className="text-lg font-semibold text-slate-900">{t("factory.title")}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Fabrika Adı</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t("factory.name")}</label>
                 <input
                   type="text"
                   value={factoryForm.name}
@@ -541,7 +545,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Resmi Unvan</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t("factory.officialName")}</label>
                 <input
                   type="text"
                   value={factoryForm.officialName}
@@ -550,7 +554,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Vergi No</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t("factory.taxId")}</label>
                 <input
                   type="text"
                   value={factoryForm.taxId}
@@ -559,7 +563,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Adres</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t("factory.address")}</label>
                 <input
                   type="text"
                   value={factoryForm.address}
@@ -568,7 +572,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Şehir</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t("factory.city")}</label>
                 <input
                   type="text"
                   value={factoryForm.city}
@@ -578,7 +582,7 @@ export default function SettingsPage() {
               </div>
               {factoryInfo.authorizedPerson && (
                 <div className="bg-slate-50 p-4 rounded-lg">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Yetkili Kişi</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t("factory.authorizedPerson")}</label>
                   <p className="text-sm text-slate-600">{factoryInfo.authorizedPerson.name}</p>
                   <p className="text-xs text-slate-500">{factoryInfo.authorizedPerson.email}</p>
                   {factoryInfo.authorizedPerson.phone && (
@@ -592,7 +596,7 @@ export default function SettingsPage() {
                 className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
               >
                 {factorySubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                Kaydet
+                {t("save")}
               </button>
             </div>
           </div>
@@ -601,14 +605,14 @@ export default function SettingsPage() {
 
       {activeTab === "production" && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
-          <h2 className="text-lg font-semibold text-slate-900">Üretim Ayarları</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{t("production.title")}</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Varsayılan Bidon Ağırlığı (kg)
+                {t("production.drumWeight")}
               </label>
               <p className="text-xs text-slate-500 mb-2">
-                Bu değer, üretim ve teslimat ekranlarındaki bidon ağırlığı inputlarının varsayılan değeri olarak kullanılır.
+                {t("production.drumWeightHint")}
               </p>
               <input
                 type="number"
@@ -626,7 +630,7 @@ export default function SettingsPage() {
               className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {productionSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Kaydet
+              {t("save")}
             </button>
           </div>
         </div>

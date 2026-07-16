@@ -439,5 +439,85 @@
       "login": "Accedi",
       "backToLogin": "Torna all'accesso"
     }
+  },
+  "settings": {
+    "meta": {
+      "title": "Impostazioni",
+      "description": "Impostazioni del frantoio e dell'account."
+    },
+    "title": "Impostazioni",
+    "subtitle": "Gestisci le impostazioni dell'app e dell'account.",
+    "save": "Salva",
+    "tabs": {
+      "products": "Prodotti e prezzi",
+      "profile": "Il mio profilo",
+      "security": "Sicurezza",
+      "factory": "Dati del frantoio",
+      "production": "Impostazioni di produzione"
+    },
+    "products": {
+      "addTitle": "Aggiungi nuova varietà",
+      "namePlaceholder": "Es.: Coratina, Leccino...",
+      "add": "Aggiungi",
+      "empty": "Nessun prodotto ancora aggiunto.",
+      "colName": "Nome prodotto",
+      "colActions": "Azioni",
+      "delete": "Elimina",
+      "loadError": "Impossibile caricare i prodotti",
+      "added": "Prodotto aggiunto",
+      "addError": "Errore durante l'aggiunta del prodotto",
+      "confirmDelete": "Vuoi davvero eliminare questo prodotto?",
+      "deleted": "Prodotto eliminato",
+      "deleteError": "Impossibile eliminare il prodotto (potrebbe essere in uso)"
+    },
+    "profile": {
+      "title": "Dati del profilo",
+      "name": "Nome e cognome",
+      "namePlaceholder": "Nome e cognome",
+      "email": "Email",
+      "emailPlaceholder": "esempio@email.com",
+      "phone": "Telefono",
+      "phonePlaceholder": "333 000 0000",
+      "updated": "Profilo aggiornato",
+      "updateError": "Impossibile aggiornare il profilo"
+    },
+    "security": {
+      "title": "Cambia password",
+      "current": "Password attuale",
+      "currentPlaceholder": "Inserisci la password attuale",
+      "new": "Nuova password",
+      "newPlaceholder": "Almeno 6 caratteri",
+      "confirm": "Nuova password (ripeti)",
+      "confirmPlaceholder": "Ripeti la nuova password",
+      "submit": "Cambia password",
+      "mismatch": "Le nuove password non coincidono",
+      "minLength": "La password deve avere almeno 6 caratteri",
+      "changed": "Password cambiata con successo",
+      "changeError": "Impossibile cambiare la password"
+    },
+    "factory": {
+      "licenseStatus": "Stato della licenza",
+      "daysRemaining": "Tempo rimanente: {days} giorni",
+      "expired": "Licenza scaduta",
+      "unlimited": "Illimitata",
+      "endDate": "Data di scadenza: {date}",
+      "title": "Dati del frantoio",
+      "name": "Nome del frantoio",
+      "officialName": "Ragione sociale",
+      "taxId": "Partita IVA",
+      "address": "Indirizzo",
+      "city": "Città",
+      "authorizedPerson": "Persona autorizzata",
+      "loadError": "Impossibile caricare i dati del frantoio",
+      "updated": "Dati del frantoio aggiornati",
+      "updateError": "Aggiornamento non riuscito"
+    },
+    "production": {
+      "title": "Impostazioni di produzione",
+      "drumWeight": "Peso predefinito del fusto (kg)",
+      "drumWeightHint": "Questo valore viene usato come predefinito nei campi del peso del fusto nelle schermate di produzione e consegna.",
+      "updated": "Impostazioni di produzione aggiornate",
+      "updateError": "Aggiornamento non riuscito"
+    }
   }
 }

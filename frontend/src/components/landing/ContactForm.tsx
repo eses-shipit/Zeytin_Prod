@@ -42,45 +42,43 @@ export function ContactForm({ defaultInterest }: { defaultInterest?: string }) {
 
   if (status === "success") {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center dark:border-emerald-900 dark:bg-emerald-950/40">
-        <CheckCircle2 className="h-12 w-12 text-emerald-600" />
-        <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-200">{t("successTitle")}</h3>
-        <p className="text-emerald-700 dark:text-emerald-300">{t("successMsg")}</p>
+      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[color:var(--emerald)]/30 bg-[color:var(--emerald)]/5 p-8 text-center">
+        <CheckCircle2 className="h-12 w-12 text-[color:var(--emerald)]" />
+        <h3 className="font-display text-xl text-[color:var(--emerald-deep)]">{t("successTitle")}</h3>
+        <p className="text-[color:var(--ink)]/70">{t("successMsg")}</p>
       </div>
     );
   }
 
+  // Krem/zeytin paleti — landing kapsamındaki CSS değişkenlerini kullanır.
+  const labelClass = "mb-2 block text-xs font-medium uppercase tracking-widest text-[color:var(--ink)]/60";
   const inputClass =
-    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
+    "w-full rounded-xl border border-[color:var(--line)] bg-[#fffdf6] px-4 py-3 text-[color:var(--ink)] outline-none transition focus:border-[color:var(--emerald)] focus:ring-2 focus:ring-[color:var(--emerald)]/15";
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
-      <div className="sm:col-span-1">
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-          {t("name")} <span className="text-red-500">*</span>
-        </label>
+    <form onSubmit={handleSubmit} className="grid gap-5 sm:grid-cols-2">
+      <div>
+        <label className={labelClass}>{t("name")} <span className="text-[color:var(--ochre)]">*</span></label>
         <input name="name" required maxLength={120} className={inputClass} />
       </div>
-      <div className="sm:col-span-1">
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-          {t("email")} <span className="text-red-500">*</span>
-        </label>
+      <div>
+        <label className={labelClass}>{t("email")} <span className="text-[color:var(--ochre)]">*</span></label>
         <input name="email" type="email" required maxLength={160} className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("phone")}</label>
+        <label className={labelClass}>{t("phone")}</label>
         <input name="phone" type="tel" maxLength={30} className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("factory")}</label>
+        <label className={labelClass}>{t("factory")}</label>
         <input name="factoryName" maxLength={160} className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("city")}</label>
+        <label className={labelClass}>{t("city")}</label>
         <input name="city" maxLength={80} className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("interest")}</label>
+        <label className={labelClass}>{t("interest")}</label>
         <select name="interest" defaultValue={defaultInterest ?? "DEMO"} className={inputClass}>
           <option value="DEMO">{t("interestDemo")}</option>
           <option value="STANDARD">{t("interestStandard")}</option>
@@ -88,19 +86,17 @@ export function ContactForm({ defaultInterest }: { defaultInterest?: string }) {
         </select>
       </div>
       <div className="sm:col-span-2">
-        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("message")}</label>
-        <textarea name="message" rows={3} maxLength={2000} className={inputClass} />
+        <label className={labelClass}>{t("message")}</label>
+        <textarea name="message" rows={4} maxLength={2000} className={`${inputClass} resize-none`} />
       </div>
 
-      {status === "error" && (
-        <p className="sm:col-span-2 text-sm text-red-600">{t("error")}</p>
-      )}
+      {status === "error" && <p className="text-sm text-red-600 sm:col-span-2">{t("error")}</p>}
 
       <div className="sm:col-span-2">
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60 sm:w-auto"
+          className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 font-medium disabled:opacity-60 sm:w-auto"
         >
           {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
           {status === "submitting" ? t("submitting") : t("submit")}
