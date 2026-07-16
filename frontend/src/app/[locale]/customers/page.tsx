@@ -2,9 +2,12 @@
 
 import axios from "@/lib/axios";
 import { ChevronRight, Search, User, Plus, Edit } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/cn";
+import { useTranslations, useLocale } from "next-intl";
+import { formatCurrency, formatKg } from "@/lib/format";
+import { useTenantCurrency } from "@/hooks/useTenantCurrency";
+import type { Locale } from "@/i18n/routing";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 
 type Customer = {
@@ -15,6 +18,9 @@ type Customer = {
 };
 
 export default function CustomersPage() {
+  const t = useTranslations("customers");
+  const locale = useLocale() as Locale;
+  const currency = useTenantCurrency();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -45,10 +51,10 @@ export default function CustomersPage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
             <User className="h-7 w-7 text-indigo-600" />
-            Müşteriler
+            {t("title")}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Cari hesapları ve stok durumlarını görüntüleyin.
+            {t("subtitle")}
           </p>
         </div>
         <button
@@ -56,7 +62,7 @@ export default function CustomersPage() {
           className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           <Plus className="h-4 w-4" />
-          Yeni Müşteri
+          {t("newCustomer")}
         </button>
       </header>
 
@@ -65,7 +71,7 @@ export default function CustomersPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <input
           type="text"
-          placeholder="Müşteri ara..."
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
@@ -75,9 +81,9 @@ export default function CustomersPage() {
       {/* Liste */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-500">Yükleniyor...</div>
+          <div className="p-8 text-center text-slate-500">{t("loading")}</div>
         ) : filteredCustomers.length === 0 ? (
-          <div className="p-8 text-center text-slate-500">Müşteri bulunamadı.</div>
+          <div className="p-8 text-center text-slate-500">{t("notFound")}</div>
         ) : (
           <div className="divide-y divide-slate-100">
             {filteredCustomers.map((customer) => (
@@ -106,17 +112,17 @@ export default function CustomersPage() {
                       setIsModalOpen(true);
                     }}
                     className="p-2 rounded-lg text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    title="Düzenle"
+                    title={t("edit")}
                   >
                     <Edit className="h-4 w-4" />
                   </button>
                   <div className="flex items-center gap-6">
                     <div className="text-right hidden sm:block">
                       <div className="text-sm font-medium text-emerald-600">
-                        {customer.oliveOilBalance.toFixed(1)} kg Yağ
+                        {formatKg(customer.oliveOilBalance, locale, { digits: 1 })} {t("oilSuffix")}
                       </div>
                       <div className="text-xs text-slate-500">
-                        ₺{customer.balanceTL.toLocaleString("tr-TR")}
+                        {formatCurrency(customer.balanceTL, currency, locale)}
                       </div>
                     </div>
                     <Link href={`/customers/${customer.id}`}>
