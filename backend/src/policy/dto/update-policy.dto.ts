@@ -86,6 +86,11 @@ export class UpdatePolicyDto {
   @IsEnum(PriceSource)
   liquidationPriceSource?: PriceSource;
 
+  // Pro özelliği: gerçek SMS. false ise üretim sonrası SMS simüle edilir.
+  @IsOptional()
+  @IsBoolean()
+  messageAutomationEnabled?: boolean;
+
   // --- Birim ve yuvarlama ---
   // ISO 4217. Şimdilik desteklenen pazarlar: Türkiye ve AB (ES/IT/PT).
   @IsOptional()

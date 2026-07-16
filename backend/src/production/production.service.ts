@@ -285,19 +285,23 @@ export class ProductionService {
                 .toDecimalPlaces(KG_DP, ROUND);
 
             const message = `Sn. ${customer.name}, uretim tamamlandi. Giren: ${customerTotalOlive}kg, Cikan: ${customerSpecificOil.toFixed(1)}kg, Randiman: 1/${yieldRatio.toFixed(1)}, Asit: ${dto.acidRatio ?? "-"} . Fabrika: ${tenantName}`;
-             
-             await this.smsService.queueSms(customer.phone, message);
-             
-             // Log SMS send to AuditLog
+
+             // Mesaj otomasyonu Pro özelliği. Ücretsiz/demo planda SMS SİMÜLE
+             // edilir: operatöre "gönderildi" görünür ama gerçek SMS gitmez.
+             const simulated = !policy.messageAutomationEnabled;
+             await this.smsService.queueSms(customer.phone, message, { simulated });
+
+             // Denetim kaydı gerçeği yansıtır: gerçekten mi gönderildi yoksa
+             // simüle mi edildi. Fabrika sahibi sonradan yanılmasın.
              const userId = this.contextService.get("USER_ID");
              await this.auditService.logAction(
                tenantId,
                userId || null,
-               "SMS_SENT",
+               simulated ? "SMS_SIMULATED" : "SMS_SENT",
                batch.id,
-               { customerId: customer.id, customerPhone: customer.phone, message },
+               { customerId: customer.id, simulated },
              );
-             
+
              smsSent = true;
         }
       } catch (err) {
@@ -331,6 +335,9 @@ export class ProductionService {
 
       if (!batch) throw new NotFoundException("Parti bulunamadı.");
 
+      // Mesaj otomasyonu bayrağı için yürürlükteki politika.
+      const policy = await this.policyService.getActivePolicy();
+
       // Paylar partide saklı; yeniden hesaplanmıyor. Yeniden hesaplamak, o gün
       // müşteriye bildirilen ve bakiyeye yazılan değerden farklı bir sonuç
       // üretebilirdi (ör. hizmet bedeli kuralı sonradan değişirse).
@@ -352,19 +359,20 @@ export class ProductionService {
               .div(totalOliveKgD)
               .toDecimalPlaces(KG_DP, ROUND);
           const message = `Sn. ${customer.name}, uretim tamamlandi. Giren: ${customerTotalOlive}kg, Cikan: ${customerSpecificOil.toFixed(1)}kg, Randiman: 1/${batch.yieldRatio.toFixed(1)}, Asit: ${batch.acidRatio ?? "-"}. Fabrika: ${tenantName}`;
-           
-           await this.smsService.queueSms(customer.phone, message);
-           
-           // Log SMS resend to AuditLog
+
+           // Ücretsiz/demo planda tekrar gönderim de simüle edilir.
+           const simulated = !policy.messageAutomationEnabled;
+           await this.smsService.queueSms(customer.phone, message, { simulated });
+
            const userId = this.contextService.get("USER_ID");
            await this.auditService.logAction(
              tenantId,
              userId || null,
-             "SMS_SENT",
+             simulated ? "SMS_SIMULATED" : "SMS_SENT",
              batchId,
-             { customerId: customer.id, customerPhone: customer.phone, message, isResend: true },
+             { customerId: customer.id, simulated, isResend: true },
            );
-           
+
            sentCount++;
       }
 

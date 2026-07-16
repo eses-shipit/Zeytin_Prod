@@ -18,12 +18,31 @@ export class SmsService {
   constructor(private readonly smsProvider: MockSmsProvider) {}
 
   /**
-   * Kuyruğa SMS gönderim işi ekler.
+   * SMS gönderim işi.
+   *
+   * @param simulated true (ücretsiz/demo): gerçek sağlayıcı ÇAĞRILMAZ. Mesaj
+   *   yalnızca loglanır ve işlem başarılı sayılır; böylece operatörün ekranında
+   *   "gönderildi" görünür ama müşteriye gerçek SMS gitmez. false (Pro): gerçek
+   *   sağlayıcı devreye girer.
+   *
+   * NOT: Gerçek sağlayıcı (Netgsm/Twilio vb.) henüz entegre edilmedi;
+   *   `smsProvider` şu an mock. Pro için tek yapılacak: MockSmsProvider yerine
+   *   gerçek sağlayıcıyı bağlamak (sms.module.ts provider binding'i).
    */
-  async queueSms(to: string, message: string) {
+  async queueSms(to: string, message: string, opts: { simulated?: boolean } = {}) {
+    if (opts.simulated) {
+      // Kuyruğa hiç girmez; sağlayıcıya dokunulmaz.
+      this.logger.log(`[SİMÜLE] SMS gönderilmedi (ücretsiz plan). Alıcı: ${this.maskPhone(to)}`);
+      return;
+    }
     this.queue.push({ to, message, retries: 0 });
     this.logger.log(`Job added to queue. Queue size: ${this.queue.length}`);
     this.processQueue(); // Tetikle
+  }
+
+  /** Loglarda telefonu maskele (KVKK). */
+  private maskPhone(phone: string): string {
+    return phone.length > 4 ? `***${phone.slice(-4)}` : "***";
   }
 
   /**
@@ -40,7 +59,7 @@ export class SmsService {
       try {
         await this.smsProvider.sendSms(job.to, job.message);
       } catch (error) {
-        this.logger.error(`Failed to send SMS to ${job.to}`, error);
+        this.logger.error(`Failed to send SMS to ${this.maskPhone(job.to)}`, error);
         // Basit retry mantığı (1 kez tekrar dene)
         if (job.retries < 1) {
           job.retries++;

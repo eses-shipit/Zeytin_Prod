@@ -337,6 +337,13 @@ model TenantPolicy {
   allowNegativeBalance   Boolean     @default(true)
   liquidationPriceSource PriceSource @default(PER_TRANSACTION)
 
+  // --- Mesaj otomasyonu (SMS) ---
+  /// Pro özelliği. false (ücretsiz/demo): üretim sonrası müşteriye SMS
+  /// SİMÜLE edilir — operatörün ekranında "gönderildi" görünür ama gerçek SMS
+  /// gitmez ve denetim kaydı bunu "simulated" olarak işaretler. true (Pro):
+  /// gerçek SMS sağlayıcısı devreye girer (sağlayıcı entegrasyonu ayrıca eklenir).
+  messageAutomationEnabled Boolean @default(false)
+
   // --- Birim ve yuvarlama ---
   /// Çok ülkeli kurulum: TRY / EUR. "TL" arayüzde sabit yazılıydı.
   currency        String  @default("TRY")
