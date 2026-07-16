@@ -10,7 +10,10 @@ import {
   History,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/cn";
+import { formatNumber, formatDateTime } from "@/lib/format";
+import type { Locale } from "@/i18n/routing";
 import { useScale } from "../hooks/useScale";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { OfflineStorageService } from "../services/offline-storage";
@@ -54,6 +57,8 @@ type RecentTicket = {
 };
 
 export function WeighingTerminal() {
+  const t = useTranslations("terminal");
+  const locale = useLocale() as Locale;
   const { weightKg, isConnected, error, connect, disconnect } = useScale();
   const { isOnline } = useNetworkStatus();
   const [grossKg, setGrossKg] = useState<number>(0);
@@ -132,7 +137,7 @@ export function WeighingTerminal() {
         data: payload
       });
       
-      setStatus({ type: "success", message: "Fiş cihazınıza kaydedildi. İnternet bağlantısı geldiğinde otomatik gönderilecek." });
+      setStatus({ type: "success", message: t("savedOffline") });
       setGrossKg(0);
       setTareKg(0);
       setNote("");
@@ -142,7 +147,7 @@ export function WeighingTerminal() {
 
     try {
       await axios.post('/tickets', payload);
-      setStatus({ type: "success", message: "Kantar fişi başarıyla oluşturuldu." });
+      setStatus({ type: "success", message: t("savedSuccess") });
       // Reset form after success
       setGrossKg(0);
       setTareKg(0);
@@ -150,7 +155,7 @@ export function WeighingTerminal() {
       // Listeyi güncelle
       fetchData();
     } catch {
-      setStatus({ type: "error", message: "Fiş kaydedilirken bir hata oluştu." });
+      setStatus({ type: "error", message: t("saveError") });
     } finally {
       setIsSubmitting(false);
     }
@@ -171,10 +176,10 @@ export function WeighingTerminal() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
             <Scale className="h-7 w-7 text-indigo-600" />
-            Kantar Terminali
+            {t("title")}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Zeytin kabul ve tartım işlemleri
+            {t("subtitle")}
           </p>
         </div>
         <button
@@ -188,7 +193,7 @@ export function WeighingTerminal() {
           )}
         >
           <PlugZap className={cn("h-4 w-4 transition-colors", isConnected ? "text-slate-500" : "text-indigo-200")} />
-          {isConnected ? "Bağlantıyı Kes" : "Kantar Bağlan"}
+          {isConnected ? t("disconnect") : t("connect")}
         </button>
       </div>
 
@@ -203,15 +208,15 @@ export function WeighingTerminal() {
                 isConnected ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
               )}>
                 <span className={cn("h-1.5 w-1.5 rounded-full", isConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400")} />
-                {isConnected ? "Canlı" : "Çevrimdışı"}
+                {isConnected ? t("live") : t("offline")}
               </span>
             </div>
             
             <div className="text-center">
-              <div className="mb-2 text-sm font-medium text-slate-500 uppercase tracking-wider">Anlık Ağırlık</div>
+              <div className="mb-2 text-sm font-medium text-slate-500 uppercase tracking-wider">{t("currentWeight")}</div>
               <div className="flex items-baseline justify-center gap-2">
                 <span className="text-6xl font-bold tracking-tight text-slate-900 tabular-nums">
-                  {weightKg ?? 0}
+                  {formatNumber(weightKg ?? 0, locale)}
                 </span>
                 <span className="text-2xl font-medium text-slate-400">kg</span>
               </div>
@@ -228,7 +233,7 @@ export function WeighingTerminal() {
           {/* Weighing Inputs */}
           <div className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Brüt Ağırlık</label>
+              <label className="text-sm font-medium text-slate-700">{t("grossWeight")}</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
@@ -243,7 +248,7 @@ export function WeighingTerminal() {
                 <button
                   onClick={useLiveWeightAsGross}
                   className="flex aspect-square items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100"
-                  title="Kantardan Al"
+                  title={t("fromScale")}
                 >
                   <History className="h-5 w-5" />
                 </button>
@@ -251,7 +256,7 @@ export function WeighingTerminal() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Dara Ağırlık</label>
+              <label className="text-sm font-medium text-slate-700">{t("tareWeight")}</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
@@ -266,7 +271,7 @@ export function WeighingTerminal() {
                 <button
                   onClick={useLiveWeightAsTare}
                   className="flex aspect-square items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100"
-                  title="Kantardan Al"
+                  title={t("fromScale")}
                 >
                   <History className="h-5 w-5" />
                 </button>
@@ -275,9 +280,9 @@ export function WeighingTerminal() {
 
             <div className="col-span-full pt-4 border-t border-slate-100">
               <div className="flex items-center justify-between rounded-xl bg-slate-900 px-6 py-4 text-white">
-                <span className="text-sm font-medium text-slate-300">Net Zeytin</span>
+                <span className="text-sm font-medium text-slate-300">{t("netOlive")}</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold tracking-tight">{netKg}</span>
+                  <span className="text-3xl font-bold tracking-tight">{formatNumber(netKg, locale)}</span>
                   <span className="text-lg text-slate-400">kg</span>
                 </div>
               </div>
@@ -290,19 +295,19 @@ export function WeighingTerminal() {
           <div className="flex-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-2 text-lg font-semibold text-slate-900">
               <UserRound className="h-5 w-5 text-indigo-600" />
-              Fiş Detayları
+              {t("ticketDetails")}
             </div>
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Müşteri</label>
+                <label className="text-sm font-medium text-slate-700">{t("customer")}</label>
                 <div className="flex gap-2">
                   <select
                     value={customerId}
                     onChange={(e) => setCustomerId(e.target.value)}
                     className="block w-full rounded-lg border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
                   >
-                    <option value="" disabled>Seçiniz...</option>
+                    <option value="" disabled>{t("select")}</option>
                     {customers.map((customer) => (
                       <option key={customer.id} value={customer.id}>
                         {customer.name}
@@ -312,7 +317,7 @@ export function WeighingTerminal() {
                   <button
                     onClick={() => setCustomerModalOpen(true)}
                     className="flex aspect-square items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
-                    title="Yeni Müşteri Ekle"
+                    title={t("addCustomer")}
                   >
                     <Plus className="h-5 w-5" />
                   </button>
@@ -326,56 +331,56 @@ export function WeighingTerminal() {
                   onClick={() => setShowDetails(!showDetails)}
                   className="flex w-full items-center justify-between p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider hover:bg-slate-100 transition-colors"
                 >
-                  <span>Ürün Detayları</span>
+                  <span>{t("productDetails")}</span>
                   <span className="text-lg text-slate-400">{showDetails ? "−" : "+"}</span>
                 </button>
                 
                 {showDetails && (
                   <div className="p-4 pt-0 grid gap-4 animate-in slide-in-from-top-2">
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">Mevkii / Köy</label>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">{t("origin")}</label>
                       <input
                         type="text"
                         value={origin}
                         onChange={(e) => setOrigin(e.target.value)}
-                        placeholder="Örn: Taşlık"
+                        placeholder={t("originPlaceholder")}
                         className="w-full rounded-lg border-slate-200 px-3 py-2 text-sm bg-white"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Cins</label>
+                        <label className="block text-xs font-medium text-slate-600 mb-1">{t("variety")}</label>
                         <select
                           value={productId}
                           onChange={(e) => setProductId(e.target.value)}
                           className="w-full rounded-lg border-slate-200 px-3 py-2 text-sm bg-white"
                         >
-                          <option value="" disabled>Seçiniz...</option>
+                          <option value="" disabled>{t("select")}</option>
                           {products.map((p) => (
                             <option key={p.id} value={p.id}>{p.name}</option>
                           ))}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Kalite</label>
+                        <label className="block text-xs font-medium text-slate-600 mb-1">{t("quality")}</label>
                         <select
                           value={quality}
                           onChange={(e) => setQuality(e.target.value as any)}
                           className="w-full rounded-lg border-slate-200 px-3 py-2 text-sm bg-white"
                         >
-                          <option value="TREE">Üst (Sırık)</option>
-                          <option value="GROUND">Dip</option>
-                          <option value="MIXED">Karışık</option>
+                          <option value="TREE">{t("qualityTree")}</option>
+                          <option value="GROUND">{t("qualityGround")}</option>
+                          <option value="MIXED">{t("qualityMixed")}</option>
                         </select>
                       </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Not</label>
+                        <label className="block text-xs font-medium text-slate-600 mb-1">{t("note")}</label>
                         <input
                           type="text"
                           value={note}
                           onChange={(e) => setNote(e.target.value)}
-                          placeholder="Örn: Çuval iadesi yapılacak..."
+                          placeholder={t("notePlaceholder")}
                           className="w-full rounded-lg border-slate-200 px-3 py-2 text-sm bg-white"
                         />
                     </div>
@@ -408,7 +413,7 @@ export function WeighingTerminal() {
                     : "bg-indigo-600 text-white shadow-indigo-200 hover:bg-indigo-700 hover:shadow-md focus:ring-indigo-500"
                 )}
               >
-                {isSubmitting ? "Kaydediliyor..." : "Fişi Kaydet"}
+                {isSubmitting ? t("saving") : t("saveTicket")}
               </button>
             </div>
           </div>
@@ -419,25 +424,25 @@ export function WeighingTerminal() {
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-lg font-semibold text-slate-900 flex items-center gap-2">
           <History className="h-5 w-5 text-slate-500" />
-          Son İşlemler
+          {t("recentTitle")}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-slate-900">
               <tr>
-                <th className="px-4 py-3 font-semibold rounded-l-lg">Fiş No</th>
-                <th className="px-4 py-3 font-semibold">Tarih</th>
-                <th className="px-4 py-3 font-semibold">Müşteri</th>
-                <th className="px-4 py-3 font-semibold">Brüt</th>
-                <th className="px-4 py-3 font-semibold">Dara</th>
-                <th className="px-4 py-3 font-semibold text-right rounded-r-lg">Net (kg)</th>
+                <th className="px-4 py-3 font-semibold rounded-l-lg">{t("colTicketNo")}</th>
+                <th className="px-4 py-3 font-semibold">{t("colDate")}</th>
+                <th className="px-4 py-3 font-semibold">{t("colCustomer")}</th>
+                <th className="px-4 py-3 font-semibold">{t("colGross")}</th>
+                <th className="px-4 py-3 font-semibold">{t("colTare")}</th>
+                <th className="px-4 py-3 font-semibold text-right rounded-r-lg">{t("colNet")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {recentTickets.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                    Henüz kayıt bulunmuyor.
+                    {t("noRecords")}
                   </td>
                 </tr>
               ) : (
@@ -447,15 +452,15 @@ export function WeighingTerminal() {
                        {ticket.publicId || ticket.id.slice(-6)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {new Date(ticket.createdAt).toLocaleString("tr-TR")}
+                      {formatDateTime(ticket.createdAt, locale)}
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-900">
                       {ticket.customer.name}
                     </td>
-                    <td className="px-4 py-3">{ticket.grossKg}</td>
-                    <td className="px-4 py-3">{ticket.tareKg}</td>
+                    <td className="px-4 py-3">{formatNumber(ticket.grossKg, locale)}</td>
+                    <td className="px-4 py-3">{formatNumber(ticket.tareKg, locale)}</td>
                     <td className="px-4 py-3 text-right font-bold text-slate-900">
-                      {ticket.netKg}
+                      {formatNumber(ticket.netKg, locale)}
                     </td>
                   </tr>
                 ))

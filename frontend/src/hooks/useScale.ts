@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const WEIGHT_REGEX = /([+-]?\s*\d+)\s*kg/i;
 
@@ -14,6 +15,12 @@ export type UseScaleResult = ScaleState & {
 };
 
 export function useScale(): UseScaleResult {
+  const t = useTranslations("terminal");
+  // `t`'yi ref'te tut: connect/disconnect callback'lerinin kimliği
+  // (empty deps) değişmesin, ama en güncel çeviriyi kullansın.
+  const tRef = useRef(t);
+  tRef.current = t;
+
   const [state, setState] = useState<ScaleState>({
     weightKg: null,
     isConnected: false,
@@ -45,7 +52,7 @@ export function useScale(): UseScaleResult {
     } catch (error) {
       console.error("Kantar bağlantısı kesilirken hata:", error);
       // Hata olsa bile state'i temizle ki UI takılı kalmasın
-      setState((prev) => ({ ...prev, isConnected: false, error: "Bağlantı kesilirken hata oluştu" }));
+      setState((prev) => ({ ...prev, isConnected: false, error: tRef.current("scaleError.disconnect") }));
     }
   }, []);
 
@@ -53,7 +60,7 @@ export function useScale(): UseScaleResult {
     if (!("serial" in navigator)) {
       setState((prev) => ({
         ...prev,
-        error: "Tarayıcı Web Serial API'yi desteklemiyor.",
+        error: tRef.current("scaleError.notSupported"),
       }));
       return;
     }
@@ -102,7 +109,7 @@ export function useScale(): UseScaleResult {
        setState((prev) => ({
          ...prev,
          isConnected: false,
-         error: "Cihaz bağlantısı koptu veya okunamadı.",
+         error: tRef.current("scaleError.readFailed"),
        }));
     }
   }, []);
