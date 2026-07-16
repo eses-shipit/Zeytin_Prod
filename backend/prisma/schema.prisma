@@ -168,7 +168,25 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  tenant       Tenant?              @relation(fields: [tenantId], references: [id])
+  resetTokens  PasswordResetToken[]
+}
+
+/// Parola sıfırlama token'ı.
+///
+/// Ham token DEĞİL, SHA-256 özeti saklanır: veritabanı sızsa bile token'lar
+/// kullanılamaz. Tek kullanımlık (usedAt) ve kısa ömürlü (expiresAt).
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 enum LicenseStatus {

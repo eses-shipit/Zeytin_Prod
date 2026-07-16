@@ -10,6 +10,7 @@ import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { LicenseStatus, TenantStatus, UserRole } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
+import * as crypto from "crypto";
 import { TokenService } from "../common/token.service";
 import { AuditService } from "../audit/audit.service";
 import { PolicyService } from "../policy/policy.service";
@@ -27,11 +28,74 @@ export class AuthService {
     private readonly contextService: ContextService,
   ) {}
 
-  // KALDIRILDI: recoverPassword()
-  // Saklanan parolayı doğrudan HTTP yanıtında döndürüyordu ve tek koşulu lisans
-  // kodunu bilmekti. Parolalar artık hash'lendiği için zaten geri döndürülemez.
-  // Yerine imzalı, tek kullanımlık, kısa ömürlü sıfırlama token'ı gelecek
-  // (Faz 5). Frontend'deki /auth/forgot-password sayfası bu akışı bekliyor.
+  // Eski recoverPassword() KALDIRILDI (parolayı yanıtta dönüyordu). Yerine
+  // aşağıdaki token'lı akış geldi.
+
+  /**
+   * Parola sıfırlama talebi. Token üretir, ÖZETİNİ saklar ve bağlantıyı
+   * gönderir (e-posta servisi yoksa loglar).
+   *
+   * KULLANICI NUMARALANDIRMAYA KARŞI: e-posta kayıtlı olsa da olmasa da hep
+   * aynı başarı yanıtı döner. Aksi halde saldırgan hangi e-postaların kayıtlı
+   * olduğunu öğrenebilirdi.
+   */
+  async forgotPassword(email: string): Promise<{ success: true }> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (user) {
+      // Ham token yalnızca kullanıcıya gider; DB'ye SHA-256 özeti yazılır.
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
+
+      // Bu kullanıcının önceki (kullanılmamış) token'larını geçersiz kıl.
+      await this.prisma.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+      await this.prisma.passwordResetToken.create({
+        data: { userId: user.id, tokenHash, expiresAt },
+      });
+
+      const base = process.env.FRONTEND_URL?.split(",")[0]?.trim() || "http://localhost:3000";
+      const resetLink = `${base}/auth/reset-password?token=${rawToken}`;
+
+      // TODO: e-posta servisi (SMTP/Resend) eklenince buradan gönder.
+      // Servis yokken bağlantıyı logluyoruz ki geliştirme/destek sırasında
+      // erişilebilsin. Token'ın kendisi hassas: yalnızca sunucu loguna yazılır.
+      this.logger.warn(`[PAROLA SIFIRLAMA] ${email} için bağlantı: ${resetLink}`);
+    }
+
+    return { success: true };
+  }
+
+  /** Token'ı doğrular ve parolayı değiştirir. */
+  async resetPassword(token: string, newPassword: string): Promise<{ success: true }> {
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const record = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!record || record.usedAt || record.expiresAt < new Date()) {
+      throw new BadRequestException("Bağlantı geçersiz veya süresi dolmuş. Lütfen yeniden talep edin.");
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { password: passwordHash },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { success: true };
+  }
 
   async checkLicense(code: string) {
     const license = await this.prisma.license.findUnique({

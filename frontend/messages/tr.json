@@ -427,23 +427,36 @@
       "login": "Giriş Yap"
     },
     "forgot": {
+      "title": "Şifreni mi unuttun?",
+      "subtitle": "E-posta adresini gir, sana bir şifre sıfırlama bağlantısı gönderelim.",
+      "email": "E-posta",
+      "emailPlaceholder": "ornek@fabrika.com",
+      "submit": "Sıfırlama Bağlantısı Gönder",
+      "sending": "Gönderiliyor...",
+      "sentTitle": "Bağlantı gönderildi",
+      "sentMsg": "Eğer bu e-posta sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi. Lütfen gelen kutunu kontrol et.",
+      "error": "Bir hata oluştu. Lütfen tekrar dene.",
+      "backToLogin": "Girişe dön",
       "meta": {
         "title": "Şifremi Unuttum",
-        "description": "Hesap şifrenizi sıfırlayın."
-      },
-      "brandSubtitle": "Şifre Kurtarma",
-      "verifyTitle": "Hesabınızı Doğrulayın",
-      "verifySubtitle": "Güvenlik için e-posta ve lisans kodunuzu girin.",
-      "email": "E-posta Adresi",
-      "emailPlaceholder": "admin@ornek.com",
-      "licenseCode": "Lisans Kodu",
-      "submit": "Doğrula ve Şifreyi Göster",
-      "verified": "Bilgiler doğrulandı.",
-      "verifyError": "Bilgiler doğrulanamadı.",
-      "identityVerified": "Kimlik Doğrulandı!",
-      "currentPassword": "Mevcut Şifreniz:",
-      "login": "Giriş Yap",
-      "backToLogin": "Giriş Ekranına Dön"
+        "description": "ZeytinSaaS hesabınız için şifre sıfırlama bağlantısı alın.",
+        "ogTitle": "Şifremi Unuttum | ZeytinSaaS",
+        "ogDescription": "Şifre sıfırlama bağlantısı alın."
+      }
+    },
+    "reset": {
+      "title": "Yeni şifre belirle",
+      "subtitle": "Hesabın için yeni bir şifre gir.",
+      "newPassword": "Yeni şifre",
+      "confirmPassword": "Yeni şifre (tekrar)",
+      "submit": "Şifreyi Değiştir",
+      "saving": "Kaydediliyor...",
+      "successTitle": "Şifren değiştirildi",
+      "successMsg": "Yeni şifrenle giriş yapabilirsin.",
+      "mismatch": "Şifreler eşleşmiyor.",
+      "tooShort": "Şifre en az 8 karakter olmalıdır.",
+      "missingToken": "Geçersiz veya eksik bağlantı. Lütfen şifre sıfırlamayı yeniden başlat.",
+      "toLogin": "Giriş yap"
     }
   },
   "settings": {

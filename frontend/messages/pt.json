@@ -427,23 +427,36 @@
       "login": "Iniciar sessão"
     },
     "forgot": {
+      "title": "Esqueceu a senha?",
+      "subtitle": "Introduza o seu e-mail e enviaremos um link para a redefinir.",
+      "email": "E-mail",
+      "emailPlaceholder": "exemplo@lagar.com",
+      "submit": "Enviar link de redefinição",
+      "sending": "A enviar...",
+      "sentTitle": "Link enviado",
+      "sentMsg": "Se este e-mail estiver registado, enviámos um link para redefinir a senha. Verifique a sua caixa de entrada.",
+      "error": "Ocorreu um erro. Tente novamente.",
+      "backToLogin": "Voltar ao início de sessão",
       "meta": {
-        "title": "Recuperar palavra-passe",
-        "description": "Reponha a palavra-passe da sua conta."
-      },
-      "brandSubtitle": "Recuperação de palavra-passe",
-      "verifyTitle": "Verifique a sua conta",
-      "verifySubtitle": "Por segurança, introduza o seu e-mail e código de licença.",
-      "email": "Endereço de e-mail",
-      "emailPlaceholder": "admin@exemplo.com",
-      "licenseCode": "Código de licença",
-      "submit": "Verificar e mostrar palavra-passe",
-      "verified": "Dados verificados.",
-      "verifyError": "Não foi possível verificar os dados.",
-      "identityVerified": "Identidade verificada!",
-      "currentPassword": "A sua palavra-passe atual:",
-      "login": "Iniciar sessão",
-      "backToLogin": "Voltar ao início de sessão"
+        "title": "Esqueci a senha",
+        "description": "Receba um link para redefinir a senha da sua conta ZeytinSaaS.",
+        "ogTitle": "Recuperar senha | ZeytinSaaS",
+        "ogDescription": "Receba um link para redefinir a sua senha."
+      }
+    },
+    "reset": {
+      "title": "Definir nova senha",
+      "subtitle": "Introduza uma nova senha para a sua conta.",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Repita a senha",
+      "submit": "Alterar senha",
+      "saving": "A guardar...",
+      "successTitle": "Senha alterada",
+      "successMsg": "Já pode iniciar sessão com a nova senha.",
+      "mismatch": "As senhas não coincidem.",
+      "tooShort": "A senha deve ter pelo menos 8 caracteres.",
+      "missingToken": "Link inválido ou incompleto. Reinicie a redefinição.",
+      "toLogin": "Iniciar sessão"
     }
   },
   "settings": {

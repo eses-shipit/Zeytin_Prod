@@ -427,23 +427,36 @@
       "login": "Iniciar sesión"
     },
     "forgot": {
-      "meta": {
-        "title": "Recuperar contraseña",
-        "description": "Restablezca la contraseña de su cuenta."
-      },
-      "brandSubtitle": "Recuperación de contraseña",
-      "verifyTitle": "Verifique su cuenta",
-      "verifySubtitle": "Por seguridad, introduzca su correo y código de licencia.",
+      "title": "¿Olvidaste tu contraseña?",
+      "subtitle": "Introduce tu correo y te enviaremos un enlace para restablecerla.",
       "email": "Correo electrónico",
-      "emailPlaceholder": "admin@ejemplo.com",
-      "licenseCode": "Código de licencia",
-      "submit": "Verificar y mostrar contraseña",
-      "verified": "Datos verificados.",
-      "verifyError": "No se han podido verificar los datos.",
-      "identityVerified": "¡Identidad verificada!",
-      "currentPassword": "Su contraseña actual:",
-      "login": "Iniciar sesión",
-      "backToLogin": "Volver al inicio de sesión"
+      "emailPlaceholder": "ejemplo@almazara.com",
+      "submit": "Enviar enlace de restablecimiento",
+      "sending": "Enviando...",
+      "sentTitle": "Enlace enviado",
+      "sentMsg": "Si este correo está registrado, te hemos enviado un enlace para restablecer la contraseña. Revisa tu bandeja de entrada.",
+      "error": "Se ha producido un error. Inténtalo de nuevo.",
+      "backToLogin": "Volver al inicio de sesión",
+      "meta": {
+        "title": "He olvidado mi contraseña",
+        "description": "Recibe un enlace para restablecer la contraseña de tu cuenta de ZeytinSaaS.",
+        "ogTitle": "Recuperar contraseña | ZeytinSaaS",
+        "ogDescription": "Recibe un enlace para restablecer tu contraseña."
+      }
+    },
+    "reset": {
+      "title": "Establecer nueva contraseña",
+      "subtitle": "Introduce una nueva contraseña para tu cuenta.",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Repite la contraseña",
+      "submit": "Cambiar contraseña",
+      "saving": "Guardando...",
+      "successTitle": "Contraseña cambiada",
+      "successMsg": "Ya puedes iniciar sesión con tu nueva contraseña.",
+      "mismatch": "Las contraseñas no coinciden.",
+      "tooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "missingToken": "Enlace no válido o incompleto. Inicia de nuevo el restablecimiento.",
+      "toLogin": "Iniciar sesión"
     }
   },
   "settings": {

@@ -427,23 +427,36 @@
       "login": "Accedi"
     },
     "forgot": {
+      "title": "Password dimenticata?",
+      "subtitle": "Inserisci la tua email e ti invieremo un link per reimpostarla.",
+      "email": "Email",
+      "emailPlaceholder": "esempio@frantoio.com",
+      "submit": "Invia link di reimpostazione",
+      "sending": "Invio...",
+      "sentTitle": "Link inviato",
+      "sentMsg": "Se questa email è registrata, ti abbiamo inviato un link per reimpostare la password. Controlla la posta in arrivo.",
+      "error": "Si è verificato un errore. Riprova.",
+      "backToLogin": "Torna al login",
       "meta": {
         "title": "Password dimenticata",
-        "description": "Reimposta la password del tuo account."
-      },
-      "brandSubtitle": "Recupero password",
-      "verifyTitle": "Verifica il tuo account",
-      "verifySubtitle": "Per sicurezza, inserisci email e codice di licenza.",
-      "email": "Indirizzo email",
-      "emailPlaceholder": "admin@esempio.com",
-      "licenseCode": "Codice di licenza",
-      "submit": "Verifica e mostra password",
-      "verified": "Dati verificati.",
-      "verifyError": "Impossibile verificare i dati.",
-      "identityVerified": "Identità verificata!",
-      "currentPassword": "La tua password attuale:",
-      "login": "Accedi",
-      "backToLogin": "Torna all'accesso"
+        "description": "Ricevi un link per reimpostare la password del tuo account ZeytinSaaS.",
+        "ogTitle": "Password dimenticata | ZeytinSaaS",
+        "ogDescription": "Ricevi un link per reimpostare la password."
+      }
+    },
+    "reset": {
+      "title": "Imposta nuova password",
+      "subtitle": "Inserisci una nuova password per il tuo account.",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Ripeti la password",
+      "submit": "Cambia password",
+      "saving": "Salvataggio...",
+      "successTitle": "Password cambiata",
+      "successMsg": "Ora puoi accedere con la nuova password.",
+      "mismatch": "Le password non coincidono.",
+      "tooShort": "La password deve avere almeno 8 caratteri.",
+      "missingToken": "Link non valido o incompleto. Riavvia la reimpostazione.",
+      "toLogin": "Accedi"
     }
   },
   "settings": {

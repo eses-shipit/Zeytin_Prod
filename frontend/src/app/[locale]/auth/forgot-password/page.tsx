@@ -5,136 +5,91 @@ import Image from "next/image";
 import axios from "axios";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { Mail, KeyRound, ArrowRight, Loader2, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 
+/**
+ * Şifre sıfırlama TALEBİ.
+ *
+ * Eski hâli güvensiz recover-password endpoint'ini çağırıp kullanıcının
+ * mevcut parolasını EKRANDA gösteriyordu. Yeni akış: e-posta gönderilir,
+ * kayıtlı olsun olmasın hep aynı genel mesaj döner (kullanıcı numaralandırmaya
+ * karşı). Gerçek sıfırlama /auth/reset-password sayfasında yapılır.
+ */
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth.forgot");
-  const [loading, setLoading] = useState(false);
-  const [recoveredPassword, setRecoveredPassword] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({
-    email: "",
-    licenseCode: "",
-  });
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setRecoveredPassword(null);
-
+    setStatus("sending");
     try {
-      const res = await axios.post(`${apiBase}/auth/recover-password`, formData);
-      if (res.data.success) {
-          setRecoveredPassword(res.data.password);
-          toast.success(t("verified"));
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || t("verifyError"));
-    } finally {
-      setLoading(false);
+      await axios.post(`${apiBase}/auth/forgot-password`, { email });
+      setStatus("sent");
+    } catch {
+      setStatus("error");
     }
-  };
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
-      {/* Header / Logo */}
-      <div className="mb-8 text-center animate-in fade-in slide-in-from-top-4">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white p-2 shadow-lg">
-              <Image src="/logo-512.png" alt="ZeytinSaaS" width={56} height={56} className="object-contain" />
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white p-2 shadow-lg">
+          <Image src="/logo-512.png" alt="ZeytinSaaS" width={56} height={56} className="object-contain" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">ZeytinSaaS</h1>
+      </div>
+
+      <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
+        {status === "sent" ? (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <CheckCircle2 className="h-12 w-12 text-emerald-600" />
+            <h2 className="text-lg font-semibold text-slate-900">{t("sentTitle")}</h2>
+            <p className="text-slate-600">{t("sentMsg")}</p>
+            <Link href="/auth/login" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-800">
+              <ArrowLeft className="h-4 w-4" /> {t("backToLogin")}
+            </Link>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">ZeytinSaaS</h1>
-          <p className="mt-2 text-slate-500 font-medium">{t("brandSubtitle")}</p>
-      </div>
-
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl border border-slate-100 animate-in zoom-in-95 duration-300">
-        {!recoveredPassword ? (
-            <>
-                <div className="mb-8 text-center">
-                <h2 className="text-xl font-semibold text-slate-900">{t("verifyTitle")}</h2>
-                <p className="text-sm text-slate-500 mt-1">{t("verifySubtitle")}</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    {t("email")}
-                    </label>
-                    <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                        <input
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500"
-                        placeholder={t("emailPlaceholder")}
-                        required
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    {t("licenseCode")}
-                    </label>
-                    <div className="relative">
-                        <KeyRound className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                        <input
-                        name="licenseCode"
-                        type="text"
-                        value={formData.licenseCode}
-                        onChange={handleChange}
-                        className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 font-mono uppercase focus:border-indigo-500 focus:ring-indigo-500"
-                        placeholder="XXXX-XXXX-XXXX"
-                        required
-                        />
-                    </div>
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("submit")}
-                </button>
-                </form>
-            </>
         ) : (
-            <div className="text-center space-y-6 animate-in fade-in">
-                <div className="mx-auto h-16 w-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-4">
-                    <ShieldCheck className="h-8 w-8" />
-                </div>
-                <h2 className="text-xl font-bold text-slate-900">{t("identityVerified")}</h2>
+          <>
+            <h2 className="text-xl font-bold text-slate-900">{t("title")}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t("subtitle")}</p>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <p className="text-xs text-slate-500 mb-1">{t("currentPassword")}</p>
-                    <p className="text-lg font-mono font-bold text-slate-900 select-all">{recoveredPassword}</p>
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("email")}</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t("emailPlaceholder")}
+                    className="w-full rounded-lg border border-slate-300 py-2.5 pl-9 pr-3 text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  />
                 </div>
+              </div>
 
-                <Link
-                    href="/auth/login"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all"
-                >
-                    {t("login")}
-                    <ArrowRight className="h-4 w-4" />
-                </Link>
-            </div>
+              {status === "error" && <p className="text-sm text-red-600">{t("error")}</p>}
+
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {status === "sending" && <Loader2 className="h-4 w-4 animate-spin" />}
+                {status === "sending" ? t("sending") : t("submit")}
+              </button>
+            </form>
+
+            <Link href="/auth/login" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800">
+              <ArrowLeft className="h-4 w-4" /> {t("backToLogin")}
+            </Link>
+          </>
         )}
-      </div>
-
-      <div className="mt-8 text-center text-sm text-slate-500">
-        <Link href="/auth/login" className="flex items-center justify-center gap-2 font-medium text-slate-600 hover:text-slate-900 transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            {t("backToLogin")}
-        </Link>
       </div>
     </div>
   );
