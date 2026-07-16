@@ -13,7 +13,8 @@ import {
   RefreshCw,
   CheckCircle2,
   Loader2,
-  Smartphone
+  Smartphone,
+  Inbox
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
