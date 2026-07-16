@@ -66,6 +66,12 @@ const frontendUrlSchema = Joi.string()
     ContextModule, // Global module import
     ConfigModule.forRoot({
       isGlobal: true,
+      // Yerel geliştirmede .env.local (localhost DB) önceliklidir; .env prod
+      // bağlantısını taşıyor. Sıra önemli: dizideki İLK dosyanın değeri kazanır,
+      // böylece `npm run dev` yanlışlıkla prod'a bağlanmaz. Canlıda bu dosyalar
+      // bulunmaz; ortam değişkenleri hosting panelinden gelir ve dosyaların
+      // önüne geçer.
+      envFilePath: [".env.local", ".env"],
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
         // Secret yoksa uygulama başlamaz. Bu doğrulama uzun süre yorumda kaldığı
