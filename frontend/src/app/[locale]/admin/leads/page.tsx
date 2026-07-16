@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import { ArrowLeft, Mail, Phone, Building2, MapPin, Inbox, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { formatDateTime } from "@/lib/format";
 import { toast } from "sonner";
 
 /**
@@ -11,8 +14,6 @@ import { toast } from "sonner";
  *
  * E-posta bildirimi kurulu olmadığından (harici servis gerekiyor) talepler
  * buradan takip edilir. Backend GET/PATCH /leads yalnızca SUPER_ADMIN'e açık.
- *
- * NOT: Bu ekran henüz i18n'e taşınmadı (diğer admin sayfaları gibi Türkçe).
  */
 
 type Lead = {
@@ -30,12 +31,7 @@ type Lead = {
   createdAt: string;
 };
 
-const STATUS_LABEL: Record<Lead["status"], string> = {
-  NEW: "Yeni",
-  CONTACTED: "İletişime geçildi",
-  CONVERTED: "Müşteri oldu",
-  REJECTED: "Reddedildi",
-};
+const STATUSES: Lead["status"][] = ["NEW", "CONTACTED", "CONVERTED", "REJECTED"];
 
 const STATUS_STYLE: Record<Lead["status"], string> = {
   NEW: "bg-emerald-100 text-emerald-700",
@@ -44,13 +40,11 @@ const STATUS_STYLE: Record<Lead["status"], string> = {
   REJECTED: "bg-slate-200 text-slate-600",
 };
 
-const INTEREST_LABEL: Record<string, string> = {
-  DEMO: "Deneme",
-  STANDARD: "Standart",
-  PRO: "Pro",
-};
+const INTERESTS = new Set(["DEMO", "STANDARD", "PRO"]);
 
 export default function AdminLeadsPage() {
+  const t = useTranslations("admin.leads");
+  const locale = useLocale() as Locale;
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("ALL");
@@ -67,7 +61,7 @@ export default function AdminLeadsPage() {
       const res = await axios.get(`/leads${q}`);
       setLeads(res.data);
     } catch {
-      toast.error("Talepler yüklenemedi.");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -77,9 +71,9 @@ export default function AdminLeadsPage() {
     try {
       await axios.patch(`/leads/${id}`, { status });
       setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
-      toast.success("Durum güncellendi.");
+      toast.success(t("statusUpdated"));
     } catch {
-      toast.error("Güncellenemedi.");
+      toast.error(t("updateError"));
     }
   }
 
@@ -92,8 +86,8 @@ export default function AdminLeadsPage() {
           <ArrowLeft className="w-5 h-5 text-slate-500" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Lisans Talepleri</h1>
-          <p className="text-sm text-slate-500">Web sitesi iletişim formundan gelen talepler.</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+          <p className="text-sm text-slate-500">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -107,7 +101,7 @@ export default function AdminLeadsPage() {
               filter === s ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            {s === "ALL" ? "Tümü" : STATUS_LABEL[s as Lead["status"]]}
+            {s === "ALL" ? t("all") : t(`status.${s}`)}
             {s === "NEW" && newCount > 0 && (
               <span className="ml-1.5 rounded-full bg-white/90 px-1.5 text-xs text-emerald-700">{newCount}</span>
             )}
@@ -122,7 +116,7 @@ export default function AdminLeadsPage() {
       ) : leads.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
           <Inbox className="h-10 w-10 text-slate-300" />
-          <p className="text-slate-500">Bu filtrede talep yok.</p>
+          <p className="text-slate-500">{t("empty")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -134,7 +128,7 @@ export default function AdminLeadsPage() {
                     <h3 className="font-semibold text-slate-900">{lead.name}</h3>
                     {lead.interest && (
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                        {INTEREST_LABEL[lead.interest] ?? lead.interest}
+                        {INTERESTS.has(lead.interest) ? t(`interest.${lead.interest}`) : lead.interest}
                       </span>
                     )}
                     <span className="rounded-full px-2 py-0.5 text-xs font-medium uppercase text-slate-400">
@@ -168,19 +162,19 @@ export default function AdminLeadsPage() {
 
                 <div className="flex flex-col items-end gap-2">
                   <span className="whitespace-nowrap text-xs text-slate-400">
-                    {new Date(lead.createdAt).toLocaleString("tr-TR")}
+                    {formatDateTime(lead.createdAt, locale)}
                   </span>
                   <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLE[lead.status]}`}>
-                    {STATUS_LABEL[lead.status]}
+                    {t(`status.${lead.status}`)}
                   </span>
                   <select
                     value={lead.status}
                     onChange={(e) => updateStatus(lead.id, e.target.value as Lead["status"])}
                     className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-emerald-500"
                   >
-                    {(Object.keys(STATUS_LABEL) as Lead["status"][]).map((s) => (
+                    {STATUSES.map((s) => (
                       <option key={s} value={s}>
-                        {STATUS_LABEL[s]}
+                        {t(`status.${s}`)}
                       </option>
                     ))}
                   </select>
