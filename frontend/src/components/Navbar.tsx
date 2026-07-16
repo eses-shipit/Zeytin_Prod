@@ -1,15 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { Factory, LayoutDashboard, Users, Scale, Menu, X, Settings, MessageSquare, ShieldCheck, CreditCard, LogOut, Package } from "lucide-react";
 import { useEffect, useState } from "react";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export function Navbar() {
+  // usePathname/useRouter/Link @/i18n/navigation'dan: pathname dil prefix'i
+  // İÇERMEZ ("/dashboard"), Link ve router.push hedef dile göre prefix ekler.
+  // Böylece ES'teyken bir menü linkine tıklamak Türkçe'ye düşürmez.
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("nav");
   const [isAdmin, setIsAdmin] = useState(false);
   const [userInitial, setUserInitial] = useState("U");
   const [tenantName, setTenantName] = useState<string | null>(null);
@@ -87,26 +92,13 @@ export function Navbar() {
   };
 
   // Uygulama navbar'ının GÖSTERİLMEYECEĞİ sayfalar: giriş/kayıt, yazdırma,
-  // hukuki metinler ve herkese açık landing ("/").
-  //
-  // pathname next/navigation'dan geliyor, yani dil prefix'ini İÇERİR
-  // ("/es/dashboard"). Landing'i doğru yakalamak için önce prefix'i soyuyoruz;
-  // aksi halde "/es" landing'i navbar'lı açılırdı.
-  const LOCALES = ["tr", "es", "it", "pt"];
-  const stripped = (() => {
-    const seg = pathname.split("/");
-    if (LOCALES.includes(seg[1])) {
-      const rest = seg.slice(2).join("/");
-      return rest === "" ? "/" : `/${rest}`;
-    }
-    return pathname;
-  })();
-
+  // hukuki metinler ve herkese açık landing ("/"). pathname artık prefix'siz
+  // (@/i18n/navigation), o yüzden elle soyma gerekmiyor.
   const isPublicShell =
-    stripped === "/" ||
-    stripped.startsWith("/auth") ||
-    stripped.startsWith("/print") ||
-    stripped.startsWith("/legal");
+    pathname === "/" ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/print") ||
+    pathname.startsWith("/legal");
 
   if (isPublicShell) {
     return null;
@@ -114,20 +106,20 @@ export function Navbar() {
 
   // Define Links based on Role
   const tenantLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/terminal", label: "Kantar", icon: Scale },
-    { href: "/production", label: "Üretim", icon: Factory },
-    { href: "/inventory", label: "Envanter", icon: Package },
-    { href: "/customers", label: "Müşteriler", icon: Users },
-    { href: "/support", label: "Destek", icon: MessageSquare },
-    { href: "/settings", label: "Ayarlar", icon: Settings },
+    { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/terminal", label: t("weighing"), icon: Scale },
+    { href: "/production", label: t("production"), icon: Factory },
+    { href: "/inventory", label: t("inventory"), icon: Package },
+    { href: "/customers", label: t("customers"), icon: Users },
+    { href: "/support", label: t("support"), icon: MessageSquare },
+    { href: "/settings", label: t("settings"), icon: Settings },
   ];
 
   const adminLinks = [
-    { href: "/admin", label: "Genel Bakış", icon: LayoutDashboard },
-    { href: "/admin/tenants", label: "Fabrikalar", icon: Factory },
-    { href: "/admin/licenses", label: "Lisanslar", icon: CreditCard },
-    { href: "/admin/tickets", label: "Destek Merkezi", icon: MessageSquare },
+    { href: "/admin", label: t("overview"), icon: LayoutDashboard },
+    { href: "/admin/tenants", label: t("factories"), icon: Factory },
+    { href: "/admin/licenses", label: t("licenses"), icon: CreditCard },
+    { href: "/admin/tickets", label: t("supportCenter"), icon: MessageSquare },
   ];
   
   const isSuperAdminPage = pathname.startsWith("/admin");
@@ -189,11 +181,12 @@ export function Navbar() {
             <Link
               href="/admin"
               className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-100"
-              title="Admin paneline dön"
+              title={t("backToAdmin")}
             >
-              Admin Paneli
+              {t("adminPanel")}
             </Link>
           )}
+          <LocaleSwitcher />
           <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xs font-bold text-slate-600">
               {userInitial}
@@ -201,7 +194,7 @@ export function Navbar() {
             <button
               onClick={handleLogout}
               className="rounded p-1 text-slate-400 transition-colors hover:text-red-600"
-              title="Çıkış Yap"
+              title={t("logout")}
             >
               <LogOut className="h-5 w-5" />
             </button>
@@ -214,7 +207,7 @@ export function Navbar() {
             type="button"
             onClick={() => setIsMobileMenuOpen((o) => !o)}
             className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-            aria-label={isMobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
+            aria-label={isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -250,11 +243,15 @@ export function Navbar() {
                 className="mt-2 flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-indigo-600 transition-colors hover:bg-indigo-50"
               >
                 <ShieldCheck className="h-5 w-5 shrink-0" />
-                Admin Paneli
-              </Link>
+              {t("adminPanel")}
+            </Link>
             )}
+            {/* Mobil menü: Dil değiştirici */}
+            <div className="mt-3 flex justify-center border-t border-slate-200 pt-4">
+              <LocaleSwitcher />
+            </div>
             {/* Mobil menü: Kullanıcı + Çıkış */}
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
+            <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-slate-600">
                 {userInitial}
               </div>
@@ -266,7 +263,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-4 py-2 text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
               >
                 <LogOut className="h-4 w-4" />
-                Çıkış Yap
+                {t("logout")}
               </button>
             </div>
           </div>

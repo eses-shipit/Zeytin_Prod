@@ -1023,5 +1023,23 @@
       "title": "Yönetim Paneli",
       "description": "Platform yönetimi ve genel bakış."
     }
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "weighing": "Kantar",
+    "production": "Üretim",
+    "inventory": "Envanter",
+    "customers": "Müşteriler",
+    "support": "Destek",
+    "settings": "Ayarlar",
+    "overview": "Genel Bakış",
+    "factories": "Fabrikalar",
+    "supportCenter": "Destek Merkezi",
+    "adminPanel": "Admin Paneli",
+    "logout": "Çıkış Yap",
+    "licenses": "Lisanslar",
+    "backToAdmin": "Admin paneline dön",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat"
   }
 }

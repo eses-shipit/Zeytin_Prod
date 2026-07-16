@@ -1023,5 +1023,23 @@
       "title": "Painel de administração",
       "description": "Gestão da plataforma e visão geral."
     }
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "weighing": "Balança",
+    "production": "Produção",
+    "inventory": "Inventário",
+    "customers": "Clientes",
+    "support": "Suporte",
+    "settings": "Definições",
+    "overview": "Visão geral",
+    "factories": "Lagares",
+    "supportCenter": "Centro de suporte",
+    "adminPanel": "Painel de admin",
+    "logout": "Sair",
+    "licenses": "Licenças",
+    "backToAdmin": "Voltar ao painel de admin",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
   }
 }

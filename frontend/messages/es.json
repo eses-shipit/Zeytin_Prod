@@ -1023,5 +1023,23 @@
       "title": "Panel de administración",
       "description": "Gestión de la plataforma y vista general."
     }
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "weighing": "Báscula",
+    "production": "Producción",
+    "inventory": "Inventario",
+    "customers": "Clientes",
+    "support": "Soporte",
+    "settings": "Ajustes",
+    "overview": "Resumen",
+    "factories": "Almazaras",
+    "supportCenter": "Centro de soporte",
+    "adminPanel": "Panel de admin",
+    "logout": "Cerrar sesión",
+    "licenses": "Licencias",
+    "backToAdmin": "Volver al panel de admin",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
   }
 }

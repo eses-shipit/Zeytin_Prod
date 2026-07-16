@@ -1023,5 +1023,23 @@
       "title": "Pannello di amministrazione",
       "description": "Gestione della piattaforma e panoramica."
     }
+  },
+  "nav": {
+    "dashboard": "Pannello",
+    "weighing": "Pesa",
+    "production": "Produzione",
+    "inventory": "Inventario",
+    "customers": "Clienti",
+    "support": "Supporto",
+    "settings": "Impostazioni",
+    "overview": "Panoramica",
+    "factories": "Frantoi",
+    "supportCenter": "Centro assistenza",
+    "adminPanel": "Pannello admin",
+    "logout": "Esci",
+    "licenses": "Licenze",
+    "backToAdmin": "Torna al pannello admin",
+    "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu"
   }
 }
