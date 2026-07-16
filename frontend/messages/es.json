@@ -353,7 +353,10 @@
     "dailyPriceSaved": "Precio del día guardado.",
     "noPrice": "No hay precio para hoy.",
     "on": "Activado",
-    "off": "Desactivado"
+    "off": "Desactivado",
+    "sectionMessaging": "Automatización de mensajes (Pro)",
+    "messageAutomationEnabled": "Enviar SMS automático al cliente tras la producción",
+    "messagingHint": "Función Pro. Si está desactivada, en el plan gratuito el SMS se simula: el operador ve \"enviado\" pero no se envía ningún SMS real."
   },
   "auth": {
     "tagline": "Automatización para almazaras",

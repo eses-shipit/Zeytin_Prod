@@ -353,7 +353,10 @@
     "dailyPriceSaved": "Prezzo del giorno salvato.",
     "noPrice": "Nessun prezzo per oggi.",
     "on": "Attivo",
-    "off": "Disattivato"
+    "off": "Disattivato",
+    "sectionMessaging": "Automazione messaggi (Pro)",
+    "messageAutomationEnabled": "Invia SMS automatico al cliente dopo la produzione",
+    "messagingHint": "Funzione Pro. Se disattivata, nel piano gratuito l’SMS è simulato: l’operatore vede \"inviato\" ma non parte alcun SMS reale."
   },
   "auth": {
     "tagline": "Automazione per frantoi",

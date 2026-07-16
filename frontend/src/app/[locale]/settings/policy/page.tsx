@@ -34,6 +34,7 @@ type Policy = {
   minWithdrawalKg: number | null;
   allowNegativeBalance: boolean;
   liquidationPriceSource: "PER_TRANSACTION" | "DAILY_TABLE";
+  messageAutomationEnabled: boolean;
   currency: "TRY" | "EUR";
   kgDecimalPlaces: number;
   tlDecimalPlaces: number;
@@ -100,6 +101,7 @@ export default function PolicyPage() {
         minWithdrawalKg: policy.minWithdrawalKg != null ? Number(policy.minWithdrawalKg) : undefined,
         allowNegativeBalance: policy.allowNegativeBalance,
         liquidationPriceSource: policy.liquidationPriceSource,
+        messageAutomationEnabled: policy.messageAutomationEnabled,
         currency: policy.currency,
         kgDecimalPlaces: Number(policy.kgDecimalPlaces),
         tlDecimalPlaces: Number(policy.tlDecimalPlaces),
@@ -248,6 +250,13 @@ export default function PolicyPage() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* Mesaj otomasyonu (Pro) */}
+        <section className={card}>
+          <h2 className="mb-2 font-semibold text-slate-900">{t("sectionMessaging")}</h2>
+          <Toggle k="messageAutomationEnabled" text={t("messageAutomationEnabled")} />
+          <p className="mt-1 text-xs text-slate-500">{t("messagingHint")}</p>
         </section>
 
         {/* Para birimi & yuvarlama */}

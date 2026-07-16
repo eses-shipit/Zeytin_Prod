@@ -353,7 +353,10 @@
     "dailyPriceSaved": "Günün fiyatı kaydedildi.",
     "noPrice": "Bugün için fiyat girilmemiş.",
     "on": "Açık",
-    "off": "Kapalı"
+    "off": "Kapalı",
+    "sectionMessaging": "Mesaj otomasyonu (Pro)",
+    "messageAutomationEnabled": "Üretim sonrası müşteriye otomatik SMS gönder",
+    "messagingHint": "Pro özelliği. Kapalıyken ücretsiz planda SMS simüle edilir: operatöre \"gönderildi\" görünür ama gerçek SMS gitmez."
   },
   "auth": {
     "tagline": "Zeytinyağı Fabrika Otomasyonu",

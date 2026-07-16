@@ -353,7 +353,10 @@
     "dailyPriceSaved": "Preço do dia guardado.",
     "noPrice": "Sem preço para hoje.",
     "on": "Ativado",
-    "off": "Desativado"
+    "off": "Desativado",
+    "sectionMessaging": "Automação de mensagens (Pro)",
+    "messageAutomationEnabled": "Enviar SMS automático ao cliente após a produção",
+    "messagingHint": "Função Pro. Quando desativada, no plano gratuito o SMS é simulado: o operador vê \"enviado\" mas nenhum SMS real é enviado."
   },
   "auth": {
     "tagline": "Automação para lagares",
