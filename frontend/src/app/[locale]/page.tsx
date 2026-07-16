@@ -163,9 +163,9 @@ export default async function LandingPage({
           </a>
 
           <nav className="hidden items-center gap-8 text-sm md:flex">
-            <a href="#features" className="transition hover:text-[color:var(--emerald)]">{t("features.title")}</a>
-            <a href="#pricing" className="transition hover:text-[color:var(--emerald)]">{t("pricing.title")}</a>
-            <a href="#contact" className="transition hover:text-[color:var(--emerald)]">{t("contact.title")}</a>
+            <a href="#features" className="transition hover:text-[color:var(--emerald)]">{t("nav.navFeatures")}</a>
+            <a href="#pricing" className="transition hover:text-[color:var(--emerald)]">{t("nav.navPricing")}</a>
+            <a href="#contact" className="transition hover:text-[color:var(--emerald)]">{t("nav.navContact")}</a>
           </nav>
 
           <div className="flex items-center gap-2">

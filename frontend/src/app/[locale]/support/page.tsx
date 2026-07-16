@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Plus, MessageSquare, AlertCircle, CheckCircle2, Clock } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "@/lib/format";
+import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
 
 type Ticket = {
@@ -16,6 +19,8 @@ type Ticket = {
 };
 
 export default function SupportPage() {
+  const t = useTranslations("support");
+  const locale = useLocale() as Locale;
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,10 +65,11 @@ export default function SupportPage() {
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case "URGENT": return "Acil";
-      case "HIGH": return "Yüksek";
-      case "NORMAL": return "Normal";
-      case "LOW": return "Düşük";
+      case "URGENT":
+      case "HIGH":
+      case "NORMAL":
+      case "LOW":
+        return t(`priority.${priority}`);
       default: return priority;
     }
   };
@@ -72,30 +78,30 @@ export default function SupportPage() {
     <div className="container mx-auto max-w-5xl py-8 px-4">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Destek Taleplerim</h1>
-          <p className="text-slate-500 mt-1">Teknik sorunlar ve sorularınız için buradayız.</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+          <p className="text-slate-500 mt-1">{t("subtitle")}</p>
         </div>
-        <Link 
-          href="/support/new" 
+        <Link
+          href="/support/new"
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          Yeni Talep Oluştur
+          {t("newTicket")}
         </Link>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-slate-500">Yükleniyor...</div>
+        <div className="text-center py-12 text-slate-500">{t("loading")}</div>
       ) : tickets.length === 0 ? (
         <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
           <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-slate-900">Henüz talep oluşturmadınız</h3>
-          <p className="text-slate-500 mb-6">Bir sorunuz mu var? Hemen yeni bir destek talebi oluşturun.</p>
-          <Link 
-            href="/support/new" 
+          <h3 className="text-lg font-medium text-slate-900">{t("emptyTitle")}</h3>
+          <p className="text-slate-500 mb-6">{t("emptyDesc")}</p>
+          <Link
+            href="/support/new"
             className="text-indigo-600 font-medium hover:underline"
           >
-            Talep Oluştur &rarr;
+            {t("emptyCta")} &rarr;
           </Link>
         </div>
       ) : (
@@ -103,10 +109,10 @@ export default function SupportPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Konu</th>
-                <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Durum</th>
-                <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Öncelik</th>
-                <th className="px-6 py-4 font-semibold text-slate-700 text-sm text-right">Tarih</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colSubject")}</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colStatus")}</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colPriority")}</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 text-sm text-right">{t("colDate")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -127,9 +133,9 @@ export default function SupportPage() {
                       "px-2.5 py-1 rounded-full text-xs font-medium",
                       getStatusColor(ticket.status)
                     )}>
-                      {ticket.status === "WAITING_FOR_CUSTOMER" ? "Yanıt Bekliyor" : 
-                       ticket.status === "IN_PROGRESS" ? "İşleniyor" :
-                       ticket.status === "RESOLVED" ? "Çözüldü" : "Açık"}
+                      {ticket.status === "WAITING_FOR_CUSTOMER" ? t("status.WAITING_FOR_CUSTOMER") :
+                       ticket.status === "IN_PROGRESS" ? t("status.IN_PROGRESS") :
+                       ticket.status === "RESOLVED" ? t("status.RESOLVED") : t("status.OPEN")}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -139,7 +145,7 @@ export default function SupportPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right text-sm text-slate-500">
-                    {new Date(ticket.createdAt).toLocaleDateString("tr-TR")}
+                    {formatDate(ticket.createdAt, locale)}
                   </td>
                 </tr>
               ))}

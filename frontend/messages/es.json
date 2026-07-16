@@ -198,7 +198,10 @@
     "nav": {
       "product": "ZeytinSaaS",
       "login": "Iniciar sesión",
-      "getStarted": "Solicitar demo"
+      "getStarted": "Solicitar demo",
+      "navFeatures": "Funciones",
+      "navPricing": "Precios",
+      "navContact": "Contacto"
     },
     "hero": {
       "badge": "CRM para almazaras",
@@ -756,5 +759,55 @@
   "drums": {
     "subtitle": "Gestione todos los bidones de la almazara y regístrelos como devueltos.",
     "capacityLt": "Capacidad (L)"
+  },
+  "support": {
+    "meta": {
+      "title": "Soporte",
+      "description": "Cree y haga seguimiento de sus solicitudes de soporte."
+    },
+    "title": "Mis solicitudes de soporte",
+    "subtitle": "Estamos aquí para sus problemas técnicos y preguntas.",
+    "newTicket": "Crear nueva solicitud",
+    "loading": "Cargando...",
+    "emptyTitle": "Aún no ha creado ninguna solicitud",
+    "emptyDesc": "¿Tiene alguna pregunta? Cree una nueva solicitud de soporte ahora.",
+    "emptyCta": "Crear solicitud",
+    "colSubject": "Asunto",
+    "colStatus": "Estado",
+    "colPriority": "Prioridad",
+    "colDate": "Fecha",
+    "priority": {
+      "URGENT": "Urgente",
+      "HIGH": "Alta",
+      "NORMAL": "Normal",
+      "LOW": "Baja"
+    },
+    "status": {
+      "OPEN": "Abierto",
+      "IN_PROGRESS": "En curso",
+      "WAITING_FOR_CUSTOMER": "Esperando respuesta",
+      "RESOLVED": "Resuelto"
+    },
+    "new": {
+      "back": "Volver a las solicitudes",
+      "title": "Nueva solicitud de soporte",
+      "subject": "Asunto",
+      "subjectPlaceholder": "Resuma brevemente el problema",
+      "priorityLevel": "Nivel de prioridad",
+      "message": "Su mensaje",
+      "messagePlaceholder": "Escriba los detalles aquí...",
+      "submit": "Enviar solicitud",
+      "submitting": "Enviando...",
+      "success": "Su solicitud de soporte ha sido creada.",
+      "error": "Se ha producido un error al crear la solicitud."
+    },
+    "detail": {
+      "priorityLabel": "Prioridad {priority}",
+      "you": "Usted",
+      "supportTeam": "Equipo de soporte",
+      "resolvedNote": "Esta solicitud se ha resuelto. Si escribe un nuevo mensaje, se reabrirá.",
+      "inputPlaceholder": "Escriba un mensaje...",
+      "sendError": "No se ha podido enviar el mensaje."
+    }
   }
 }

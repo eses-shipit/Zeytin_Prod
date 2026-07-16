@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, Send } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
 
 export default function NewTicketPage() {
+  const t = useTranslations("support");
   const router = useRouter();
   const [subject, setSubject] = useState("");
   const [priority, setPriority] = useState("NORMAL");
@@ -28,10 +29,10 @@ export default function NewTicketPage() {
         { subject, priority, message },
         { headers: { "X-Tenant-ID": tenantId } }
       );
-      toast.success("Destek talebiniz oluşturuldu.");
+      toast.success(t("new.success"));
       router.push("/support");
     } catch (err) {
-      toast.error("Talep oluşturulurken bir hata oluştu.");
+      toast.error(t("new.error"));
     } finally {
       setIsSubmitting(false);
     }

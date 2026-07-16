@@ -198,7 +198,10 @@
     "nav": {
       "product": "ZeytinSaaS",
       "login": "Accedi",
-      "getStarted": "Richiedi demo"
+      "getStarted": "Richiedi demo",
+      "navFeatures": "Funzioni",
+      "navPricing": "Prezzi",
+      "navContact": "Contatti"
     },
     "hero": {
       "badge": "CRM per frantoi",
@@ -756,5 +759,55 @@
   "drums": {
     "subtitle": "Gestisci tutti i fusti del frantoio e registra i resi.",
     "capacityLt": "Capacità (L)"
+  },
+  "support": {
+    "meta": {
+      "title": "Assistenza",
+      "description": "Crea e monitora le tue richieste di assistenza."
+    },
+    "title": "Le mie richieste di assistenza",
+    "subtitle": "Siamo qui per i tuoi problemi tecnici e le tue domande.",
+    "newTicket": "Crea nuova richiesta",
+    "loading": "Caricamento...",
+    "emptyTitle": "Non hai ancora creato richieste",
+    "emptyDesc": "Hai una domanda? Crea subito una nuova richiesta di assistenza.",
+    "emptyCta": "Crea richiesta",
+    "colSubject": "Oggetto",
+    "colStatus": "Stato",
+    "colPriority": "Priorità",
+    "colDate": "Data",
+    "priority": {
+      "URGENT": "Urgente",
+      "HIGH": "Alta",
+      "NORMAL": "Normale",
+      "LOW": "Bassa"
+    },
+    "status": {
+      "OPEN": "Aperto",
+      "IN_PROGRESS": "In lavorazione",
+      "WAITING_FOR_CUSTOMER": "In attesa di risposta",
+      "RESOLVED": "Risolto"
+    },
+    "new": {
+      "back": "Torna alle richieste",
+      "title": "Nuova richiesta di assistenza",
+      "subject": "Oggetto",
+      "subjectPlaceholder": "Riassumi brevemente il problema",
+      "priorityLevel": "Livello di priorità",
+      "message": "Il tuo messaggio",
+      "messagePlaceholder": "Scrivi qui i dettagli...",
+      "submit": "Invia richiesta",
+      "submitting": "Invio...",
+      "success": "La tua richiesta di assistenza è stata creata.",
+      "error": "Si è verificato un errore durante la creazione della richiesta."
+    },
+    "detail": {
+      "priorityLabel": "Priorità {priority}",
+      "you": "Tu",
+      "supportTeam": "Team di assistenza",
+      "resolvedNote": "Questa richiesta è stata risolta. Se scrivi un nuovo messaggio, verrà riaperta.",
+      "inputPlaceholder": "Scrivi un messaggio...",
+      "sendError": "Impossibile inviare il messaggio."
+    }
   }
 }

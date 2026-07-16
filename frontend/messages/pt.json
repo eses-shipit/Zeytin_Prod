@@ -198,7 +198,10 @@
     "nav": {
       "product": "ZeytinSaaS",
       "login": "Entrar",
-      "getStarted": "Pedir demo"
+      "getStarted": "Pedir demo",
+      "navFeatures": "Funcionalidades",
+      "navPricing": "Preços",
+      "navContact": "Contacto"
     },
     "hero": {
       "badge": "CRM para lagares de azeite",
@@ -756,5 +759,55 @@
   "drums": {
     "subtitle": "Faça a gestão de todos os bidões do lagar e registe devoluções.",
     "capacityLt": "Capacidade (L)"
+  },
+  "support": {
+    "meta": {
+      "title": "Suporte",
+      "description": "Crie e acompanhe os seus pedidos de suporte."
+    },
+    "title": "Os meus pedidos de suporte",
+    "subtitle": "Estamos aqui para os seus problemas técnicos e questões.",
+    "newTicket": "Criar novo pedido",
+    "loading": "A carregar...",
+    "emptyTitle": "Ainda não criou nenhum pedido",
+    "emptyDesc": "Tem alguma questão? Crie já um novo pedido de suporte.",
+    "emptyCta": "Criar pedido",
+    "colSubject": "Assunto",
+    "colStatus": "Estado",
+    "colPriority": "Prioridade",
+    "colDate": "Data",
+    "priority": {
+      "URGENT": "Urgente",
+      "HIGH": "Alta",
+      "NORMAL": "Normal",
+      "LOW": "Baixa"
+    },
+    "status": {
+      "OPEN": "Aberto",
+      "IN_PROGRESS": "Em processamento",
+      "WAITING_FOR_CUSTOMER": "A aguardar resposta",
+      "RESOLVED": "Resolvido"
+    },
+    "new": {
+      "back": "Voltar aos pedidos",
+      "title": "Novo pedido de suporte",
+      "subject": "Assunto",
+      "subjectPlaceholder": "Resuma brevemente o problema",
+      "priorityLevel": "Nível de prioridade",
+      "message": "A sua mensagem",
+      "messagePlaceholder": "Escreva os detalhes aqui...",
+      "submit": "Enviar pedido",
+      "submitting": "A enviar...",
+      "success": "O seu pedido de suporte foi criado.",
+      "error": "Ocorreu um erro ao criar o pedido."
+    },
+    "detail": {
+      "priorityLabel": "Prioridade {priority}",
+      "you": "Você",
+      "supportTeam": "Equipa de suporte",
+      "resolvedNote": "Este pedido foi resolvido. Se escrever uma nova mensagem, será reaberto.",
+      "inputPlaceholder": "Escreva uma mensagem...",
+      "sendError": "Não foi possível enviar a mensagem."
+    }
   }
 }

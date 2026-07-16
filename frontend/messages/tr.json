@@ -198,7 +198,10 @@
     "nav": {
       "product": "ZeytinSaaS",
       "login": "Giriş Yap",
-      "getStarted": "Demo İste"
+      "getStarted": "Demo İste",
+      "navFeatures": "Özellikler",
+      "navPricing": "Fiyatlar",
+      "navContact": "İletişim"
     },
     "hero": {
       "badge": "Zeytinyağı fabrikaları için CRM",
@@ -756,5 +759,55 @@
   "drums": {
     "subtitle": "Fabrikadaki tüm bidonları yönet, iade al.",
     "capacityLt": "Kapasite (Lt)"
+  },
+  "support": {
+    "meta": {
+      "title": "Destek",
+      "description": "Destek talepleri oluşturun ve takip edin."
+    },
+    "title": "Destek Taleplerim",
+    "subtitle": "Teknik sorunlar ve sorularınız için buradayız.",
+    "newTicket": "Yeni Talep Oluştur",
+    "loading": "Yükleniyor...",
+    "emptyTitle": "Henüz talep oluşturmadınız",
+    "emptyDesc": "Bir sorunuz mu var? Hemen yeni bir destek talebi oluşturun.",
+    "emptyCta": "Talep Oluştur",
+    "colSubject": "Konu",
+    "colStatus": "Durum",
+    "colPriority": "Öncelik",
+    "colDate": "Tarih",
+    "priority": {
+      "URGENT": "Acil",
+      "HIGH": "Yüksek",
+      "NORMAL": "Normal",
+      "LOW": "Düşük"
+    },
+    "status": {
+      "OPEN": "Açık",
+      "IN_PROGRESS": "İşleniyor",
+      "WAITING_FOR_CUSTOMER": "Yanıt Bekliyor",
+      "RESOLVED": "Çözüldü"
+    },
+    "new": {
+      "back": "Taleplere Dön",
+      "title": "Yeni Destek Talebi",
+      "subject": "Konu",
+      "subjectPlaceholder": "Sorunu kısaca özetleyin",
+      "priorityLevel": "Öncelik Seviyesi",
+      "message": "Mesajınız",
+      "messagePlaceholder": "Detayları buraya yazın...",
+      "submit": "Talebi Gönder",
+      "submitting": "Gönderiliyor...",
+      "success": "Destek talebiniz oluşturuldu.",
+      "error": "Talep oluşturulurken bir hata oluştu."
+    },
+    "detail": {
+      "priorityLabel": "{priority} Öncelik",
+      "you": "Siz",
+      "supportTeam": "Destek Ekibi",
+      "resolvedNote": "Bu talep çözüme kavuşturuldu. Yeni bir mesaj yazarsanız tekrar açılacaktır.",
+      "inputPlaceholder": "Bir mesaj yazın...",
+      "sendError": "Mesaj gönderilemedi."
+    }
   }
 }
