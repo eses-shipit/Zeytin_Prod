@@ -16,7 +16,10 @@ import {
   Smartphone,
   Inbox
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { formatNumber, formatDate } from "@/lib/format";
 import { toast } from "sonner";
 import {
   BarChart,
@@ -69,6 +72,8 @@ type GlobalStats = {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 export default function AdminDashboardPage() {
+  const t = useTranslations("admin.dashboard");
+  const locale = useLocale() as Locale;
   const [stats, setStats] = useState<GlobalStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -87,7 +92,7 @@ export default function AdminDashboardPage() {
     } catch (err: any) {
       console.error("[AdminPage] ❌ Fetch stats error:", err);
       console.error("[AdminPage] Error response:", err.response);
-      const errorMessage = err.response?.data?.message || err.message || "Veriler yüklenemedi.";
+      const errorMessage = err.response?.data?.message || err.message || t("loadError");
       toast.error(errorMessage);
       
       // Eğer unauthorized hatası ise, login sayfasına yönlendir
@@ -107,15 +112,15 @@ export default function AdminDashboardPage() {
   }, []);
 
   const handleExtendTenant = async (id: string) => {
-      const days = prompt("Kaç gün uzatmak istiyorsunuz?", "365");
+      const days = prompt(t("extendPrompt"), "365");
       if (!days) return;
-      
+
       try {
           await axios.post(`/admin/tenants/${id}/extend`, { days: Number(days) });
-          toast.success("Üyelik süresi uzatıldı.");
+          toast.success(t("extendSuccess"));
           fetchData();
       } catch (err: any) {
-          toast.error("Süre uzatılamadı.");
+          toast.error(t("extendError"));
       }
   };
 
@@ -134,54 +139,54 @@ export default function AdminDashboardPage() {
           <div className="space-y-8 animate-in fade-in">
             {/* Page Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-slate-900">Genel Bakış</h1>
-                <p className="text-slate-500 text-sm">Sistem genelindeki metrikler ve aktiviteler.</p>
+                <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+                <p className="text-slate-500 text-sm">{t("subtitle")}</p>
             </div>
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-slate-500">Toplam Fabrika</h3>
+                  <h3 className="text-sm font-medium text-slate-500">{t("totalFactories")}</h3>
                   <Factory className="h-5 w-5 text-indigo-600" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900">{stats.totalTenants}</div>
-                <div className="text-xs text-emerald-600 mt-1 font-medium">{stats.activeTenants} Aktif</div>
+                <div className="text-3xl font-bold text-slate-900">{formatNumber(stats.totalTenants, locale)}</div>
+                <div className="text-xs text-emerald-600 mt-1 font-medium">{t("activeCount", { count: stats.activeTenants })}</div>
               </div>
 
               <Link href="/admin/tickets" className="block bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-indigo-300 transition-colors cursor-pointer group">
                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-medium text-slate-500 group-hover:text-indigo-600 transition-colors">Destek Merkezi</h3>
+                    <h3 className="text-sm font-medium text-slate-500 group-hover:text-indigo-600 transition-colors">{t("supportCenter")}</h3>
                     <MessageSquare className="h-5 w-5 text-indigo-500" />
                  </div>
-                 <div className="text-lg font-bold text-slate-900 mb-1">Talepleri Yönet</div>
-                 <div className="text-xs text-slate-400">Tüm fabrikalardan gelen bildirimler</div>
+                 <div className="text-lg font-bold text-slate-900 mb-1">{t("manageTickets")}</div>
+                 <div className="text-xs text-slate-400">{t("ticketsHint")}</div>
               </Link>
 
               {/* Landing page'den gelen lisans/demo talepleri (lead). */}
               <Link href="/admin/leads" className="block bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-300 transition-colors cursor-pointer group">
                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-medium text-slate-500 group-hover:text-emerald-600 transition-colors">Lisans Talepleri</h3>
+                    <h3 className="text-sm font-medium text-slate-500 group-hover:text-emerald-600 transition-colors">{t("licenseRequests")}</h3>
                     <Inbox className="h-5 w-5 text-emerald-500" />
                  </div>
-                 <div className="text-lg font-bold text-slate-900 mb-1">Gelen Talepler</div>
-                 <div className="text-xs text-slate-400">Web sitesi iletişim formundan</div>
+                 <div className="text-lg font-bold text-slate-900 mb-1">{t("incomingRequests")}</div>
+                 <div className="text-xs text-slate-400">{t("requestsHint")}</div>
               </Link>
 
               <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-slate-500">Global Üretilen Yağ</h3>
+                  <h3 className="text-sm font-medium text-slate-500">{t("globalOil")}</h3>
                   <Database className="h-5 w-5 text-amber-500" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900">{(stats.globalOilKg / 1000).toFixed(1)} <span className="text-lg text-slate-400">ton</span></div>
-                <div className="text-xs text-slate-500 mt-1">Tüm zamanlar</div>
+                <div className="text-3xl font-bold text-slate-900">{formatNumber(stats.globalOilKg / 1000, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-lg text-slate-400">{t("ton")}</span></div>
+                <div className="text-xs text-slate-500 mt-1">{t("allTime")}</div>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-slate-500">Lisans Durumu</h3>
+                  <h3 className="text-sm font-medium text-slate-500">{t("licenseStatus")}</h3>
                   <Key className="h-5 w-5 text-slate-600" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900">{stats.totalLicenses}</div>
-                <div className="text-xs text-slate-500 mt-1">{stats.totalLicenses - stats.usedLicenses} Boşta</div>
+                <div className="text-3xl font-bold text-slate-900">{formatNumber(stats.totalLicenses, locale)}</div>
+                <div className="text-xs text-slate-500 mt-1">{t("idleCount", { count: stats.totalLicenses - stats.usedLicenses })}</div>
               </div>
             </div>
 
@@ -190,15 +195,15 @@ export default function AdminDashboardPage() {
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                   <Smartphone className="h-5 w-5 text-indigo-600" />
-                  SMS İstatistikleri
+                  {t("smsStats")}
                 </h3>
                 <div className="text-sm font-medium text-slate-600">
-                  Toplam: <span className="text-indigo-600 font-bold">{stats.totalSmsSent}</span> SMS
+                  {t("smsTotal")}: <span className="text-indigo-600 font-bold">{formatNumber(stats.totalSmsSent, locale)}</span> {t("smsUnit")}
                 </div>
               </div>
               <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
                 {stats.smsStats.length === 0 ? (
-                  <div className="p-6 text-center text-slate-500 text-sm">Henüz SMS gönderimi yapılmamış.</div>
+                  <div className="p-6 text-center text-slate-500 text-sm">{t("noSms")}</div>
                 ) : (
                   stats.smsStats.map((sms) => (
                     <div key={sms.tenantId} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
@@ -208,12 +213,12 @@ export default function AdminDashboardPage() {
                         </div>
                         <div>
                           <div className="font-semibold text-slate-900 text-sm">{sms.tenantName}</div>
-                          <div className="text-xs text-slate-500">Fabrika ID: {sms.tenantId.substring(0, 8)}...</div>
+                          <div className="text-xs text-slate-500">{t("factoryId")}: {sms.tenantId.substring(0, 8)}...</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-indigo-600">{sms.smsCount}</div>
-                        <div className="text-xs text-slate-500">SMS</div>
+                        <div className="text-lg font-bold text-indigo-600">{formatNumber(sms.smsCount, locale)}</div>
+                        <div className="text-xs text-slate-500">{t("smsUnit")}</div>
                       </div>
                     </div>
                   ))
@@ -227,7 +232,7 @@ export default function AdminDashboardPage() {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                         <TrendingUp className="h-5 w-5 text-emerald-600" />
-                        Büyüme Grafiği
+                        {t("growthChart")}
                     </h3>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -249,7 +254,7 @@ export default function AdminDashboardPage() {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                         <MessageSquare className="h-5 w-5 text-indigo-600" />
-                        Destek Durumu
+                        {t("supportStatus")}
                     </h3>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -283,19 +288,19 @@ export default function AdminDashboardPage() {
                     <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                         <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                             <Activity className="h-5 w-5 text-indigo-600" />
-                            Canlı Operasyon Akışı
+                            {t("liveFeed")}
                         </h3>
                         <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
                     </div>
                     <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
                         {stats.recentActivities.length === 0 ? (
-                            <div className="p-6 text-center text-slate-500 text-sm">Henüz işlem kaydı yok.</div>
+                            <div className="p-6 text-center text-slate-500 text-sm">{t("noActivity")}</div>
                         ) : (
                             stats.recentActivities.map((log) => (
                                 <div key={log.id} className="p-4 hover:bg-slate-50 transition-colors">
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="font-semibold text-slate-900 text-sm">{log.tenantName}</span>
-                                        <span className="text-xs text-slate-400">{new Date(log.date).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' })}</span>
+                                        <span className="text-xs text-slate-400">{formatDate(log.date, locale, { hour: "2-digit", minute: "2-digit" })}</span>
                                     </div>
                                     <div className="text-xs text-slate-600 bg-slate-100 inline-block px-2 py-1 rounded">
                                         {log.action}
@@ -312,36 +317,36 @@ export default function AdminDashboardPage() {
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                                 <AlertTriangle className="h-5 w-5 text-amber-500" />
-                                Lisansı Bitmek Üzere Olanlar
+                                {t("expiringLicenses")}
                             </h3>
                             <button onClick={fetchData} className="text-slate-400 hover:text-indigo-600 transition-colors">
                                 <RefreshCw className="h-4 w-4" />
                             </button>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">
-                            Son 30 gün içinde biten lisanslar gösterilmektedir.
+                            {t("expiringHint")}
                         </p>
                     </div>
                     <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
                         {stats.expiringTenants.length === 0 ? (
                             <div className="p-6 text-center text-emerald-600 text-sm flex flex-col items-center gap-2">
                                 <CheckCircle2 className="h-8 w-8 opacity-20" />
-                                Kritik durumda fabrika yok.
+                                {t("noCritical")}
                             </div>
                         ) : (
-                            stats.expiringTenants.map((t) => (
-                                <div key={t.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
+                            stats.expiringTenants.map((tenant) => (
+                                <div key={tenant.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
                                     <div>
-                                        <div className="font-semibold text-slate-900 text-sm">{t.name}</div>
+                                        <div className="font-semibold text-slate-900 text-sm">{tenant.name}</div>
                                         <div className="text-xs text-rose-600 font-medium">
-                                            Bitiş: {new Date(t.subscriptionEndDate).toLocaleDateString("tr-TR")}
+                                            {t("endLabel")}: {formatDate(tenant.subscriptionEndDate, locale)}
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => handleExtendTenant(t.id)}
+                                    <button
+                                        onClick={() => handleExtendTenant(tenant.id)}
                                         className="text-indigo-600 text-xs font-medium hover:bg-indigo-50 px-2 py-1 rounded transition-colors"
                                     >
-                                        Uzat
+                                        {t("extend")}
                                     </button>
                                 </div>
                             ))
