@@ -932,7 +932,11 @@
         "deleteSuccess": "Usuario eliminado.",
         "deleteError": "No se pudo eliminar."
       },
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "meta": {
+        "title": "Almazaras",
+        "description": "Gestión de las almazaras registradas."
+      }
     },
     "licenses": {
       "title": "Gestión de licencias",
@@ -957,7 +961,11 @@
       "deleteError": "No se pudo eliminar la licencia.",
       "copied": "Copiado",
       "copyTooltip": "Copiar",
-      "deleteTooltip": "Eliminar"
+      "deleteTooltip": "Eliminar",
+      "meta": {
+        "title": "Licencias",
+        "description": "Gestión de licencias y suscripciones."
+      }
     },
     "tickets": {
       "title": "Gestión del centro de soporte",
@@ -982,6 +990,10 @@
         "URGENT": "URGENTE",
         "HIGH": "Alta",
         "NORMAL": "Normal"
+      },
+      "meta": {
+        "title": "Centro de soporte",
+        "description": "Gestión de las solicitudes de soporte recibidas."
       }
     },
     "ticketDetail": {
@@ -1003,6 +1015,10 @@
         "NORMAL": "Normal",
         "LOW": "Baja"
       }
+    },
+    "meta": {
+      "title": "Panel de administración",
+      "description": "Gestión de la plataforma y vista general."
     }
   }
 }

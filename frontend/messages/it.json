@@ -932,7 +932,11 @@
         "deleteSuccess": "Utente eliminato.",
         "deleteError": "Eliminazione non riuscita."
       },
-      "close": "Chiudi"
+      "close": "Chiudi",
+      "meta": {
+        "title": "Frantoi",
+        "description": "Gestione dei frantoi registrati."
+      }
     },
     "licenses": {
       "title": "Gestione licenze",
@@ -957,7 +961,11 @@
       "deleteError": "Impossibile eliminare la licenza.",
       "copied": "Copiato",
       "copyTooltip": "Copia",
-      "deleteTooltip": "Elimina"
+      "deleteTooltip": "Elimina",
+      "meta": {
+        "title": "Licenze",
+        "description": "Gestione di licenze e abbonamenti."
+      }
     },
     "tickets": {
       "title": "Gestione centro assistenza",
@@ -982,6 +990,10 @@
         "URGENT": "URGENTE",
         "HIGH": "Alta",
         "NORMAL": "Normale"
+      },
+      "meta": {
+        "title": "Centro assistenza",
+        "description": "Gestione delle richieste di assistenza ricevute."
       }
     },
     "ticketDetail": {
@@ -1003,6 +1015,10 @@
         "NORMAL": "Normale",
         "LOW": "Bassa"
       }
+    },
+    "meta": {
+      "title": "Pannello di amministrazione",
+      "description": "Gestione della piattaforma e panoramica."
     }
   }
 }

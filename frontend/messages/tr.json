@@ -932,7 +932,11 @@
         "deleteSuccess": "Kullanıcı silindi.",
         "deleteError": "Silme başarısız."
       },
-      "close": "Kapat"
+      "close": "Kapat",
+      "meta": {
+        "title": "Fabrikalar",
+        "description": "Kayıtlı fabrikaların yönetimi."
+      }
     },
     "licenses": {
       "title": "Lisans Yönetimi",
@@ -957,7 +961,11 @@
       "deleteError": "Lisans silinemedi.",
       "copied": "Kopyalandı",
       "copyTooltip": "Kopyala",
-      "deleteTooltip": "Sil"
+      "deleteTooltip": "Sil",
+      "meta": {
+        "title": "Lisanslar",
+        "description": "Lisans ve abonelik yönetimi."
+      }
     },
     "tickets": {
       "title": "Destek Merkezi Yönetimi",
@@ -982,6 +990,10 @@
         "URGENT": "ACİL",
         "HIGH": "Yüksek",
         "NORMAL": "Normal"
+      },
+      "meta": {
+        "title": "Destek Merkezi",
+        "description": "Gelen destek taleplerinin yönetimi."
       }
     },
     "ticketDetail": {
@@ -1003,6 +1015,10 @@
         "NORMAL": "Normal",
         "LOW": "Düşük"
       }
+    },
+    "meta": {
+      "title": "Yönetim Paneli",
+      "description": "Platform yönetimi ve genel bakış."
     }
   }
 }

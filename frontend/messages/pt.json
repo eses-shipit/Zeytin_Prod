@@ -932,7 +932,11 @@
         "deleteSuccess": "Utilizador eliminado.",
         "deleteError": "Falha na eliminação."
       },
-      "close": "Fechar"
+      "close": "Fechar",
+      "meta": {
+        "title": "Lagares",
+        "description": "Gestão dos lagares registados."
+      }
     },
     "licenses": {
       "title": "Gestão de licenças",
@@ -957,7 +961,11 @@
       "deleteError": "Não foi possível eliminar a licença.",
       "copied": "Copiado",
       "copyTooltip": "Copiar",
-      "deleteTooltip": "Eliminar"
+      "deleteTooltip": "Eliminar",
+      "meta": {
+        "title": "Licenças",
+        "description": "Gestão de licenças e subscrições."
+      }
     },
     "tickets": {
       "title": "Gestão do centro de suporte",
@@ -982,6 +990,10 @@
         "URGENT": "URGENTE",
         "HIGH": "Alta",
         "NORMAL": "Normal"
+      },
+      "meta": {
+        "title": "Centro de suporte",
+        "description": "Gestão dos pedidos de suporte recebidos."
       }
     },
     "ticketDetail": {
@@ -1003,6 +1015,10 @@
         "NORMAL": "Normal",
         "LOW": "Baixa"
       }
+    },
+    "meta": {
+      "title": "Painel de administração",
+      "description": "Gestão da plataforma e visão geral."
     }
   }
 }
