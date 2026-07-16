@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { formatDate, formatDateTime } from "@/lib/format";
 
 type Tenant = {
   id: string;
@@ -31,6 +34,8 @@ type Tenant = {
 };
 
 export default function AdminTenantsPage() {
+  const t = useTranslations("admin.tenants");
+  const locale = useLocale() as Locale;
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
@@ -45,7 +50,7 @@ export default function AdminTenantsPage() {
       setTenants(res.data);
     } catch (err: any) {
       console.error("Fetch tenants error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Fabrika listesi yüklenemedi.";
+      const errorMessage = err.response?.data?.message || err.message || t("loadError");
       toast.error(errorMessage);
       
       // Eğer unauthorized hatası ise, login sayfasına yönlendir
@@ -64,15 +69,15 @@ export default function AdminTenantsPage() {
   }, []);
 
   const handleExtendTenant = async (id: string) => {
-      const days = prompt("Kaç gün uzatmak istiyorsunuz?", "365");
+      const days = prompt(t("extendPrompt"), "365");
       if (!days) return;
-      
+
       try {
           await axios.post(`/admin/tenants/${id}/extend`, { days: Number(days) });
-          toast.success("Üyelik süresi uzatıldı.");
+          toast.success(t("extendSuccess"));
           fetchTenants();
       } catch (err: any) {
-          toast.error("Süre uzatılamadı.");
+          toast.error(t("extendError"));
       }
   };
 
@@ -80,7 +85,7 @@ export default function AdminTenantsPage() {
       try {
           const res = await axios.post(`/admin/impersonate/${tenantId}`, {});
           if (res.data.success) {
-              if(!confirm("Yönetici oturumunuz sonlandırılacak ve seçilen fabrikanın yöneticisi olarak giriş yapacaksınız. Devam etmek istiyor musunuz?")) return;
+              if(!confirm(t("impersonateConfirm"))) return;
               
               // 1. Mevcut Super Admin oturumunu yedekle
               const currentUser = localStorage.getItem("user");
@@ -101,7 +106,7 @@ export default function AdminTenantsPage() {
               window.location.href = "/dashboard";
           }
       } catch (err: any) {
-          toast.error("Yönetim paneline geçiş yapılamadı. (Yönetici kullanıcısı yok olabilir)");
+          toast.error(t("impersonateError"));
       }
   };
 
@@ -122,23 +127,23 @@ export default function AdminTenantsPage() {
       
       try {
             await axios.patch(`/admin/tenants/${editingTenant.id}`, editForm);
-          toast.success("Fabrika bilgileri güncellendi.");
+          toast.success(t("updateSuccess"));
           setEditingTenant(null);
           fetchTenants();
       } catch (err: any) {
-          toast.error(err.response?.data?.message || "Güncelleme başarısız.");
+          toast.error(err.response?.data?.message || t("updateError"));
       }
   };
 
   const handleDeleteTenant = async (id: string, name: string) => {
-      if (!confirm(`"${name}" fabrikasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
-      
+      if (!confirm(t("deleteConfirm", { name }))) return;
+
       try {
                 await axios.delete(`/admin/tenants/${id}`);
-          toast.success("Fabrika silindi.");
+          toast.success(t("deleteSuccess"));
           fetchTenants();
       } catch (err: any) {
-          toast.error(err.response?.data?.message || "Silme işlemi başarısız.");
+          toast.error(err.response?.data?.message || t("deleteError"));
       }
   };
 
@@ -148,7 +153,7 @@ export default function AdminTenantsPage() {
           setUsers(res.data);
           setManagingUsers(tenantId);
       } catch (err: any) {
-          toast.error("Kullanıcılar yüklenemedi.");
+          toast.error(t("usersLoadError"));
       }
   };
 
@@ -157,7 +162,7 @@ export default function AdminTenantsPage() {
                 const res = await axios.get(`/admin/tenants/${tenantId}/users`);
           setUsers(res.data);
       } catch (err: any) {
-          toast.error("Kullanıcılar yüklenemedi.");
+          toast.error(t("usersLoadError"));
       }
   };
 
@@ -175,8 +180,8 @@ export default function AdminTenantsPage() {
         <div className="space-y-6 animate-in fade-in">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Fabrikalar</h1>
-                    <p className="text-slate-500 text-sm">Sisteme kayıtlı tüm işletmeler.</p>
+                    <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+                    <p className="text-slate-500 text-sm">{t("subtitle")}</p>
                 </div>
             </div>
 
@@ -184,83 +189,83 @@ export default function AdminTenantsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
                 <tr>
-                  <th className="px-6 py-4">Fabrika Adı</th>
-                  <th className="px-6 py-4">Kod</th>
-                  <th className="px-6 py-4">Durum</th>
-                  <th className="px-6 py-4">Kullanıcı</th>
-                  <th className="px-6 py-4">Üyelik Bitiş</th>
-                  <th className="px-6 py-4">İşlemler</th>
+                  <th className="px-6 py-4">{t("colName")}</th>
+                  <th className="px-6 py-4">{t("colCode")}</th>
+                  <th className="px-6 py-4">{t("colStatus")}</th>
+                  <th className="px-6 py-4">{t("colUsers")}</th>
+                  <th className="px-6 py-4">{t("colSubEnd")}</th>
+                  <th className="px-6 py-4">{t("colActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {tenants.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 font-semibold text-slate-900">{t.name}</td>
-                    <td className="px-6 py-4 font-mono text-xs">{t.code || "-"}</td>
+                {tenants.map((tenant) => (
+                  <tr key={tenant.id} className="hover:bg-slate-50">
+                    <td className="px-6 py-4 font-semibold text-slate-900">{tenant.name}</td>
+                    <td className="px-6 py-4 font-mono text-xs">{tenant.code || "-"}</td>
                     <td className="px-6 py-4">
-                      <span className={cn("px-2 py-1 rounded-full text-xs font-medium", t.status === "ACTIVE" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
-                        {t.status}
+                      <span className={cn("px-2 py-1 rounded-full text-xs font-medium", tenant.status === "ACTIVE" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
+                        {tenant.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                        {t._count.users === 0 ? (
+                        {tenant._count.users === 0 ? (
                             <span className="text-amber-600 font-medium flex items-center gap-1 text-xs">
                                 <AlertCircle className="h-3 w-3" />
-                                Yok
+                                {t("noUsers")}
                             </span>
-                        ) : t._count.users}
+                        ) : tenant._count.users}
                     </td>
                     <td className="px-6 py-4 text-slate-600">
-                      {t.subscriptionEndDate ? new Date(t.subscriptionEndDate).toLocaleDateString() : "-"}
+                      {tenant.subscriptionEndDate ? formatDate(tenant.subscriptionEndDate, locale) : "-"}
                     </td>
                     <td className="px-6 py-4">
                         <div className="flex gap-2 flex-wrap">
-                            <button 
-                                onClick={() => setSelectedTenant(t)}
+                            <button
+                                onClick={() => setSelectedTenant(tenant)}
                                 className="text-slate-600 hover:text-slate-800 flex items-center gap-1 text-xs font-medium bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 transition-colors"
-                                title="Detaylar"
+                                title={t("detailTooltip")}
                             >
                                 <Eye className="h-3 w-3" />
-                                Detay
+                                {t("detail")}
                             </button>
-                            <button 
-                                onClick={() => handleEditTenant(t)}
+                            <button
+                                onClick={() => handleEditTenant(tenant)}
                                 className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-xs font-medium bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors"
-                                title="Düzenle"
+                                title={t("edit")}
                             >
                                 <Edit className="h-3 w-3" />
-                                Düzenle
+                                {t("edit")}
                             </button>
-                            <button 
-                                onClick={() => handleExtendTenant(t.id)}
+                            <button
+                                onClick={() => handleExtendTenant(tenant.id)}
                                 className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 text-xs font-medium bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 transition-colors"
                             >
                                 <CalendarPlus className="h-3 w-3" />
-                                Uzat
+                                {t("extend")}
                             </button>
-                            <button 
-                                onClick={() => handleManageUsers(t.id)}
+                            <button
+                                onClick={() => handleManageUsers(tenant.id)}
                                 className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-xs font-medium bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors"
-                                title="Kullanıcıları Yönet"
+                                title={t("usersTooltip")}
                             >
                                 <Users className="h-3 w-3" />
-                                Kullanıcılar
+                                {t("users")}
                             </button>
-                            <button 
-                                onClick={() => handleImpersonate(t.id)}
+                            <button
+                                onClick={() => handleImpersonate(tenant.id)}
                                 className="text-amber-600 hover:text-amber-800 flex items-center gap-1 text-xs font-medium bg-amber-50 px-2 py-1 rounded hover:bg-amber-100 transition-colors"
-                                title="Fabrika Yöneticisi Olarak Giriş Yap"
+                                title={t("manageTooltip")}
                             >
                                 <Key className="h-3 w-3" />
-                                Yönet
+                                {t("manage")}
                             </button>
-                            <button 
-                                onClick={() => handleDeleteTenant(t.id, t.name)}
+                            <button
+                                onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
                                 className="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs font-medium bg-red-50 px-2 py-1 rounded hover:bg-red-100 transition-colors"
-                                title="Sil"
+                                title={t("deleteTooltip")}
                             >
                                 <Trash2 className="h-3 w-3" />
-                                Sil
+                                {t("delete")}
                             </button>
                         </div>
                     </td>
@@ -269,7 +274,7 @@ export default function AdminTenantsPage() {
                 {tenants.length === 0 && (
                     <tr>
                         <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                            Henüz kayıtlı fabrika yok.
+                            {t("empty")}
                         </td>
                     </tr>
                 )}
@@ -283,56 +288,56 @@ export default function AdminTenantsPage() {
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                 <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
                     <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-slate-900">Fabrika Detayları</h3>
+                        <h3 className="text-lg font-bold text-slate-900">{t("detailModal.title")}</h3>
                         <button onClick={() => setSelectedTenant(null)} className="text-slate-400 hover:text-slate-600">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
                     <div className="p-6 space-y-4">
                         <div>
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Fabrika Adı</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.name")}</label>
                             <p className="text-base font-semibold text-slate-900 mt-1">{selectedTenant.name}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Kısa Kod</label>
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.code")}</label>
                                 <p className="text-sm font-mono font-medium text-slate-700 mt-1 bg-slate-50 inline-block px-2 py-1 rounded">{selectedTenant.code}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Durum</label>
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.status")}</label>
                                 <p className={cn("text-sm font-medium mt-1", selectedTenant.status === 'ACTIVE' ? "text-emerald-600" : "text-red-600")}>
                                     {selectedTenant.status}
                                 </p>
                             </div>
                         </div>
                         <div className="border-t border-slate-100 pt-4 mt-2">
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Resmi Unvan</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.officialName")}</label>
                             <p className="text-sm text-slate-900 mt-1">{selectedTenant.officialName || "-"}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Vergi No</label>
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.taxId")}</label>
                                 <p className="text-sm text-slate-900 mt-1">{selectedTenant.taxId || "-"}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Şehir</label>
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.city")}</label>
                                 <p className="text-sm text-slate-900 mt-1">{selectedTenant.city || "-"}</p>
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Adres</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("detailModal.address")}</label>
                             <p className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{selectedTenant.address || "-"}</p>
                         </div>
                         <div className="bg-slate-50 p-3 rounded-lg mt-4 text-xs text-slate-500">
-                            Kayıt Tarihi: {new Date(selectedTenant.createdAt).toLocaleString('tr-TR')}
+                            {t("detailModal.createdAt")}: {formatDateTime(selectedTenant.createdAt, locale)}
                         </div>
                     </div>
                     <div className="bg-slate-50 px-6 py-4 flex justify-end">
-                        <button 
+                        <button
                             onClick={() => setSelectedTenant(null)}
                             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
                         >
-                            Kapat
+                            {t("close")}
                         </button>
                     </div>
                 </div>
@@ -344,14 +349,14 @@ export default function AdminTenantsPage() {
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                 <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
                     <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-slate-900">Fabrika Düzenle</h3>
+                        <h3 className="text-lg font-bold text-slate-900">{t("editModal.title")}</h3>
                         <button onClick={() => setEditingTenant(null)} className="text-slate-400 hover:text-slate-600">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
                     <div className="p-6 space-y-4">
                         <div>
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">Fabrika Adı</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">{t("editModal.name")}</label>
                             <input
                                 type="text"
                                 value={editForm.name}
@@ -360,7 +365,7 @@ export default function AdminTenantsPage() {
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">Kısa Kod</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">{t("editModal.code")}</label>
                             <input
                                 type="text"
                                 value={editForm.code}
@@ -369,7 +374,7 @@ export default function AdminTenantsPage() {
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">Resmi Unvan</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">{t("editModal.officialName")}</label>
                             <input
                                 type="text"
                                 value={editForm.officialName}
@@ -379,7 +384,7 @@ export default function AdminTenantsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">Vergi No</label>
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">{t("editModal.taxId")}</label>
                                 <input
                                     type="text"
                                     value={editForm.taxId}
@@ -388,7 +393,7 @@ export default function AdminTenantsPage() {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">Şehir</label>
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">{t("editModal.city")}</label>
                                 <input
                                     type="text"
                                     value={editForm.city}
@@ -398,7 +403,7 @@ export default function AdminTenantsPage() {
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">Adres</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">{t("editModal.address")}</label>
                             <textarea
                                 value={editForm.address}
                                 onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
@@ -408,17 +413,17 @@ export default function AdminTenantsPage() {
                         </div>
                     </div>
                     <div className="bg-slate-50 px-6 py-4 flex justify-end gap-2">
-                        <button 
+                        <button
                             onClick={() => setEditingTenant(null)}
                             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
                         >
-                            İptal
+                            {t("editModal.cancel")}
                         </button>
-                        <button 
+                        <button
                             onClick={handleUpdateTenant}
                             className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
                         >
-                            Kaydet
+                            {t("editModal.save")}
                         </button>
                     </div>
                 </div>
@@ -430,7 +435,7 @@ export default function AdminTenantsPage() {
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                 <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
                     <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-slate-900">Kullanıcı Yönetimi</h3>
+                        <h3 className="text-lg font-bold text-slate-900">{t("usersModal.title")}</h3>
                         <button onClick={() => setManagingUsers(null)} className="text-slate-400 hover:text-slate-600">
                             <X className="h-5 w-5" />
                         </button>
@@ -438,7 +443,7 @@ export default function AdminTenantsPage() {
                     <div className="p-6 overflow-y-auto flex-1">
                         <div className="space-y-4">
                             {users.length === 0 ? (
-                                <div className="text-center text-slate-500 py-8">Bu fabrikada henüz kullanıcı yok.</div>
+                                <div className="text-center text-slate-500 py-8">{t("usersModal.empty")}</div>
                             ) : (
                                 users.map((user) => (
                                     <div key={user.id} className="bg-slate-50 p-4 rounded-lg flex items-center justify-between">
@@ -447,25 +452,25 @@ export default function AdminTenantsPage() {
                                             <div className="text-sm text-slate-600">{user.email}</div>
                                             <div className="text-xs text-slate-500 mt-1">
                                                 {user.phone && `📞 ${user.phone} • `}
-                                                Rol: {user.role === "ADMIN" ? "Yönetici" : "Kullanıcı"}
+                                                {t("usersModal.roleLabel")}: {user.role === "ADMIN" ? t("usersModal.roleAdmin") : t("usersModal.roleUser")}
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={async () => {
-                                                    if (confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) {
+                                                    if (confirm(t("usersModal.deleteConfirm"))) {
                                                         try {
                                                             await axios.delete(`/admin/users/${user.id}`);
-                                                            toast.success("Kullanıcı silindi.");
+                                                            toast.success(t("usersModal.deleteSuccess"));
                                                             fetchUsers(managingUsers);
                                                         } catch (err: any) {
-                                                            toast.error(err.response?.data?.message || "Silme başarısız.");
+                                                            toast.error(err.response?.data?.message || t("usersModal.deleteError"));
                                                         }
                                                     }
                                                 }}
                                                 className="text-red-600 hover:text-red-800 text-xs font-medium bg-red-50 px-2 py-1 rounded hover:bg-red-100 transition-colors"
                                             >
-                                                Sil
+                                                {t("usersModal.delete")}
                                             </button>
                                         </div>
                                     </div>
@@ -474,11 +479,11 @@ export default function AdminTenantsPage() {
                         </div>
                     </div>
                     <div className="bg-slate-50 px-6 py-4 flex justify-end">
-                        <button 
+                        <button
                             onClick={() => setManagingUsers(null)}
                             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
                         >
-                            Kapat
+                            {t("close")}
                         </button>
                     </div>
                 </div>
