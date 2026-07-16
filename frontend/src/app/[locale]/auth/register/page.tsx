@@ -80,6 +80,12 @@ export default function RegisterPage() {
       toast.error(t("factoryRequired"));
       return;
     }
+    // Kısa kod uzunluğu ADIM 2'de kontrol edilir; aksi halde kullanıcı 3. adıma
+    // geçip "Kaydı Tamamla"da anlamsız bir hatayla karşılaşıyordu.
+    if (step === 2 && formData.factoryShortCode.trim().length < 3) {
+      toast.error(t("shortCodeMin"));
+      return;
+    }
     setStep(step + 1);
   };
 
@@ -130,6 +136,12 @@ export default function RegisterPage() {
           errorMessage = responseMsg.join(", ");
       } else if (typeof responseMsg === "string") {
           errorMessage = responseMsg;
+      } else if (err instanceof Error && err.message) {
+          // İstemci tarafı fırlatılan hatalar (ör. kısa kod uzunluğu) HTTP
+          // yanıtı taşımaz; mesajları kaybolmasın diye burada gösteriyoruz.
+          // Önceden bu dal yoktu ve kullanıcı gerçek sebep yerine hep
+          // "Kayıt işlemi başarısız oldu" görüyordu.
+          errorMessage = err.message;
       }
 
       toast.error(errorMessage);
