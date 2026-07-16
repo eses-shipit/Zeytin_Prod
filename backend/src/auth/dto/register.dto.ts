@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, IsBoolean } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, IsBoolean, IsIn } from "class-validator";
 
 export class RegisterDto {
   @IsString()
@@ -47,5 +47,11 @@ export class RegisterDto {
   @IsBoolean()
   @IsNotEmpty()
   acceptedTerms!: boolean; // KVKK ve Kullanım Koşulları onayı
+
+  // Kaydın yapıldığı dil. Fabrikanın başlangıç para birimini belirler
+  // (ES/IT/PT -> EUR, TR -> TRY). Sonradan politika ekranından değiştirilebilir.
+  @IsOptional()
+  @IsIn(["tr", "es", "it", "pt"])
+  locale?: string;
 }
 

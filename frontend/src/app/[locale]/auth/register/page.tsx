@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import axios from "axios";
 import { useRouter, Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 import {
   Building2,
@@ -25,6 +25,7 @@ import { cn } from "@/lib/cn";
 export default function RegisterPage() {
   const t = useTranslations("auth.register");
   const tBrand = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -104,6 +105,7 @@ export default function RegisterPage() {
       await axios.post(`${apiBase}/auth/register`, {
         ...formData,
         factoryShortCode: formData.factoryShortCode.toUpperCase(),
+        locale, // fabrikanın başlangıç para birimi bu dile göre belirlenir
       });
 
       toast.success(t("success"));

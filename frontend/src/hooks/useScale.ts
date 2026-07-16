@@ -1,7 +1,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-const WEIGHT_REGEX = /([+-]?\s*\d+)\s*kg/i;
+// Ağırlık: tam sayı VEYA ondalıklı, hem nokta hem virgül ayracıyla.
+// Avrupa terazileri "12,5 kg" (virgül) gönderir; eski regex sadece tam sayı +
+// "kg" ekini yakalıyor, ondalık ve virgülü kaçırıyordu. Binlik ayracı da
+// (1.234,5 / 1,234.5) tolere edilir.
+const WEIGHT_REGEX = /([+-]?\s*\d[\d.,]*)\s*kg/i;
+
+/**
+ * Terazi çıktısındaki sayıyı ayrıştırır. Hem "12.5" hem "12,5" hem de binlik
+ * ayraçlı "1.234,5" / "1,234.5" biçimlerini destekler.
+ *
+ * Kural: SON nokta/virgül ondalık ayracıdır; ondan öncekiler binlik ayracıdır
+ * ve atılır. Ayraç yoksa tam sayıdır.
+ */
+function parseWeight(raw: string): number | null {
+  const s = raw.replace(/\s+/g, "");
+  const lastSep = Math.max(s.lastIndexOf("."), s.lastIndexOf(","));
+
+  let normalized: string;
+  if (lastSep === -1) {
+    normalized = s;
+  } else {
+    const intPart = s.slice(0, lastSep).replace(/[.,]/g, "");
+    const fracPart = s.slice(lastSep + 1);
+    normalized = `${intPart}.${fracPart}`;
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
 type ScaleState = {
   weightKg: number | null;
@@ -95,9 +123,8 @@ export function useScale(): UseScaleResult {
           for (const line of lines) {
             const match = WEIGHT_REGEX.exec(line);
             if (match) {
-              const normalized = match[1].replace(/\s+/g, "");
-              const parsed = Number(normalized);
-              if (Number.isFinite(parsed)) {
+              const parsed = parseWeight(match[1]);
+              if (parsed !== null) {
                 setState((prev) => ({ ...prev, weightKg: parsed }));
               }
             }

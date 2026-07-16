@@ -142,7 +142,9 @@ export class AuthService {
           // D. Fabrikanın ilk çalışma politikası (sürüm 1).
           // Aynı transaction içinde: politikasız bir fabrika üretim yapamaz,
           // dolayısıyla kaydın yarısı oluşup yarısı oluşmamalı.
-          await this.policyService.createInitialPolicy(tenant.id, tx);
+          // Para birimi kayıt diline göre: AB dilleri EUR, Türkçe TRY.
+          const currency = ["es", "it", "pt"].includes(dto.locale ?? "") ? "EUR" : "TRY";
+          await this.policyService.createInitialPolicy(tenant.id, tx, currency);
 
           // Token Üret
           const token = this.generateToken(user, tenant.code);

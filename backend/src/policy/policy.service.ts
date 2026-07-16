@@ -47,9 +47,10 @@ export class PolicyService {
   async createInitialPolicy(
     tenantId: string,
     tx: Prisma.TransactionClient | PrismaService = this.prisma,
+    currency = "TRY",
   ): Promise<TenantPolicy> {
     return tx.tenantPolicy.create({
-      data: { tenantId, version: 1, isActive: true },
+      data: { tenantId, version: 1, isActive: true, currency },
     });
   }
 
