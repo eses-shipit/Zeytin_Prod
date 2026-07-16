@@ -13,6 +13,7 @@ import * as bcrypt from "bcryptjs";
 import { TokenService } from "../common/token.service";
 import { AuditService } from "../audit/audit.service";
 import { PolicyService } from "../policy/policy.service";
+import { ContextService } from "../common/context.service";
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly auditService: AuditService,
     private readonly policyService: PolicyService,
+    private readonly contextService: ContextService,
   ) {}
 
   // KALDIRILDI: recoverPassword()
@@ -102,6 +104,13 @@ export class AuthService {
               subscriptionEndDate,
             },
           });
+
+          // Kayıt @Public bir route; bu noktaya kadar istek bağlamında tenant
+          // yok. Fabrika oluşturulduktan sonra bağlamı ona ayarlıyoruz ki
+          // aynı transaction içindeki tenant-kapsamlı yazma (aşağıdaki politika
+          // oluşturma) fail-closed Prisma katmanınca reddedilmesin. Ayarlanan
+          // değer tam da yeni oluşturulan fabrikadır, dolayısıyla güvenli.
+          this.contextService.set("TENANT_ID", tenant.id);
 
           // B. User Oluştur (ADMIN rolüyle) - bcrypt hash
           if (!dto.acceptedTerms) {
