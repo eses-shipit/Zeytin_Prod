@@ -595,5 +595,153 @@
       "WITH_CUSTOMER": "Dal cliente",
       "FILLED": "Pieno"
     }
+  },
+  "production": {
+    "title": "Linea di produzione",
+    "subtitle": "Molitura le olive in attesa e monitora lo storico di produzione.",
+    "tabs": {
+      "production": "Linea di produzione",
+      "history": "Storico produzione",
+      "tickets": "Ricevute di pesa"
+    },
+    "printReport": "Rapporto di produzione",
+    "receipt": {
+      "title": "Ricevuta di consegna",
+      "production": "Produzione:",
+      "deliveredAt": "Data di consegna:",
+      "customers": "Cliente/i",
+      "drums": "Fusti",
+      "storedOil": "Olio in deposito - Conservato nel serbatoio",
+      "close": "Chiudi"
+    },
+    "confirm": {
+      "title": "Conferma produzione",
+      "selectedOlive": "Olive selezionate:",
+      "oilOut": "Olio ottenuto:",
+      "yield": "Resa:",
+      "acidRatio": "Grado di acidità:",
+      "factoryShare": "Quota del frantoio ({amount}%):",
+      "serviceFee": "Costo del servizio ({amount} {currency}/kg):",
+      "customerRemaining": "Rimane al cliente:",
+      "warning": "L'operazione è irreversibile. Vuoi confermare?",
+      "cancel": "Annulla",
+      "submit": "Conferma e salva"
+    },
+    "ticketsTab": {
+      "searchPlaceholder": "Cerca cliente...",
+      "allStatuses": "Tutti gli stati",
+      "pending": "In attesa (non molito)",
+      "completed": "Completato (molito)",
+      "colDate": "Data",
+      "colCustomer": "Cliente",
+      "colOriginVarietyQuality": "Località / Varietà / Qualità",
+      "colGross": "Lordo",
+      "colTare": "Tara",
+      "colNet": "Netto",
+      "colStatus": "Stato",
+      "empty": "Nessun record trovato.",
+      "qualityTree": "Dall'albero",
+      "qualityGround": "Da terra",
+      "qualityMixed": "Mista",
+      "statusCompleted": "Molito",
+      "statusPending": "In attesa"
+    },
+    "pending": {
+      "title": "Ricevute in attesa ({count})",
+      "selected": "{count} selezionati • {kg}",
+      "empty": "Nessuna operazione in attesa.",
+      "netOlive": "Olive nette"
+    },
+    "form": {
+      "title": "Registrazione produzione",
+      "totalOil": "Olio totale ottenuto (kg)",
+      "oilShare": "Quota olio (%)",
+      "cash": "Contanti ({currency}/kg)",
+      "factoryShareRate": "Percentuale del frantoio (%)",
+      "serviceFeeRate": "Costo di molitura ({currency}/kg)",
+      "acidRatio": "Grado di acidità",
+      "temp": "Temperatura (°C)",
+      "line": "N. linea",
+      "filtration": "Filtrazione",
+      "filtrationOn": "Eseguita",
+      "filtrationOff": "Non eseguita",
+      "tank": "Serbatoio di destinazione",
+      "tankSelect": "Seleziona un serbatoio (opzionale)",
+      "drumSelect": "Selezione fusti (disponibili)",
+      "noDrums": "Nessun fusto disponibile.",
+      "drumCapacity": "({capacity} L)",
+      "drumHintStore": "Quando l'olio del cliente resta in deposito, la selezione dei fusti è opzionale (l'olio va nel serbatoio).",
+      "drumHintRequired": "Seleziona almeno un fusto per registrare la produzione.",
+      "storeOil": "Il cliente ha lasciato l'olio in deposito",
+      "storeOilHint": "Se non selezionato, l'olio è considerato consegnato e il saldo non aumenta.",
+      "submit": "Completa la produzione",
+      "submitting": "Elaborazione..."
+    },
+    "preview": {
+      "totalOlive": "Olive totali:",
+      "yield": "Resa:",
+      "factoryShare": "Quota del frantoio:",
+      "serviceFee": "Costo del servizio:",
+      "customerRemaining": "Rimane al cliente:"
+    },
+    "lastResult": {
+      "title": "Ultima operazione riuscita",
+      "yield": "Resa",
+      "customerRemaining": "Rimane al cliente"
+    },
+    "history": {
+      "exportExcel": "Esporta in Excel",
+      "printList": "Stampa elenco",
+      "colDateBatch": "Data / ID lotto",
+      "colOliveIn": "Olive in entrata",
+      "colOilOut": "Olio ottenuto",
+      "colYield": "Resa",
+      "colAcid": "Acidità",
+      "colStatus": "Stato",
+      "colActions": "Azioni",
+      "empty": "Nessun record di produzione trovato.",
+      "statusDelivered": "Consegnato",
+      "statusCompleted": "Completato",
+      "deliver": "Consegna",
+      "deliverTitle": "Consegna i fusti al cliente",
+      "print": "Stampa",
+      "printTitle": "Stampa ricevuta",
+      "sms": "SMS",
+      "smsTitle": "Reinvia SMS",
+      "detailsTitle": "Vedi dettagli"
+    },
+    "drumSelect": {
+      "title": "Selezione fusti",
+      "subtitle": "Seleziona i fusti da consegnare per l'olio in deposito.",
+      "empty": "Nessun fusto disponibile.",
+      "cancel": "Annulla",
+      "submit": "Consegna"
+    },
+    "toasts": {
+      "exportEmpty": "Nessun dato da esportare.",
+      "exportDone": "File Excel scaricato.",
+      "selectTicket": "Seleziona almeno una ricevuta.",
+      "selectDrum": "Seleziona almeno un fusto.",
+      "successSms": "Produzione completata con successo! Un SMS informativo è stato inviato al cliente.",
+      "successNoSms": "Produzione completata. (SMS non inviato: numero di telefono mancante)",
+      "productionFailed": "Operazione non riuscita.",
+      "storedOilDelivered": "Olio in deposito consegnato.",
+      "drumsDelivered": "Fusti consegnati al cliente.",
+      "deliveryFailed": "Consegna non riuscita.",
+      "smsFailed": "Impossibile inviare l'SMS."
+    },
+    "excel": {
+      "fileName": "Rapporto_Produzione",
+      "batchNo": "N. lotto",
+      "date": "Data",
+      "customer": "Cliente",
+      "variety": "Varietà di olive",
+      "oliveIn": "Olive in entrata (kg)",
+      "oilOut": "Olio ottenuto (kg)",
+      "yield": "Resa (1/X)",
+      "acidRatio": "Grado di acidità",
+      "temp": "Temperatura",
+      "filtration": "Filtrazione"
+    }
   }
 }

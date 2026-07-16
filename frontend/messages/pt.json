@@ -595,5 +595,153 @@
       "WITH_CUSTOMER": "Com cliente",
       "FILLED": "Cheio"
     }
+  },
+  "production": {
+    "title": "Linha de produção",
+    "subtitle": "Prense as azeitonas pendentes e acompanhe o histórico de produção.",
+    "tabs": {
+      "production": "Linha de produção",
+      "history": "Histórico de produção",
+      "tickets": "Recibos de balança"
+    },
+    "printReport": "Relatório de produção",
+    "receipt": {
+      "title": "Recibo de entrega",
+      "production": "Produção:",
+      "deliveredAt": "Data de entrega:",
+      "customers": "Cliente(s)",
+      "drums": "Bidões",
+      "storedOil": "Azeite em depósito - Guardado no depósito",
+      "close": "Fechar"
+    },
+    "confirm": {
+      "title": "Confirmação de produção",
+      "selectedOlive": "Azeitona selecionada:",
+      "oilOut": "Azeite obtido:",
+      "yield": "Rendimento:",
+      "acidRatio": "Grau de acidez:",
+      "factoryShare": "Parte do lagar ({amount}%):",
+      "serviceFee": "Taxa de serviço ({amount} {currency}/kg):",
+      "customerRemaining": "Fica para o cliente:",
+      "warning": "Esta ação não pode ser anulada. Pretende confirmar?",
+      "cancel": "Cancelar",
+      "submit": "Confirmar e guardar"
+    },
+    "ticketsTab": {
+      "searchPlaceholder": "Procurar cliente...",
+      "allStatuses": "Todos os estados",
+      "pending": "Pendente (por prensar)",
+      "completed": "Concluído (prensado)",
+      "colDate": "Data",
+      "colCustomer": "Cliente",
+      "colOriginVarietyQuality": "Localidade / Variedade / Qualidade",
+      "colGross": "Bruto",
+      "colTare": "Tara",
+      "colNet": "Líquido",
+      "colStatus": "Estado",
+      "empty": "Nenhum registo encontrado.",
+      "qualityTree": "Da árvore",
+      "qualityGround": "Do chão",
+      "qualityMixed": "Mista",
+      "statusCompleted": "Prensado",
+      "statusPending": "Pendente"
+    },
+    "pending": {
+      "title": "Recibos pendentes ({count})",
+      "selected": "{count} selecionados • {kg}",
+      "empty": "Não há operações pendentes.",
+      "netOlive": "Azeitona líquida"
+    },
+    "form": {
+      "title": "Registo de produção",
+      "totalOil": "Azeite total obtido (kg)",
+      "oilShare": "Parte de azeite (%)",
+      "cash": "Dinheiro ({currency}/kg)",
+      "factoryShareRate": "Percentagem do lagar (%)",
+      "serviceFeeRate": "Taxa de prensagem ({currency}/kg)",
+      "acidRatio": "Grau de acidez",
+      "temp": "Temperatura (°C)",
+      "line": "N.º de linha",
+      "filtration": "Filtração",
+      "filtrationOn": "Realizada",
+      "filtrationOff": "Não realizada",
+      "tank": "Depósito de destino",
+      "tankSelect": "Selecione um depósito (opcional)",
+      "drumSelect": "Seleção de bidões (disponíveis)",
+      "noDrums": "Não há bidões disponíveis.",
+      "drumCapacity": "({capacity} L)",
+      "drumHintStore": "Quando o azeite do cliente fica em depósito, selecionar bidões é opcional (o azeite vai para o depósito).",
+      "drumHintRequired": "Selecione pelo menos um bidão para registar a produção.",
+      "storeOil": "O cliente deixou o azeite em depósito",
+      "storeOilHint": "Se não for marcado, o azeite é considerado entregue e o saldo não aumenta.",
+      "submit": "Concluir produção",
+      "submitting": "A processar..."
+    },
+    "preview": {
+      "totalOlive": "Azeitona total:",
+      "yield": "Rendimento:",
+      "factoryShare": "Parte do lagar:",
+      "serviceFee": "Taxa de serviço:",
+      "customerRemaining": "Fica para o cliente:"
+    },
+    "lastResult": {
+      "title": "Última operação bem-sucedida",
+      "yield": "Rendimento",
+      "customerRemaining": "Fica para o cliente"
+    },
+    "history": {
+      "exportExcel": "Exportar para Excel",
+      "printList": "Imprimir lista",
+      "colDateBatch": "Data / ID do lote",
+      "colOliveIn": "Azeitona recebida",
+      "colOilOut": "Azeite obtido",
+      "colYield": "Rendimento",
+      "colAcid": "Acidez",
+      "colStatus": "Estado",
+      "colActions": "Ações",
+      "empty": "Nenhum registo de produção encontrado.",
+      "statusDelivered": "Entregue",
+      "statusCompleted": "Concluído",
+      "deliver": "Entregar",
+      "deliverTitle": "Entregar os bidões ao cliente",
+      "print": "Imprimir",
+      "printTitle": "Imprimir recibo",
+      "sms": "SMS",
+      "smsTitle": "Reenviar SMS",
+      "detailsTitle": "Ver detalhes"
+    },
+    "drumSelect": {
+      "title": "Seleção de bidões",
+      "subtitle": "Selecione os bidões a entregar para o azeite em depósito.",
+      "empty": "Não há bidões disponíveis.",
+      "cancel": "Cancelar",
+      "submit": "Entregar"
+    },
+    "toasts": {
+      "exportEmpty": "Não há dados para exportar.",
+      "exportDone": "Ficheiro Excel transferido.",
+      "selectTicket": "Selecione pelo menos um recibo.",
+      "selectDrum": "Selecione pelo menos um bidão.",
+      "successSms": "Produção concluída com sucesso! Foi enviado um SMS informativo ao cliente.",
+      "successNoSms": "Produção concluída. (SMS não enviado: número de telefone em falta)",
+      "productionFailed": "A operação falhou.",
+      "storedOilDelivered": "Azeite em depósito entregue.",
+      "drumsDelivered": "Bidões entregues ao cliente.",
+      "deliveryFailed": "A entrega falhou.",
+      "smsFailed": "Não foi possível enviar o SMS."
+    },
+    "excel": {
+      "fileName": "Relatorio_Producao",
+      "batchNo": "N.º de lote",
+      "date": "Data",
+      "customer": "Cliente",
+      "variety": "Variedade de azeitona",
+      "oliveIn": "Azeitona recebida (kg)",
+      "oilOut": "Azeite obtido (kg)",
+      "yield": "Rendimento (1/X)",
+      "acidRatio": "Grau de acidez",
+      "temp": "Temperatura",
+      "filtration": "Filtração"
+    }
   }
 }

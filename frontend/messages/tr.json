@@ -595,5 +595,153 @@
       "WITH_CUSTOMER": "Müşteride",
       "FILLED": "Dolu"
     }
+  },
+  "production": {
+    "title": "Üretim Hattı",
+    "subtitle": "Bekleyen zeytinleri sıkıma al ve üretim geçmişini izle.",
+    "tabs": {
+      "production": "Üretim Hattı",
+      "history": "Üretim Geçmişi",
+      "tickets": "Kantar Fişleri"
+    },
+    "printReport": "Üretim Raporu",
+    "receipt": {
+      "title": "Teslimat Makbuzu",
+      "production": "Üretim:",
+      "deliveredAt": "Teslim Tarihi:",
+      "customers": "Müşteri(ler)",
+      "drums": "Bidonlar",
+      "storedOil": "Emanete bırakılan yağ - Tankta saklanıyor",
+      "close": "Kapat"
+    },
+    "confirm": {
+      "title": "Üretim Onayı",
+      "selectedOlive": "Seçilen Zeytin:",
+      "oilOut": "Çıkan Yağ:",
+      "yield": "Randıman:",
+      "acidRatio": "Asit Oranı:",
+      "factoryShare": "Fabrika Payı (%{amount}):",
+      "serviceFee": "Hizmet Bedeli ({amount} {currency}/kg):",
+      "customerRemaining": "Müşteriye Kalan:",
+      "warning": "Bu işlem geri alınamaz. Onaylıyor musunuz?",
+      "cancel": "İptal",
+      "submit": "Onayla ve Kaydet"
+    },
+    "ticketsTab": {
+      "searchPlaceholder": "Müşteri Ara...",
+      "allStatuses": "Tüm Durumlar",
+      "pending": "Bekleyen (Sıkılmadı)",
+      "completed": "Tamamlanan (Sıkıldı)",
+      "colDate": "Tarih",
+      "colCustomer": "Müşteri",
+      "colOriginVarietyQuality": "Köy / Cins / Kalite",
+      "colGross": "Brüt",
+      "colTare": "Dara",
+      "colNet": "Net",
+      "colStatus": "Durum",
+      "empty": "Kayıt bulunamadı.",
+      "qualityTree": "Üst/Sırık",
+      "qualityGround": "Dip",
+      "qualityMixed": "Karışık",
+      "statusCompleted": "Sıkıldı",
+      "statusPending": "Bekliyor"
+    },
+    "pending": {
+      "title": "Bekleyen Fişler ({count})",
+      "selected": "{count} seçildi • {kg}",
+      "empty": "Bekleyen işlem yok.",
+      "netOlive": "Net Zeytin"
+    },
+    "form": {
+      "title": "Üretim Girişi",
+      "totalOil": "Toplam Elde Edilen Yağ (kg)",
+      "oilShare": "Yağ Payı (%)",
+      "cash": "Para ({currency}/Kg)",
+      "factoryShareRate": "Fabrika Payı Oranı (%)",
+      "serviceFeeRate": "Sıkım Bedeli ({currency}/Kg)",
+      "acidRatio": "Asit Oranı",
+      "temp": "Sıcaklık (°C)",
+      "line": "Hat No",
+      "filtration": "Filtrasyon",
+      "filtrationOn": "Yapıldı",
+      "filtrationOff": "Yapılmadı",
+      "tank": "Aktarılacak Tank",
+      "tankSelect": "Tank Seçiniz (Opsiyonel)",
+      "drumSelect": "Bidon Seçimi (Boşta Olanlar)",
+      "noDrums": "Boşta bidon yok.",
+      "drumCapacity": "({capacity} L)",
+      "drumHintStore": "Müşteri yağı emanete bırakıldığında bidon seçimi opsiyoneldir (yağ tanka gider).",
+      "drumHintRequired": "Üretim kaydı için en az bir bidon seçin.",
+      "storeOil": "Müşteri Yağını Emanete Bıraktı",
+      "storeOilHint": "Seçilmezse yağ teslim edilmiş sayılır, bakiye artmaz.",
+      "submit": "Üretimi Tamamla",
+      "submitting": "İşleniyor..."
+    },
+    "preview": {
+      "totalOlive": "Toplam Zeytin:",
+      "yield": "Randıman:",
+      "factoryShare": "Fabrika Hakkı:",
+      "serviceFee": "Hizmet Bedeli:",
+      "customerRemaining": "Müşteriye Kalan:"
+    },
+    "lastResult": {
+      "title": "Son İşlem Başarılı",
+      "yield": "Randıman",
+      "customerRemaining": "Müşteriye Kalan"
+    },
+    "history": {
+      "exportExcel": "Excel'e Aktar",
+      "printList": "Listeyi Yazdır",
+      "colDateBatch": "Tarih / Parti ID",
+      "colOliveIn": "Giren Zeytin",
+      "colOilOut": "Çıkan Yağ",
+      "colYield": "Randıman",
+      "colAcid": "Asit",
+      "colStatus": "Durum",
+      "colActions": "İşlemler",
+      "empty": "Geçmiş üretim kaydı bulunamadı.",
+      "statusDelivered": "Teslim Edildi",
+      "statusCompleted": "Tamamlandı",
+      "deliver": "Teslim Et",
+      "deliverTitle": "Bidonları müşteriye teslim et",
+      "print": "Yazdır",
+      "printTitle": "Fiş Yazdır",
+      "sms": "SMS",
+      "smsTitle": "Tekrar SMS Gönder",
+      "detailsTitle": "Detayları Gör"
+    },
+    "drumSelect": {
+      "title": "Bidon Seçimi",
+      "subtitle": "Emanete bırakılan yağ için teslim edilecek bidonları seçin.",
+      "empty": "Boşta bidon bulunmuyor.",
+      "cancel": "İptal",
+      "submit": "Teslim Et"
+    },
+    "toasts": {
+      "exportEmpty": "Dışa aktarılacak veri bulunamadı.",
+      "exportDone": "Excel dosyası indirildi.",
+      "selectTicket": "Lütfen en az bir fiş seçin.",
+      "selectDrum": "Lütfen en az bir bidon seçin.",
+      "successSms": "Üretim başarıyla tamamlandı! Müşteriye bilgilendirme SMS'i gönderildi.",
+      "successNoSms": "Üretim başarıyla tamamlandı. (SMS gönderilemedi: Telefon no eksik)",
+      "productionFailed": "İşlem başarısız oldu.",
+      "storedOilDelivered": "Emanete bırakılan yağ teslim edildi.",
+      "drumsDelivered": "Bidonlar müşteriye teslim edildi.",
+      "deliveryFailed": "Teslim işlemi başarısız.",
+      "smsFailed": "SMS gönderilemedi."
+    },
+    "excel": {
+      "fileName": "Uretim_Raporu",
+      "batchNo": "Parti No",
+      "date": "Tarih",
+      "customer": "Müşteri",
+      "variety": "Zeytin Cinsi",
+      "oliveIn": "Giren Zeytin (kg)",
+      "oilOut": "Çıkan Yağ (kg)",
+      "yield": "Randıman (1/X)",
+      "acidRatio": "Asit Oranı",
+      "temp": "Sıcaklık",
+      "filtration": "Filtrasyon"
+    }
   }
 }
