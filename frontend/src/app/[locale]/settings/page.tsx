@@ -2,9 +2,33 @@
 
 import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
-import { Plus, Trash2, Loader2, User, Lock, Building2, Package, Save, XCircle, Settings2, Calendar } from "lucide-react";
+import { Plus, Trash2, Loader2, User, Lock, Building2, Package, Save, XCircle, Settings2, Calendar, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+
+/** Fabrika çalışma kuralları sayfasına yönlendiren kart (Faz 3 politika motoru). */
+function PolicyLink() {
+  const t = useTranslations("policy");
+  return (
+    <Link
+      href="/settings/policy"
+      className="flex items-center justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 transition hover:bg-emerald-100"
+    >
+      <div className="flex items-center gap-3">
+        <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-600 text-white">
+          <SlidersHorizontal className="h-5 w-5" />
+        </span>
+        <div>
+          <p className="font-semibold text-emerald-900">{t("title")}</p>
+          <p className="text-sm text-emerald-700">{t("subtitle")}</p>
+        </div>
+      </div>
+      <ChevronRight className="h-5 w-5 shrink-0 text-emerald-600" />
+    </Link>
+  );
+}
 
 type Product = {
   id: string;
@@ -246,6 +270,9 @@ export default function SettingsPage() {
         </h1>
         <p className="text-sm text-slate-500 mt-1">Uygulama ve hesap ayarlarını yönetin.</p>
       </div>
+
+      {/* Fabrika çalışma kuralları (politika motoru) — ayrı sayfa */}
+      <PolicyLink />
 
       {/* Tabs */}
       <div className="flex p-1 bg-slate-100 rounded-xl gap-1 flex-wrap">
