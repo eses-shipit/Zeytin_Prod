@@ -260,7 +260,7 @@
       },
       "standard": {
         "name": "Padrão",
-        "price": "14.900 ₺",
+        "price": "490 €",
         "tagline": "Um lagar, CRM completo",
         "features": [
           "Produtores e tickets ilimitados",
@@ -272,7 +272,7 @@
       },
       "pro": {
         "name": "Pro",
-        "price": "24.900 ₺",
+        "price": "790 €",
         "tagline": "Com automação de mensagens",
         "features": [
           "Tudo do plano Padrão",

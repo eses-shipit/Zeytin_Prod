@@ -260,7 +260,7 @@
       },
       "standard": {
         "name": "Standard",
-        "price": "14.900 ₺",
+        "price": "490 €",
         "tagline": "Un frantoio, CRM completo",
         "features": [
           "Conferitori e ticket illimitati",
@@ -272,7 +272,7 @@
       },
       "pro": {
         "name": "Pro",
-        "price": "24.900 ₺",
+        "price": "790 €",
         "tagline": "Con automazione messaggi",
         "features": [
           "Tutto del piano Standard",
