@@ -519,5 +519,81 @@
       "updated": "Ajustes de producción actualizados",
       "updateError": "Error al actualizar"
     }
+  },
+  "inventory": {
+    "title": "Gestión de inventario",
+    "subtitle": "Stock de producto y seguimiento de bidones.",
+    "tabs": {
+      "stock": "Estado de los depósitos",
+      "drums": "Gestión de bidones"
+    },
+    "oilTypes": {
+      "ACID_03": "Acidez 0,3",
+      "ACID_05": "Acidez 0,5",
+      "ACID_08": "Acidez 0,8",
+      "VIRGIN": "Virgen extra",
+      "LAMPANTE": "Lampante (crudo)"
+    },
+    "tank": {
+      "add": "Añadir depósito",
+      "edit": "Editar depósito",
+      "empty": "Aún no se ha añadido ningún depósito.",
+      "name": "Nombre del depósito",
+      "namePlaceholder": "Ej.: Depósito de cromo 1",
+      "capacity": "Capacidad (kg)",
+      "oilType": "Tipo de aceite",
+      "acidRatio": "Grado de acidez (%) - Opcional",
+      "acidRatioPlaceholder": "Ej.: 0,5",
+      "currentLevel": "Nivel actual (kg)",
+      "save": "Guardar",
+      "update": "Actualizar",
+      "acidLabel": "Acidez: {ratio}%",
+      "fillPercent": "{percent} lleno",
+      "editTitle": "Editar",
+      "deleteTitle": "Eliminar",
+      "added": "Depósito añadido",
+      "updated": "Depósito actualizado",
+      "addError": "No se ha podido añadir el depósito",
+      "updateError": "No se ha podido actualizar el depósito",
+      "loadError": "No se han podido cargar los depósitos",
+      "confirmDelete": "¿Seguro que desea eliminar este depósito? Esta acción no se puede deshacer.",
+      "deleted": "Depósito eliminado",
+      "deleteError": "No se ha podido eliminar el depósito"
+    },
+    "drum": {
+      "statusFilter": "Filtro de estado:",
+      "refresh": "Actualizar",
+      "addTitle": "Añadir bidón",
+      "code": "Código",
+      "codePlaceholder": "B-001",
+      "type": "Tipo",
+      "capacity": "Capacidad (kg)",
+      "add": "Añadir",
+      "colCode": "Código",
+      "colType": "Tipo",
+      "colCapacity": "Capacidad (kg)",
+      "colStatus": "Estado",
+      "colCustomer": "Cliente",
+      "colAction": "Acción",
+      "empty": "No se han encontrado registros.",
+      "return": "Devolver",
+      "codeRequired": "El código y la capacidad son obligatorios",
+      "added": "Bidón añadido",
+      "addError": "No se ha podido añadir el bidón",
+      "loadError": "No se ha podido cargar la lista de bidones",
+      "returned": "Bidón devuelto",
+      "returnError": "No se ha podido devolver"
+    },
+    "drumTypes": {
+      "PLASTIC": "PLÁSTICO",
+      "CHROME": "CROMO",
+      "TIN": "HOJALATA"
+    },
+    "status": {
+      "all": "Todos",
+      "AVAILABLE": "Libre",
+      "WITH_CUSTOMER": "Con cliente",
+      "FILLED": "Lleno"
+    }
   }
 }

@@ -519,5 +519,81 @@
       "updated": "Definições de produção atualizadas",
       "updateError": "Falha na atualização"
     }
+  },
+  "inventory": {
+    "title": "Gestão de inventário",
+    "subtitle": "Stock de produto e acompanhamento de bidões.",
+    "tabs": {
+      "stock": "Estado dos depósitos",
+      "drums": "Gestão de bidões"
+    },
+    "oilTypes": {
+      "ACID_03": "Acidez 0,3",
+      "ACID_05": "Acidez 0,5",
+      "ACID_08": "Acidez 0,8",
+      "VIRGIN": "Virgem extra",
+      "LAMPANTE": "Lampante (bruto)"
+    },
+    "tank": {
+      "add": "Adicionar depósito",
+      "edit": "Editar depósito",
+      "empty": "Ainda não foi adicionado nenhum depósito.",
+      "name": "Nome do depósito",
+      "namePlaceholder": "Ex.: Depósito de cromo 1",
+      "capacity": "Capacidade (kg)",
+      "oilType": "Tipo de azeite",
+      "acidRatio": "Grau de acidez (%) - Opcional",
+      "acidRatioPlaceholder": "Ex.: 0,5",
+      "currentLevel": "Nível atual (kg)",
+      "save": "Guardar",
+      "update": "Atualizar",
+      "acidLabel": "Acidez: {ratio}%",
+      "fillPercent": "{percent} cheio",
+      "editTitle": "Editar",
+      "deleteTitle": "Eliminar",
+      "added": "Depósito adicionado",
+      "updated": "Depósito atualizado",
+      "addError": "Não foi possível adicionar o depósito",
+      "updateError": "Não foi possível atualizar o depósito",
+      "loadError": "Não foi possível carregar os depósitos",
+      "confirmDelete": "Tem a certeza de que pretende eliminar este depósito? Esta ação não pode ser anulada.",
+      "deleted": "Depósito eliminado",
+      "deleteError": "Não foi possível eliminar o depósito"
+    },
+    "drum": {
+      "statusFilter": "Filtro de estado:",
+      "refresh": "Atualizar",
+      "addTitle": "Adicionar bidão",
+      "code": "Código",
+      "codePlaceholder": "B-001",
+      "type": "Tipo",
+      "capacity": "Capacidade (kg)",
+      "add": "Adicionar",
+      "colCode": "Código",
+      "colType": "Tipo",
+      "colCapacity": "Capacidade (kg)",
+      "colStatus": "Estado",
+      "colCustomer": "Cliente",
+      "colAction": "Ação",
+      "empty": "Nenhum registo encontrado.",
+      "return": "Devolver",
+      "codeRequired": "O código e a capacidade são obrigatórios",
+      "added": "Bidão adicionado",
+      "addError": "Não foi possível adicionar o bidão",
+      "loadError": "Não foi possível carregar a lista de bidões",
+      "returned": "Bidão devolvido",
+      "returnError": "Não foi possível devolver"
+    },
+    "drumTypes": {
+      "PLASTIC": "PLÁSTICO",
+      "CHROME": "CROMO",
+      "TIN": "LATA"
+    },
+    "status": {
+      "all": "Todos",
+      "AVAILABLE": "Livre",
+      "WITH_CUSTOMER": "Com cliente",
+      "FILLED": "Cheio"
+    }
   }
 }

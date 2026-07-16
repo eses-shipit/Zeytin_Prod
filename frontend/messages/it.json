@@ -519,5 +519,81 @@
       "updated": "Impostazioni di produzione aggiornate",
       "updateError": "Aggiornamento non riuscito"
     }
+  },
+  "inventory": {
+    "title": "Gestione inventario",
+    "subtitle": "Stock di prodotto e monitoraggio dei fusti.",
+    "tabs": {
+      "stock": "Stato dei serbatoi",
+      "drums": "Gestione fusti"
+    },
+    "oilTypes": {
+      "ACID_03": "Acidità 0,3",
+      "ACID_05": "Acidità 0,5",
+      "ACID_08": "Acidità 0,8",
+      "VIRGIN": "Extra vergine",
+      "LAMPANTE": "Lampante (grezzo)"
+    },
+    "tank": {
+      "add": "Aggiungi serbatoio",
+      "edit": "Modifica serbatoio",
+      "empty": "Nessun serbatoio ancora aggiunto.",
+      "name": "Nome serbatoio",
+      "namePlaceholder": "Es.: Serbatoio cromo 1",
+      "capacity": "Capacità (kg)",
+      "oilType": "Tipo di olio",
+      "acidRatio": "Grado di acidità (%) - Opzionale",
+      "acidRatioPlaceholder": "Es.: 0,5",
+      "currentLevel": "Livello attuale (kg)",
+      "save": "Salva",
+      "update": "Aggiorna",
+      "acidLabel": "Acidità: {ratio}%",
+      "fillPercent": "{percent} pieno",
+      "editTitle": "Modifica",
+      "deleteTitle": "Elimina",
+      "added": "Serbatoio aggiunto",
+      "updated": "Serbatoio aggiornato",
+      "addError": "Impossibile aggiungere il serbatoio",
+      "updateError": "Impossibile aggiornare il serbatoio",
+      "loadError": "Impossibile caricare i serbatoi",
+      "confirmDelete": "Vuoi davvero eliminare questo serbatoio? L'operazione è irreversibile.",
+      "deleted": "Serbatoio eliminato",
+      "deleteError": "Impossibile eliminare il serbatoio"
+    },
+    "drum": {
+      "statusFilter": "Filtro stato:",
+      "refresh": "Aggiorna",
+      "addTitle": "Aggiungi fusto",
+      "code": "Codice",
+      "codePlaceholder": "B-001",
+      "type": "Tipo",
+      "capacity": "Capacità (kg)",
+      "add": "Aggiungi",
+      "colCode": "Codice",
+      "colType": "Tipo",
+      "colCapacity": "Capacità (kg)",
+      "colStatus": "Stato",
+      "colCustomer": "Cliente",
+      "colAction": "Azione",
+      "empty": "Nessun record trovato.",
+      "return": "Rendi",
+      "codeRequired": "Codice e capacità obbligatori",
+      "added": "Fusto aggiunto",
+      "addError": "Impossibile aggiungere il fusto",
+      "loadError": "Impossibile caricare l'elenco dei fusti",
+      "returned": "Fusto reso",
+      "returnError": "Impossibile effettuare il reso"
+    },
+    "drumTypes": {
+      "PLASTIC": "PLASTICA",
+      "CHROME": "CROMO",
+      "TIN": "LATTA"
+    },
+    "status": {
+      "all": "Tutti",
+      "AVAILABLE": "Libero",
+      "WITH_CUSTOMER": "Dal cliente",
+      "FILLED": "Pieno"
+    }
   }
 }

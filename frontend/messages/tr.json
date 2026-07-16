@@ -519,5 +519,81 @@
       "updated": "Üretim ayarları güncellendi",
       "updateError": "Güncelleme başarısız"
     }
+  },
+  "inventory": {
+    "title": "Envanter Yönetimi",
+    "subtitle": "Ürün stoğu ve bidon takibi.",
+    "tabs": {
+      "stock": "Tanker Durumu",
+      "drums": "Bidon Yönetimi"
+    },
+    "oilTypes": {
+      "ACID_03": "0.3 Asit",
+      "ACID_05": "0.5 Asit",
+      "ACID_08": "0.8 Asit",
+      "VIRGIN": "Natürel Sızma",
+      "LAMPANTE": "Lampante (Ham)"
+    },
+    "tank": {
+      "add": "Yeni Tank Ekle",
+      "edit": "Tank Düzenle",
+      "empty": "Henüz tank eklenmemiş.",
+      "name": "Tank Adı",
+      "namePlaceholder": "Örn: Krom Tank 1",
+      "capacity": "Kapasite (kg)",
+      "oilType": "Yağ Tipi",
+      "acidRatio": "Asit Oranı (%) - Opsiyonel",
+      "acidRatioPlaceholder": "Örn: 0.5",
+      "currentLevel": "Mevcut Seviye (kg)",
+      "save": "Kaydet",
+      "update": "Güncelle",
+      "acidLabel": "Asit: {ratio}%",
+      "fillPercent": "{percent} Dolu",
+      "editTitle": "Düzenle",
+      "deleteTitle": "Sil",
+      "added": "Tank eklendi",
+      "updated": "Tank güncellendi",
+      "addError": "Tank eklenemedi",
+      "updateError": "Tank güncellenemedi",
+      "loadError": "Tanklar yüklenemedi",
+      "confirmDelete": "Bu tankı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      "deleted": "Tank silindi",
+      "deleteError": "Tank silinemedi"
+    },
+    "drum": {
+      "statusFilter": "Durum Filtresi:",
+      "refresh": "Yenile",
+      "addTitle": "Yeni Bidon Ekle",
+      "code": "Kod",
+      "codePlaceholder": "B-001",
+      "type": "Tip",
+      "capacity": "Kapasite (kg)",
+      "add": "Ekle",
+      "colCode": "Kod",
+      "colType": "Tip",
+      "colCapacity": "Kapasite (kg)",
+      "colStatus": "Durum",
+      "colCustomer": "Müşteri",
+      "colAction": "Aksiyon",
+      "empty": "Kayıt bulunamadı.",
+      "return": "İade Al",
+      "codeRequired": "Kod ve kapasite gerekli",
+      "added": "Bidon eklendi",
+      "addError": "Bidon eklenemedi",
+      "loadError": "Bidon listesi alınamadı",
+      "returned": "Bidon iade alındı",
+      "returnError": "İade alınamadı"
+    },
+    "drumTypes": {
+      "PLASTIC": "PLASTİK",
+      "CHROME": "KROM",
+      "TIN": "TENEKE"
+    },
+    "status": {
+      "all": "Tümü",
+      "AVAILABLE": "Boşta",
+      "WITH_CUSTOMER": "Müşteride",
+      "FILLED": "Dolu"
+    }
   }
 }

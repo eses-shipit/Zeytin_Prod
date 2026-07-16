@@ -5,15 +5,12 @@ import axios from "@/lib/axios";
 import { Package, Cylinder, Plus, Droplet, XCircle, Loader2, CheckCircle2, RefreshCw, RotateCcw, ShieldPlus, Edit, Trash2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { toast } from "sonner";
+import { useTranslations, useLocale } from "next-intl";
+import { formatKg, formatPercent } from "@/lib/format";
+import type { Locale } from "@/i18n/routing";
 
-// Tank Tipleri
-const OIL_TYPES = [
-  { value: "ACID_03", label: "0.3 Asit" },
-  { value: "ACID_05", label: "0.5 Asit" },
-  { value: "ACID_08", label: "0.8 Asit" },
-  { value: "VIRGIN", label: "Natürel Sızma" },
-  { value: "LAMPANTE", label: "Lampante (Ham)" },
-];
+// Tank yağ tipi değerleri; etiketleri `inventory.oilTypes.<value>` kataloğundan gelir.
+const OIL_TYPE_VALUES = ["ACID_03", "ACID_05", "ACID_08", "VIRGIN", "LAMPANTE"] as const;
 
 type Tank = {
   id: string;
@@ -49,6 +46,7 @@ function AddTankModal({
   onSuccess: () => void;
   editingTank?: Tank | null;
 }) {
+  const t = useTranslations("inventory");
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState<number>(1000);
   const [type, setType] = useState("ACID_05");
@@ -86,21 +84,21 @@ function AddTankModal({
           acidRatio: acidRatio !== "" ? Number(acidRatio) : undefined,
           currentLevel,
         });
-        toast.success("Tank güncellendi");
+        toast.success(t("tank.updated"));
       } else {
         // Ekleme
-        await axios.post("/stock/tanks", { 
-          name, 
-          capacity, 
+        await axios.post("/stock/tanks", {
+          name,
+          capacity,
           type,
           acidRatio: acidRatio !== "" ? Number(acidRatio) : undefined,
         });
-        toast.success("Tank eklendi");
+        toast.success(t("tank.added"));
       }
       onSuccess();
       onClose();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || (editingTank ? "Tank güncellenemedi" : "Tank eklenemedi"));
+      toast.error(error.response?.data?.message || (editingTank ? t("tank.updateError") : t("tank.addError")));
     } finally {
       setIsSubmitting(false);
     }
@@ -112,7 +110,7 @@ function AddTankModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in zoom-in-95">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">{editingTank ? "Tank Düzenle" : "Yeni Tank Ekle"}</h3>
+          <h3 className="text-lg font-semibold text-slate-900">{editingTank ? t("tank.edit") : t("tank.add")}</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
             <XCircle className="h-6 w-6" />
           </button>
@@ -120,18 +118,18 @@ function AddTankModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Tank Adı</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("tank.name")}</label>
             <input
               required
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Örn: Krom Tank 1"
+              placeholder={t("tank.namePlaceholder")}
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Kapasite (kg)</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("tank.capacity")}</label>
             <input
               required
               type="number"
@@ -142,34 +140,34 @@ function AddTankModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Yağ Tipi</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("tank.oilType")}</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
             >
-              {OIL_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
+              {OIL_TYPE_VALUES.map((value) => (
+                <option key={value} value={value}>
+                  {t(`oilTypes.${value}`)}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Asit Oranı (%) - Opsiyonel</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("tank.acidRatio")}</label>
             <input
               type="number"
               step={0.1}
               min={0}
               value={acidRatio}
               onChange={(e) => setAcidRatio(e.target.value === "" ? "" : Number(e.target.value))}
-              placeholder="Örn: 0.5"
+              placeholder={t("tank.acidRatioPlaceholder")}
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </div>
           {editingTank && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Mevcut Seviye (kg)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("tank.currentLevel")}</label>
               <input
                 required
                 type="number"
@@ -187,7 +185,7 @@ function AddTankModal({
             className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {editingTank ? "Güncelle" : "Kaydet"}
+            {editingTank ? t("tank.update") : t("tank.save")}
           </button>
         </form>
       </div>
@@ -196,6 +194,8 @@ function AddTankModal({
 }
 
 export default function InventoryPage() {
+  const t = useTranslations("inventory");
+  const locale = useLocale() as Locale;
   const [activeTab, setActiveTab] = useState<"stock" | "drums">("stock");
   
   // Stock State
@@ -233,20 +233,20 @@ export default function InventoryPage() {
       setTanks(res.data);
     } catch (error) {
       console.error(error);
-      toast.error("Tanklar yüklenemedi");
+      toast.error(t("tank.loadError"));
     }
   };
 
   const handleDeleteTank = async (id: string) => {
-    if (!confirm("Bu tankı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) {
+    if (!confirm(t("tank.confirmDelete"))) {
       return;
     }
     try {
       await axios.delete(`/stock/tanks/${id}`);
-      toast.success("Tank silindi");
+      toast.success(t("tank.deleted"));
       fetchTanks();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Tank silinemedi");
+      toast.error(error.response?.data?.message || t("tank.deleteError"));
     }
   };
 
@@ -259,7 +259,7 @@ export default function InventoryPage() {
       setDrums(res.data);
     } catch (err) {
       console.error(err);
-      toast.error("Bidon listesi alınamadı");
+      toast.error(t("drum.loadError"));
     } finally {
       setLoading(false);
     }
@@ -280,17 +280,17 @@ export default function InventoryPage() {
 
   const handleCreateDrum = async () => {
     if (!form.code || form.capacity <= 0) {
-      toast.error("Kod ve kapasite gerekli");
+      toast.error(t("drum.codeRequired"));
       return;
     }
     setCreating(true);
     try {
       await axios.post("/production/drums", form);
-      toast.success("Bidon eklendi");
+      toast.success(t("drum.added"));
       setForm({ code: "", type: "PLASTIC", capacity: defaultDrumCapacity });
       fetchDrums();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Bidon eklenemedi");
+      toast.error(err.response?.data?.message || t("drum.addError"));
     } finally {
       setCreating(false);
     }
@@ -299,10 +299,10 @@ export default function InventoryPage() {
   const handleReturn = async (id: string) => {
     try {
       await axios.post("/production/return-drums", { drumIds: [id] });
-      toast.success("Bidon iade alındı");
+      toast.success(t("drum.returned"));
       fetchDrums();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "İade alınamadı");
+      toast.error(err.response?.data?.message || t("drum.returnError"));
     }
   };
 
@@ -312,9 +312,9 @@ export default function InventoryPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Package className="h-6 w-6 text-indigo-600" />
-            Envanter Yönetimi
+            {t("title")}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Ürün stoğu ve bidon takibi.</p>
+          <p className="text-sm text-slate-500 mt-1">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -327,7 +327,7 @@ export default function InventoryPage() {
             activeTab === "stock" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
-          Tanker Durumu
+          {t("tabs.stock")}
         </button>
         <button
           onClick={() => setActiveTab("drums")}
@@ -336,7 +336,7 @@ export default function InventoryPage() {
             activeTab === "drums" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
-          Bidon Yönetimi
+          {t("tabs.drums")}
         </button>
       </div>
 
@@ -348,7 +348,7 @@ export default function InventoryPage() {
               className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 shadow-sm"
             >
               <Plus className="h-4 w-4" />
-              Yeni Tank Ekle
+              {t("tank.add")}
             </button>
           </div>
 
@@ -356,7 +356,7 @@ export default function InventoryPage() {
             {tanks.length === 0 ? (
               <div className="col-span-full py-12 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl">
                 <Cylinder className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p>Henüz tank eklenmemiş.</p>
+                <p>{t("tank.empty")}</p>
               </div>
             ) : (
               tanks.map((tank) => {
@@ -367,11 +367,11 @@ export default function InventoryPage() {
                       <div className="flex-1">
                         <h3 className="font-bold text-lg text-slate-900 mb-1">{tank.name}</h3>
                         <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-                          {OIL_TYPES.find(t => t.value === tank.type)?.label || tank.type}
+                          {(OIL_TYPE_VALUES as readonly string[]).includes(tank.type) ? t(`oilTypes.${tank.type}`) : tank.type}
                         </div>
                         {tank.acidRatio && (
                           <div className="text-xs text-amber-600 font-semibold">
-                            Asit: {tank.acidRatio}%
+                            {t("tank.acidLabel", { ratio: tank.acidRatio })}
                           </div>
                         )}
                       </div>
@@ -382,14 +382,14 @@ export default function InventoryPage() {
                             setIsTankModalOpen(true);
                           }}
                           className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                          title="Düzenle"
+                          title={t("tank.editTitle")}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteTank(tank.id)}
                           className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                          title="Sil"
+                          title={t("tank.deleteTitle")}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -401,8 +401,8 @@ export default function InventoryPage() {
 
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="font-semibold text-slate-700">{tank.currentLevel.toLocaleString("tr-TR")} kg</span>
-                        <span className="text-slate-500">/ {tank.capacity.toLocaleString("tr-TR")} kg</span>
+                        <span className="font-semibold text-slate-700">{formatKg(tank.currentLevel, locale)}</span>
+                        <span className="text-slate-500">/ {formatKg(tank.capacity, locale)}</span>
                       </div>
                       
                       {/* Progress Bar */}
@@ -418,7 +418,7 @@ export default function InventoryPage() {
                           />
                         </div>
                         <div className="text-center text-xs font-bold text-slate-600 mt-1">
-                          %{fillPercentage.toFixed(1)} Dolu
+                          {t("tank.fillPercent", { percent: formatPercent(fillPercentage, locale) })}
                         </div>
                       </div>
                     </div>
@@ -447,12 +447,12 @@ export default function InventoryPage() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between p-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-600">Durum Filtresi:</span>
+                <span className="text-sm text-slate-600">{t("drum.statusFilter")}</span>
                 <div className="flex gap-2">
                   {[
-                    { key: "", label: "Tümü" },
-                    { key: "AVAILABLE", label: "Boşta" },
-                    { key: "WITH_CUSTOMER", label: "Müşteride" },
+                    { key: "", label: t("status.all") },
+                    { key: "AVAILABLE", label: t("status.AVAILABLE") },
+                    { key: "WITH_CUSTOMER", label: t("status.WITH_CUSTOMER") },
                   ].map((f) => (
                     <button
                       key={f.key}
@@ -471,7 +471,7 @@ export default function InventoryPage() {
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
               >
                 <RefreshCw className="h-4 w-4" />
-                Yenile
+                {t("drum.refresh")}
               </button>
             </div>
 
@@ -479,12 +479,12 @@ export default function InventoryPage() {
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                   <tr>
-                    <th className="px-4 py-3 text-left">Kod</th>
-                    <th className="px-4 py-3 text-left">Tip</th>
-                    <th className="px-4 py-3 text-left">Kapasite (kg)</th>
-                    <th className="px-4 py-3 text-left">Durum</th>
-                    <th className="px-4 py-3 text-left">Müşteri</th>
-                    <th className="px-4 py-3 text-right">Aksiyon</th>
+                    <th className="px-4 py-3 text-left">{t("drum.colCode")}</th>
+                    <th className="px-4 py-3 text-left">{t("drum.colType")}</th>
+                    <th className="px-4 py-3 text-left">{t("drum.colCapacity")}</th>
+                    <th className="px-4 py-3 text-left">{t("drum.colStatus")}</th>
+                    <th className="px-4 py-3 text-left">{t("drum.colCustomer")}</th>
+                    <th className="px-4 py-3 text-right">{t("drum.colAction")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
@@ -497,7 +497,7 @@ export default function InventoryPage() {
                   ) : drums.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-6 text-center text-slate-500">
-                        Kayıt bulunamadı.
+                        {t("drum.empty")}
                       </td>
                     </tr>
                   ) : (
@@ -505,9 +505,9 @@ export default function InventoryPage() {
                       <tr key={d.id}>
                         <td className="px-4 py-3 font-semibold text-slate-900">{d.code}</td>
                         <td className="px-4 py-3 text-slate-700">
-                          {d.type === "PLASTIC" ? "PLASTİK" : d.type === "CHROME" ? "KROM" : "TENEKE"}
+                          {t(`drumTypes.${d.type}`)}
                         </td>
-                        <td className="px-4 py-3 text-slate-700">{d.capacity} kg</td>
+                        <td className="px-4 py-3 text-slate-700">{formatKg(d.capacity, locale)}</td>
                         <td className="px-4 py-3">
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -521,7 +521,7 @@ export default function InventoryPage() {
                             {d.status === "AVAILABLE" && <CheckCircle2 className="h-3.5 w-3.5" />}
                             {d.status === "WITH_CUSTOMER" && <RotateCcw className="h-3.5 w-3.5" />}
                             {d.status === "FILLED" && <ShieldPlus className="h-3.5 w-3.5" />}
-                            {d.status === "AVAILABLE" ? "Boşta" : d.status === "WITH_CUSTOMER" ? "Müşteride" : "Dolu"}
+                            {d.status === "AVAILABLE" ? t("status.AVAILABLE") : d.status === "WITH_CUSTOMER" ? t("status.WITH_CUSTOMER") : t("status.FILLED")}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-slate-700">
@@ -537,7 +537,7 @@ export default function InventoryPage() {
                               onClick={() => handleReturn(d.id)}
                               className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                             >
-                              İade Al
+                              {t("drum.return")}
                             </button>
                           ) : (
                             <span className="text-xs text-slate-400">-</span>
@@ -553,31 +553,31 @@ export default function InventoryPage() {
 
           {/* Create Form */}
           <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-900">Yeni Bidon Ekle</h3>
+            <h3 className="text-sm font-semibold text-slate-900">{t("drum.addTitle")}</h3>
             <div className="space-y-3 text-sm">
               <div>
-                <label className="block text-slate-600 mb-1">Kod</label>
+                <label className="block text-slate-600 mb-1">{t("drum.code")}</label>
                 <input
                   value={form.code}
                   onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                  placeholder="B-001"
+                  placeholder={t("drum.codePlaceholder")}
                 />
               </div>
               <div>
-                <label className="block text-slate-600 mb-1">Tip</label>
+                <label className="block text-slate-600 mb-1">{t("drum.type")}</label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as Drum["type"] })}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2"
                 >
-                  <option value="PLASTIC">PLASTIK</option>
-                  <option value="CHROME">KROM</option>
-                  <option value="TIN">TENEKE</option>
+                  <option value="PLASTIC">{t("drumTypes.PLASTIC")}</option>
+                  <option value="CHROME">{t("drumTypes.CHROME")}</option>
+                  <option value="TIN">{t("drumTypes.TIN")}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-slate-600 mb-1">Kapasite (kg)</label>
+                <label className="block text-slate-600 mb-1">{t("drum.capacity")}</label>
                 <input
                   type="number"
                   min={1}
@@ -591,7 +591,7 @@ export default function InventoryPage() {
                 disabled={creating}
                 className="w-full rounded-lg bg-indigo-600 text-white py-2 font-semibold hover:bg-indigo-700 disabled:opacity-60"
               >
-                {creating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Ekle"}
+                {creating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : t("drum.add")}
               </button>
             </div>
           </div>
