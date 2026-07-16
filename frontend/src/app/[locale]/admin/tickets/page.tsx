@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import { cn } from "@/lib/cn";
 import { CheckCircle2, AlertCircle, Clock, XCircle, ArrowLeft, Send } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { formatDateTime, formatNumber, formatPercent } from "@/lib/format";
 import { toast } from "sonner";
 
 type Ticket = {
@@ -26,6 +28,8 @@ type Stats = {
 };
 
 export default function AdminTicketsPage() {
+  const t = useTranslations("admin.tickets");
+  const locale = useLocale() as Locale;
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("OPEN");
@@ -53,29 +57,29 @@ export default function AdminTicketsPage() {
         <Link href="/admin" className="p-2 hover:bg-slate-100 rounded-lg">
           <ArrowLeft className="w-5 h-5 text-slate-500" />
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">Destek Merkezi Yönetimi</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-           <div className="text-sm font-medium text-slate-500">Ort. Çözüm Süresi</div>
-           <div className="text-3xl font-bold text-slate-900 mt-2">{stats?.avgResolutionTime ?? 0}s</div>
+           <div className="text-sm font-medium text-slate-500">{t("avgResolution")}</div>
+           <div className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(stats?.avgResolutionTime ?? 0, locale)}{t("hourSuffix")}</div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-           <div className="text-sm font-medium text-slate-500">SLA Uyumu (24h)</div>
+           <div className="text-sm font-medium text-slate-500">{t("slaCompliance")}</div>
            <div className={cn(
              "text-3xl font-bold mt-2",
              (stats?.slaComplianceRate ?? 0) > 90 ? "text-emerald-600" : "text-orange-600"
-           )}>%{stats?.slaComplianceRate ?? 0}</div>
+           )}>{formatPercent(stats?.slaComplianceRate ?? 0, locale, 0)}</div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-           <div className="text-sm font-medium text-slate-500">Açık Talepler</div>
-           <div className="text-3xl font-bold text-slate-900 mt-2">{stats?.openTickets ?? 0}</div>
+           <div className="text-sm font-medium text-slate-500">{t("openTickets")}</div>
+           <div className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(stats?.openTickets ?? 0, locale)}</div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 bg-rose-50 border-rose-100">
-           <div className="text-sm font-medium text-rose-600">Acil Durumlar</div>
-           <div className="text-3xl font-bold text-rose-700 mt-2">{stats?.urgentTickets ?? 0}</div>
+           <div className="text-sm font-medium text-rose-600">{t("urgent")}</div>
+           <div className="text-3xl font-bold text-rose-700 mt-2">{formatNumber(stats?.urgentTickets ?? 0, locale)}</div>
         </div>
       </div>
 
@@ -92,9 +96,7 @@ export default function AdminTicketsPage() {
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             )}
           >
-            {status === 'ALL' ? 'Tümü' : 
-             status === 'OPEN' ? 'Açık' :
-             status === 'IN_PROGRESS' ? 'İşleniyor' : 'Çözüldü'}
+            {t(`filters.${status}`)}
           </button>
         ))}
       </div>
@@ -104,11 +106,11 @@ export default function AdminTicketsPage() {
         <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Fabrika</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Konu</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Durum</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Öncelik</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm text-right">Oluşturulma</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colFactory")}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colSubject")}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colStatus")}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t("colPriority")}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm text-right">{t("colCreated")}</th>
               <th className="px-6 py-4 text-right"></th>
             </tr>
           </thead>
@@ -130,19 +132,19 @@ export default function AdminTicketsPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                   {ticket.priority === 'URGENT' && <span className="text-rose-600 font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4"/> ACİL</span>}
-                   {ticket.priority === 'HIGH' && <span className="text-orange-600 font-medium">Yüksek</span>}
-                   {ticket.priority === 'NORMAL' && <span className="text-slate-600">Normal</span>}
+                   {ticket.priority === 'URGENT' && <span className="text-rose-600 font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4"/> {t("priority.URGENT")}</span>}
+                   {ticket.priority === 'HIGH' && <span className="text-orange-600 font-medium">{t("priority.HIGH")}</span>}
+                   {ticket.priority === 'NORMAL' && <span className="text-slate-600">{t("priority.NORMAL")}</span>}
                 </td>
                 <td className="px-6 py-4 text-right text-sm text-slate-500">
-                  {new Date(ticket.createdAt).toLocaleString('tr-TR')}
+                  {formatDateTime(ticket.createdAt, locale)}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <Link 
+                  <Link
                     href={`/admin/tickets/${ticket.id}`}
                     className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                   >
-                    Yönet
+                    {t("manage")}
                   </Link>
                 </td>
               </tr>

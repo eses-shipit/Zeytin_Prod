@@ -2,9 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import axios from "@/lib/axios";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, Send, CheckCircle2, Clock } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { toast } from "sonner";
 
@@ -26,6 +29,8 @@ type TicketDetail = {
 };
 
 export default function AdminTicketDetailPage() {
+  const t = useTranslations("admin.ticketDetail");
+  const locale = useLocale() as Locale;
   const { id } = useParams();
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [newMessage, setNewMessage] = useState("");
@@ -77,31 +82,33 @@ export default function AdminTicketDetailPage() {
       };
       setTicket(prev => prev ? { ...prev, messages: [...prev.messages, newMsg] } : null);
     } catch (err) {
-      toast.error("Mesaj gönderilemedi.");
+      toast.error(t("sendError"));
     }
   };
 
   const updateStatus = async (status: string) => {
       try {
           await axios.put(`/support/admin/${id}/status`, { status });
-          toast.success(`Durum güncellendi: ${status}`);
+          toast.success(t("statusUpdated", { status: t(`status.${status}`) }));
           setTicket(prev => prev ? { ...prev, status } : null);
       } catch (err) {
-          toast.error("Durum güncellenemedi.");
+          toast.error(t("statusUpdateError"));
       }
   };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case "URGENT": return "Acil";
-      case "HIGH": return "Yüksek";
-      case "NORMAL": return "Normal";
-      case "LOW": return "Düşük";
-      default: return priority;
+      case "URGENT":
+      case "HIGH":
+      case "NORMAL":
+      case "LOW":
+        return t(`priority.${priority}`);
+      default:
+        return priority;
     }
   };
 
-  if (!ticket) return <div className="p-8 text-center text-slate-500">Yükleniyor...</div>;
+  if (!ticket) return <div className="p-8 text-center text-slate-500">{t("loading")}</div>;
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50">
@@ -125,10 +132,10 @@ export default function AdminTicketDetailPage() {
                 onChange={(e) => updateStatus(e.target.value)}
                 className="text-sm border-slate-200 rounded-lg px-2 py-1 bg-slate-50"
             >
-                <option value="OPEN">Açık</option>
-                <option value="IN_PROGRESS">İşleniyor</option>
-                <option value="WAITING_FOR_CUSTOMER">Müşteri Bekleniyor</option>
-                <option value="RESOLVED">Çözüldü</option>
+                <option value="OPEN">{t("status.OPEN")}</option>
+                <option value="IN_PROGRESS">{t("status.IN_PROGRESS")}</option>
+                <option value="WAITING_FOR_CUSTOMER">{t("status.WAITING_FOR_CUSTOMER")}</option>
+                <option value="RESOLVED">{t("status.RESOLVED")}</option>
             </select>
             <div className={cn(
                 "text-xs font-medium px-3 py-1 rounded-full",
@@ -157,7 +164,7 @@ export default function AdminTicketDetailPage() {
               {msg.message}
             </div>
             <span className="text-[10px] text-slate-400 mt-1 px-1">
-              {msg.sender === "ADMIN" ? "Siz (Destek)" : ticket.tenant.name} • {new Date(msg.createdAt).toLocaleTimeString()}
+              {msg.sender === "ADMIN" ? t("you") : ticket.tenant.name} • {formatDate(msg.createdAt, locale, { hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>
         ))}
@@ -170,7 +177,7 @@ export default function AdminTicketDetailPage() {
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Yanıt yazın..."
+            placeholder={t("replyPlaceholder")}
             className="flex-1 rounded-xl border-slate-200 bg-slate-50 pl-4 pr-12 py-3 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 transition-all"
           />
           <button
