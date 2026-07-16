@@ -351,5 +351,93 @@
     "noPrice": "No hay precio para hoy.",
     "on": "Activado",
     "off": "Desactivado"
+  },
+  "auth": {
+    "tagline": "Automatización para almazaras",
+    "login": {
+      "meta": {
+        "title": "Iniciar sesión",
+        "description": "Inicie sesión en el panel de gestión de ZeytinSaaS. Gestione la báscula, la producción y los clientes desde un solo panel.",
+        "ogTitle": "Iniciar sesión | ZeytinSaaS",
+        "ogDescription": "Inicie sesión en el panel de gestión de ZeytinSaaS."
+      },
+      "welcome": "Bienvenido",
+      "subtitle": "Inicie sesión en su cuenta.",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "admin@ejemplo.com",
+      "password": "Contraseña",
+      "forgotPassword": "¿Olvidó su contraseña?",
+      "submit": "Iniciar sesión",
+      "success": "Sesión iniciada",
+      "error": "Error al iniciar sesión.",
+      "noAccount": "¿Aún no tiene una cuenta?",
+      "registerNow": "Regístrese ahora"
+    },
+    "register": {
+      "meta": {
+        "title": "Cree el registro de su almazara",
+        "description": "Registre su almazara en ZeytinSaaS. Comprobantes de báscula, seguimiento de producción y cuentas de clientes en una sola plataforma.",
+        "ogTitle": "Cree el registro de su almazara | ZeytinSaaS",
+        "ogDescription": "Registre su almazara en ZeytinSaaS y digitalice todos sus procesos."
+      },
+      "licenseValidated": "¡Licencia validada! (Plan de {days} días)",
+      "licenseRequired": "Introduzca el código de licencia.",
+      "licenseInvalid": "Código de licencia no válido.",
+      "factoryRequired": "El nombre de la almazara y el código corto son obligatorios.",
+      "shortCodeMin": "El código corto debe tener al menos 3 caracteres.",
+      "success": "¡Registro completado! Ya puede iniciar sesión.",
+      "genericError": "Error en el registro.",
+      "emailExists": "Este correo electrónico ya está registrado.",
+      "forgotYourPassword": "¿Olvidó su contraseña?",
+      "step1Title": "Activación de licencia",
+      "step1Subtitle": "Introduzca el código de licencia que ha recibido.",
+      "licenseCode": "Código de licencia",
+      "step2Title": "Datos de la almazara",
+      "step2Subtitle": "Registremos su empresa en el sistema.",
+      "factoryName": "Nombre de la almazara (rótulo)",
+      "factoryNamePlaceholder": "Ej.: Almazara Aydın",
+      "officialName": "Razón social (facturación)",
+      "officialNamePlaceholder": "Ej.: Aydın Alimentación S.L.",
+      "shortCode": "Código corto",
+      "taxId": "NIF / CIF",
+      "city": "Ciudad",
+      "cityPlaceholder": "Sevilla",
+      "address": "Dirección",
+      "addressPlaceholder": "Calle, número, población...",
+      "step3Title": "Cuenta de administrador",
+      "step3Subtitle": "Persona autorizada que accederá al sistema.",
+      "fullName": "Nombre y apellidos",
+      "fullNamePlaceholder": "Juan Pérez",
+      "phone": "Teléfono",
+      "phonePlaceholder": "600 000 000",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "juan@ejemplo.com",
+      "password": "Contraseña",
+      "terms": "He leído y acepto las <terms>condiciones de uso</terms> y el <privacy>aviso de privacidad</privacy>.",
+      "back": "Atrás",
+      "continue": "Continuar",
+      "complete": "Completar registro",
+      "haveAccount": "¿Ya tiene una cuenta?",
+      "login": "Iniciar sesión"
+    },
+    "forgot": {
+      "meta": {
+        "title": "Recuperar contraseña",
+        "description": "Restablezca la contraseña de su cuenta."
+      },
+      "brandSubtitle": "Recuperación de contraseña",
+      "verifyTitle": "Verifique su cuenta",
+      "verifySubtitle": "Por seguridad, introduzca su correo y código de licencia.",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "admin@ejemplo.com",
+      "licenseCode": "Código de licencia",
+      "submit": "Verificar y mostrar contraseña",
+      "verified": "Datos verificados.",
+      "verifyError": "No se han podido verificar los datos.",
+      "identityVerified": "¡Identidad verificada!",
+      "currentPassword": "Su contraseña actual:",
+      "login": "Iniciar sesión",
+      "backToLogin": "Volver al inicio de sesión"
+    }
   }
 }

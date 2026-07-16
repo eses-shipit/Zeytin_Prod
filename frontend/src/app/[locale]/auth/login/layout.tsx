@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { INDEXABLE, localizedAlternates } from "@/lib/seo";
 import { localeToOpenGraph, isLocale, routing } from "@/i18n/routing";
 
@@ -8,11 +9,6 @@ import { localeToOpenGraph, isLocale, routing } from "@/i18n/routing";
  *
  * Bu sayfa PUBLIC_PATHS içinde: root'taki noindex varsayılanını bilinçli olarak
  * geçersiz kılıyoruz. Herkese açık olduğu için hreflang de BURADA anlamlı.
- *
- * NOT: Başlık/açıklama metinleri halen Türkçe — bu sayfanın stringleri henüz
- * kataloğa taşınmadı (bkz. I18N.md, öncelik listesi). hreflang şu an sadece
- * "bu URL'nin şu dillerdeki karşılığı budur" diyor; içerik migrasyonu
- * yapıldığında bu metinler de `getTranslations` ile buradan gelecek.
  */
 export async function generateMetadata({
   params: { locale },
@@ -21,11 +17,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const activeLocale = isLocale(locale) ? locale : routing.defaultLocale;
   const alternates = localizedAlternates("/auth/login");
+  const t = await getTranslations({ locale, namespace: "auth.login.meta" });
 
   return {
-    title: "Giriş Yap",
-    description:
-      "ZeytinSaaS fabrika yönetim paneline giriş yapın. Kantar, üretim ve müşteri işlemlerinizi tek panelden yönetin.",
+    title: t("title"),
+    description: t("description"),
     alternates,
     robots: INDEXABLE,
     openGraph: {
@@ -33,8 +29,8 @@ export async function generateMetadata({
       locale: localeToOpenGraph[activeLocale],
       siteName: "ZeytinSaaS",
       url: alternates.languages[activeLocale],
-      title: "Giriş Yap | ZeytinSaaS",
-      description: "ZeytinSaaS fabrika yönetim paneline giriş yapın.",
+      title: t("ogTitle"),
+      description: t("ogDescription"),
     },
   };
 }

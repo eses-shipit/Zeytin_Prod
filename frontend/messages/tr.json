@@ -351,5 +351,93 @@
     "noPrice": "Bugün için fiyat girilmemiş.",
     "on": "Açık",
     "off": "Kapalı"
+  },
+  "auth": {
+    "tagline": "Zeytinyağı Fabrika Otomasyonu",
+    "login": {
+      "meta": {
+        "title": "Giriş Yap",
+        "description": "ZeytinSaaS fabrika yönetim paneline giriş yapın. Kantar, üretim ve müşteri işlemlerinizi tek panelden yönetin.",
+        "ogTitle": "Giriş Yap | ZeytinSaaS",
+        "ogDescription": "ZeytinSaaS fabrika yönetim paneline giriş yapın."
+      },
+      "welcome": "Hoş Geldiniz",
+      "subtitle": "Hesabınıza giriş yapın.",
+      "email": "E-posta Adresi",
+      "emailPlaceholder": "admin@ornek.com",
+      "password": "Şifre",
+      "forgotPassword": "Şifremi Unuttum",
+      "submit": "Giriş Yap",
+      "success": "Giriş başarılı",
+      "error": "Giriş başarısız.",
+      "noAccount": "Henüz hesabınız yok mu?",
+      "registerNow": "Hemen Kayıt Olun"
+    },
+    "register": {
+      "meta": {
+        "title": "Fabrika Kaydı Oluştur",
+        "description": "Zeytinyağı fabrikanızı ZeytinSaaS'e kaydedin. Kantar fişleri, üretim takibi ve müşteri cari hesapları tek platformda.",
+        "ogTitle": "Fabrika Kaydı Oluştur | ZeytinSaaS",
+        "ogDescription": "Zeytinyağı fabrikanızı ZeytinSaaS'e kaydedin ve tüm süreçlerinizi dijitalleştirin."
+      },
+      "licenseValidated": "Lisans doğrulandı! ({days} Günlük Plan)",
+      "licenseRequired": "Lütfen lisans kodunu giriniz.",
+      "licenseInvalid": "Lisans kodu geçersiz.",
+      "factoryRequired": "Fabrika adı ve kısa kod zorunludur.",
+      "shortCodeMin": "Fabrika kısa kodu en az 3 karakter olmalıdır.",
+      "success": "Kayıt başarılı! Giriş yapabilirsiniz.",
+      "genericError": "Kayıt işlemi başarısız oldu.",
+      "emailExists": "Bu e-posta adresi zaten kayıtlı.",
+      "forgotYourPassword": "Şifrenizi mi unuttunuz?",
+      "step1Title": "Lisans Aktivasyonu",
+      "step1Subtitle": "Size verilen lisans kodunu giriniz.",
+      "licenseCode": "Lisans Kodu",
+      "step2Title": "Fabrika Bilgileri",
+      "step2Subtitle": "İşletmenizi sisteme kaydedelim.",
+      "factoryName": "Fabrika Adı (Tabela)",
+      "factoryNamePlaceholder": "Örn: Aydın Yağ Fabrikası",
+      "officialName": "Resmi Unvan (Fatura)",
+      "officialNamePlaceholder": "Örn: Aydın Gıda San. Tic. Ltd. Şti.",
+      "shortCode": "Kısa Kod",
+      "taxId": "Vergi No",
+      "city": "Şehir",
+      "cityPlaceholder": "İzmir",
+      "address": "Adres",
+      "addressPlaceholder": "Mahalle, Cadde, No...",
+      "step3Title": "Yönetici Hesabı",
+      "step3Subtitle": "Sisteme giriş yapacak yetkili kişi.",
+      "fullName": "Ad Soyad",
+      "fullNamePlaceholder": "Ahmet Yılmaz",
+      "phone": "Telefon",
+      "phonePlaceholder": "0555 555 55 55",
+      "email": "E-posta",
+      "emailPlaceholder": "ahmet@ornek.com",
+      "password": "Şifre",
+      "terms": "<terms>Kullanım koşullarını</terms> ve <privacy>Aydınlatma metnini</privacy> okudum, onaylıyorum.",
+      "back": "Geri",
+      "continue": "Devam Et",
+      "complete": "Kaydı Tamamla",
+      "haveAccount": "Zaten hesabınız var mı?",
+      "login": "Giriş Yap"
+    },
+    "forgot": {
+      "meta": {
+        "title": "Şifremi Unuttum",
+        "description": "Hesap şifrenizi sıfırlayın."
+      },
+      "brandSubtitle": "Şifre Kurtarma",
+      "verifyTitle": "Hesabınızı Doğrulayın",
+      "verifySubtitle": "Güvenlik için e-posta ve lisans kodunuzu girin.",
+      "email": "E-posta Adresi",
+      "emailPlaceholder": "admin@ornek.com",
+      "licenseCode": "Lisans Kodu",
+      "submit": "Doğrula ve Şifreyi Göster",
+      "verified": "Bilgiler doğrulandı.",
+      "verifyError": "Bilgiler doğrulanamadı.",
+      "identityVerified": "Kimlik Doğrulandı!",
+      "currentPassword": "Mevcut Şifreniz:",
+      "login": "Giriş Yap",
+      "backToLogin": "Giriş Ekranına Dön"
+    }
   }
 }

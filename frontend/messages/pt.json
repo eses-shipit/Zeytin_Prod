@@ -351,5 +351,93 @@
     "noPrice": "Sem preço para hoje.",
     "on": "Ativado",
     "off": "Desativado"
+  },
+  "auth": {
+    "tagline": "Automação para lagares",
+    "login": {
+      "meta": {
+        "title": "Iniciar sessão",
+        "description": "Aceda ao painel de gestão ZeytinSaaS. Faça a gestão da balança, produção e clientes num único painel.",
+        "ogTitle": "Iniciar sessão | ZeytinSaaS",
+        "ogDescription": "Aceda ao painel de gestão ZeytinSaaS."
+      },
+      "welcome": "Bem-vindo",
+      "subtitle": "Aceda à sua conta.",
+      "email": "Endereço de e-mail",
+      "emailPlaceholder": "admin@exemplo.com",
+      "password": "Palavra-passe",
+      "forgotPassword": "Esqueceu-se da palavra-passe?",
+      "submit": "Iniciar sessão",
+      "success": "Sessão iniciada",
+      "error": "Falha ao iniciar sessão.",
+      "noAccount": "Ainda não tem uma conta?",
+      "registerNow": "Registe-se agora"
+    },
+    "register": {
+      "meta": {
+        "title": "Crie o registo do seu lagar",
+        "description": "Registe o seu lagar na ZeytinSaaS. Recibos de balança, acompanhamento da produção e contas de clientes numa só plataforma.",
+        "ogTitle": "Crie o registo do seu lagar | ZeytinSaaS",
+        "ogDescription": "Registe o seu lagar na ZeytinSaaS e digitalize todos os seus processos."
+      },
+      "licenseValidated": "Licença validada! (Plano de {days} dias)",
+      "licenseRequired": "Introduza o código de licença.",
+      "licenseInvalid": "Código de licença inválido.",
+      "factoryRequired": "O nome do lagar e o código curto são obrigatórios.",
+      "shortCodeMin": "O código curto deve ter pelo menos 3 caracteres.",
+      "success": "Registo concluído! Já pode iniciar sessão.",
+      "genericError": "Falha no registo.",
+      "emailExists": "Este e-mail já está registado.",
+      "forgotYourPassword": "Esqueceu-se da palavra-passe?",
+      "step1Title": "Ativação da licença",
+      "step1Subtitle": "Introduza o código de licença que recebeu.",
+      "licenseCode": "Código de licença",
+      "step2Title": "Dados do lagar",
+      "step2Subtitle": "Vamos registar a sua empresa no sistema.",
+      "factoryName": "Nome do lagar (letreiro)",
+      "factoryNamePlaceholder": "Ex.: Lagar Aydın",
+      "officialName": "Denominação oficial (faturação)",
+      "officialNamePlaceholder": "Ex.: Aydın Alimentos Lda.",
+      "shortCode": "Código curto",
+      "taxId": "NIF",
+      "city": "Cidade",
+      "cityPlaceholder": "Évora",
+      "address": "Morada",
+      "addressPlaceholder": "Rua, número, localidade...",
+      "step3Title": "Conta de administrador",
+      "step3Subtitle": "Pessoa autorizada que acederá ao sistema.",
+      "fullName": "Nome completo",
+      "fullNamePlaceholder": "João Silva",
+      "phone": "Telefone",
+      "phonePlaceholder": "910 000 000",
+      "email": "E-mail",
+      "emailPlaceholder": "joao@exemplo.com",
+      "password": "Palavra-passe",
+      "terms": "Li e aceito os <terms>termos de utilização</terms> e o <privacy>aviso de privacidade</privacy>.",
+      "back": "Voltar",
+      "continue": "Continuar",
+      "complete": "Concluir registo",
+      "haveAccount": "Já tem uma conta?",
+      "login": "Iniciar sessão"
+    },
+    "forgot": {
+      "meta": {
+        "title": "Recuperar palavra-passe",
+        "description": "Reponha a palavra-passe da sua conta."
+      },
+      "brandSubtitle": "Recuperação de palavra-passe",
+      "verifyTitle": "Verifique a sua conta",
+      "verifySubtitle": "Por segurança, introduza o seu e-mail e código de licença.",
+      "email": "Endereço de e-mail",
+      "emailPlaceholder": "admin@exemplo.com",
+      "licenseCode": "Código de licença",
+      "submit": "Verificar e mostrar palavra-passe",
+      "verified": "Dados verificados.",
+      "verifyError": "Não foi possível verificar os dados.",
+      "identityVerified": "Identidade verificada!",
+      "currentPassword": "A sua palavra-passe atual:",
+      "login": "Iniciar sessão",
+      "backToLogin": "Voltar ao início de sessão"
+    }
   }
 }

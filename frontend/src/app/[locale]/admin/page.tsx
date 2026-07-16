@@ -156,6 +156,16 @@ export default function AdminDashboardPage() {
                  <div className="text-xs text-slate-400">Tüm fabrikalardan gelen bildirimler</div>
               </Link>
 
+              {/* Landing page'den gelen lisans/demo talepleri (lead). */}
+              <Link href="/admin/leads" className="block bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-300 transition-colors cursor-pointer group">
+                 <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-medium text-slate-500 group-hover:text-emerald-600 transition-colors">Lisans Talepleri</h3>
+                    <Inbox className="h-5 w-5 text-emerald-500" />
+                 </div>
+                 <div className="text-lg font-bold text-slate-900 mb-1">Gelen Talepler</div>
+                 <div className="text-xs text-slate-400">Web sitesi iletişim formundan</div>
+              </Link>
+
               <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium text-slate-500">Global Üretilen Yağ</h3>

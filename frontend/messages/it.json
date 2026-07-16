@@ -351,5 +351,93 @@
     "noPrice": "Nessun prezzo per oggi.",
     "on": "Attivo",
     "off": "Disattivato"
+  },
+  "auth": {
+    "tagline": "Automazione per frantoi",
+    "login": {
+      "meta": {
+        "title": "Accedi",
+        "description": "Accedi al pannello di gestione ZeytinSaaS. Gestisci pesa, produzione e clienti da un unico pannello.",
+        "ogTitle": "Accedi | ZeytinSaaS",
+        "ogDescription": "Accedi al pannello di gestione ZeytinSaaS."
+      },
+      "welcome": "Benvenuto",
+      "subtitle": "Accedi al tuo account.",
+      "email": "Indirizzo email",
+      "emailPlaceholder": "admin@esempio.com",
+      "password": "Password",
+      "forgotPassword": "Password dimenticata?",
+      "submit": "Accedi",
+      "success": "Accesso riuscito",
+      "error": "Accesso non riuscito.",
+      "noAccount": "Non hai ancora un account?",
+      "registerNow": "Registrati subito"
+    },
+    "register": {
+      "meta": {
+        "title": "Registra il tuo frantoio",
+        "description": "Registra il tuo frantoio su ZeytinSaaS. Ricevute di pesa, monitoraggio della produzione e conti clienti su un'unica piattaforma.",
+        "ogTitle": "Registra il tuo frantoio | ZeytinSaaS",
+        "ogDescription": "Registra il tuo frantoio su ZeytinSaaS e digitalizza tutti i tuoi processi."
+      },
+      "licenseValidated": "Licenza convalidata! (Piano di {days} giorni)",
+      "licenseRequired": "Inserisci il codice di licenza.",
+      "licenseInvalid": "Codice di licenza non valido.",
+      "factoryRequired": "Il nome del frantoio e il codice breve sono obbligatori.",
+      "shortCodeMin": "Il codice breve deve avere almeno 3 caratteri.",
+      "success": "Registrazione completata! Ora puoi accedere.",
+      "genericError": "Registrazione non riuscita.",
+      "emailExists": "Questo indirizzo email è già registrato.",
+      "forgotYourPassword": "Password dimenticata?",
+      "step1Title": "Attivazione licenza",
+      "step1Subtitle": "Inserisci il codice di licenza ricevuto.",
+      "licenseCode": "Codice di licenza",
+      "step2Title": "Dati del frantoio",
+      "step2Subtitle": "Registriamo la tua azienda nel sistema.",
+      "factoryName": "Nome del frantoio (insegna)",
+      "factoryNamePlaceholder": "Es.: Frantoio Aydın",
+      "officialName": "Ragione sociale (fatturazione)",
+      "officialNamePlaceholder": "Es.: Aydın Alimentari S.r.l.",
+      "shortCode": "Codice breve",
+      "taxId": "Partita IVA",
+      "city": "Città",
+      "cityPlaceholder": "Bari",
+      "address": "Indirizzo",
+      "addressPlaceholder": "Via, numero civico...",
+      "step3Title": "Account amministratore",
+      "step3Subtitle": "Persona autorizzata che accederà al sistema.",
+      "fullName": "Nome e cognome",
+      "fullNamePlaceholder": "Mario Rossi",
+      "phone": "Telefono",
+      "phonePlaceholder": "333 000 0000",
+      "email": "Email",
+      "emailPlaceholder": "mario@esempio.com",
+      "password": "Password",
+      "terms": "Ho letto e accetto le <terms>condizioni d'uso</terms> e l'<privacy>informativa sulla privacy</privacy>.",
+      "back": "Indietro",
+      "continue": "Continua",
+      "complete": "Completa la registrazione",
+      "haveAccount": "Hai già un account?",
+      "login": "Accedi"
+    },
+    "forgot": {
+      "meta": {
+        "title": "Password dimenticata",
+        "description": "Reimposta la password del tuo account."
+      },
+      "brandSubtitle": "Recupero password",
+      "verifyTitle": "Verifica il tuo account",
+      "verifySubtitle": "Per sicurezza, inserisci email e codice di licenza.",
+      "email": "Indirizzo email",
+      "emailPlaceholder": "admin@esempio.com",
+      "licenseCode": "Codice di licenza",
+      "submit": "Verifica e mostra password",
+      "verified": "Dati verificati.",
+      "verifyError": "Impossibile verificare i dati.",
+      "identityVerified": "Identità verificata!",
+      "currentPassword": "La tua password attuale:",
+      "login": "Accedi",
+      "backToLogin": "Torna all'accesso"
+    }
   }
 }
