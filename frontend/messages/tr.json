@@ -743,5 +743,18 @@
       "temp": "Sıcaklık",
       "filtration": "Filtrasyon"
     }
+  },
+  "tickets": {
+    "title": "Kantar Fiş Geçmişi",
+    "subtitle": "Tüm tartım işlemlerini filtrele ve detayları incele."
+  },
+  "stock": {
+    "title": "Stok Yönetimi",
+    "subtitle": "Fabrika tankları ve doluluk durumları.",
+    "addNew": "Yeni Ekle"
+  },
+  "drums": {
+    "subtitle": "Fabrikadaki tüm bidonları yönet, iade al.",
+    "capacityLt": "Kapasite (Lt)"
   }
 }

@@ -743,5 +743,18 @@
       "temp": "Temperatura",
       "filtration": "Filtração"
     }
+  },
+  "tickets": {
+    "title": "Histórico de recibos de balança",
+    "subtitle": "Filtre todas as pesagens e consulte os detalhes."
+  },
+  "stock": {
+    "title": "Gestão de stock",
+    "subtitle": "Depósitos do lagar e o seu nível de enchimento.",
+    "addNew": "Adicionar novo"
+  },
+  "drums": {
+    "subtitle": "Faça a gestão de todos os bidões do lagar e registe devoluções.",
+    "capacityLt": "Capacidade (L)"
   }
 }

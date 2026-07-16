@@ -743,5 +743,18 @@
       "temp": "Temperatura",
       "filtration": "Filtrazione"
     }
+  },
+  "tickets": {
+    "title": "Storico ricevute di pesa",
+    "subtitle": "Filtra tutte le pesate e consulta i dettagli."
+  },
+  "stock": {
+    "title": "Gestione stock",
+    "subtitle": "Serbatoi del frantoio e livello di riempimento.",
+    "addNew": "Aggiungi nuovo"
+  },
+  "drums": {
+    "subtitle": "Gestisci tutti i fusti del frantoio e registra i resi.",
+    "capacityLt": "Capacità (L)"
   }
 }

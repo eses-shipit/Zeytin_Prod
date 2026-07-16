@@ -12,6 +12,9 @@ import {
   Scale
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate, formatKg } from "@/lib/format";
+import type { Locale } from "@/i18n/routing";
 
 type TicketStatus = "PENDING" | "COMPLETED";
 
@@ -31,6 +34,9 @@ type WeighingTicket = {
 };
 
 export default function TicketsArchivePage() {
+  const t = useTranslations("tickets");
+  const tt = useTranslations("production.ticketsTab");
+  const locale = useLocale() as Locale;
   const [tickets, setTickets] = useState<WeighingTicket[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -78,10 +84,10 @@ export default function TicketsArchivePage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
             <Ticket className="h-7 w-7 text-indigo-600" />
-            Kantar Fiş Geçmişi
+            {t("title")}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Tüm tartım işlemlerini filtrele ve detayları incele.
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -93,7 +99,7 @@ export default function TicketsArchivePage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Müşteri Ara..."
+            placeholder={tt("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border-slate-200 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -108,9 +114,9 @@ export default function TicketsArchivePage() {
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className="w-full appearance-none rounded-lg border-slate-200 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
-            <option value="">Tüm Durumlar</option>
-            <option value="PENDING">Bekleyen (Sıkılmadı)</option>
-            <option value="COMPLETED">Tamamlanan (Sıkıldı)</option>
+            <option value="">{tt("allStatuses")}</option>
+            <option value="PENDING">{tt("pending")}</option>
+            <option value="COMPLETED">{tt("completed")}</option>
           </select>
         </div>
 
@@ -143,13 +149,13 @@ export default function TicketsArchivePage() {
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-slate-900 font-semibold border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4">Tarih</th>
-                <th className="px-6 py-4">Müşteri</th>
-                <th className="px-6 py-4">Köy / Cins / Kalite</th>
-                <th className="px-6 py-4">Brüt</th>
-                <th className="px-6 py-4">Dara</th>
-                <th className="px-6 py-4 text-right">Net</th>
-                <th className="px-6 py-4 text-center">Durum</th>
+                <th className="px-6 py-4">{tt("colDate")}</th>
+                <th className="px-6 py-4">{tt("colCustomer")}</th>
+                <th className="px-6 py-4">{tt("colOriginVarietyQuality")}</th>
+                <th className="px-6 py-4">{tt("colGross")}</th>
+                <th className="px-6 py-4">{tt("colTare")}</th>
+                <th className="px-6 py-4 text-right">{tt("colNet")}</th>
+                <th className="px-6 py-4 text-center">{tt("colStatus")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -163,7 +169,7 @@ export default function TicketsArchivePage() {
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
                     <Scale className="mx-auto h-12 w-12 opacity-20 mb-3" />
-                    Kayıt bulunamadı.
+                    {tt("empty")}
                   </td>
                 </tr>
               ) : (
@@ -171,10 +177,10 @@ export default function TicketsArchivePage() {
                   <tr key={ticket.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-slate-900">
-                        {new Date(ticket.createdAt).toLocaleDateString("tr-TR")}
+                        {formatDate(ticket.createdAt, locale)}
                       </div>
                       <div className="text-xs text-slate-400">
-                        {new Date(ticket.createdAt).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' })}
+                        {formatDate(ticket.createdAt, locale, { hour: "2-digit", minute: "2-digit" })}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-900">
@@ -191,7 +197,7 @@ export default function TicketsArchivePage() {
                              ticket.quality === "GROUND" ? "bg-amber-50 text-amber-700 ring-amber-600/20" :
                              "bg-slate-50 text-slate-600 ring-slate-500/10"
                            )}>
-                             {ticket.quality === "TREE" ? "Üst/Sırık" : ticket.quality === "GROUND" ? "Dip" : "Karışık"}
+                             {ticket.quality === "TREE" ? tt("qualityTree") : ticket.quality === "GROUND" ? tt("qualityGround") : tt("qualityMixed")}
                            </span>
                          )}
                       </div>
@@ -199,7 +205,7 @@ export default function TicketsArchivePage() {
                     <td className="px-6 py-4">{ticket.grossKg}</td>
                     <td className="px-6 py-4">{ticket.tareKg}</td>
                     <td className="px-6 py-4 text-right font-bold text-slate-900">
-                      {ticket.netKg} kg
+                      {formatKg(ticket.netKg, locale)}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={cn(
@@ -208,7 +214,7 @@ export default function TicketsArchivePage() {
                           ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" 
                           : "bg-amber-50 text-amber-700 ring-amber-600/20"
                       )}>
-                        {ticket.status === "COMPLETED" ? "Sıkıldı" : "Bekliyor"}
+                        {ticket.status === "COMPLETED" ? tt("statusCompleted") : tt("statusPending")}
                       </span>
                     </td>
                   </tr>

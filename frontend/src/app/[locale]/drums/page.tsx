@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, RefreshCw, RotateCcw, ShieldPlus, Package } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { formatNumber } from "@/lib/format";
+import type { Locale } from "@/i18n/routing";
 
 type Drum = {
   id: string;
@@ -15,6 +18,9 @@ type Drum = {
 };
 
 export default function DrumsPage() {
+  const t = useTranslations("drums");
+  const ti = useTranslations("inventory");
+  const locale = useLocale() as Locale;
   const [drums, setDrums] = useState<Drum[]>([]);
   const [statusFilter, setStatusFilter] = useState<"" | "AVAILABLE" | "WITH_CUSTOMER">("");
   const [loading, setLoading] = useState(true);
@@ -34,7 +40,7 @@ export default function DrumsPage() {
       setDrums(res.data);
     } catch (err) {
       console.error(err);
-      toast.error("Bidon listesi alınamadı");
+      toast.error(ti("drum.loadError"));
     } finally {
       setLoading(false);
     }
@@ -46,17 +52,17 @@ export default function DrumsPage() {
 
   const handleCreate = async () => {
     if (!form.code || form.capacity <= 0) {
-      toast.error("Kod ve kapasite gerekli");
+      toast.error(ti("drum.codeRequired"));
       return;
     }
     setCreating(true);
     try {
       await axios.post("/production/drums", form);
-      toast.success("Bidon eklendi");
+      toast.success(ti("drum.added"));
       setForm({ code: "", type: "PLASTIC", capacity: 60 });
       fetchDrums();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Bidon eklenemedi");
+      toast.error(err.response?.data?.message || ti("drum.addError"));
     } finally {
       setCreating(false);
     }
@@ -65,10 +71,10 @@ export default function DrumsPage() {
   const handleReturn = async (id: string) => {
     try {
       await axios.post("/production/return-drums", { drumIds: [id] });
-      toast.success("Bidon iade alındı");
+      toast.success(ti("drum.returned"));
       fetchDrums();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "İade alınamadı");
+      toast.error(err.response?.data?.message || ti("drum.returnError"));
     }
   };
 
@@ -78,16 +84,16 @@ export default function DrumsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Package className="h-6 w-6 text-indigo-600" />
-            Bidon Yönetimi
+            {ti("tabs.drums")}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Fabrikadaki tüm bidonları yönet, iade al.</p>
+          <p className="text-sm text-slate-500 mt-1">{t("subtitle")}</p>
         </div>
         <button
           onClick={fetchDrums}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
         >
           <RefreshCw className="h-4 w-4" />
-          Yenile
+          {ti("drum.refresh")}
         </button>
       </div>
 
@@ -96,12 +102,12 @@ export default function DrumsPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between p-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-600">Durum Filtresi:</span>
+              <span className="text-sm text-slate-600">{ti("drum.statusFilter")}</span>
               <div className="flex gap-2">
                 {[
-                  { key: "", label: "Tümü" },
-                  { key: "AVAILABLE", label: "Boşta" },
-                  { key: "WITH_CUSTOMER", label: "Müşteride" },
+                  { key: "", label: ti("status.all") },
+                  { key: "AVAILABLE", label: ti("status.AVAILABLE") },
+                  { key: "WITH_CUSTOMER", label: ti("status.WITH_CUSTOMER") },
                 ].map((f) => (
                   <button
                     key={f.key}
@@ -121,11 +127,11 @@ export default function DrumsPage() {
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 text-left">Kod</th>
-                  <th className="px-4 py-3 text-left">Tip</th>
-                  <th className="px-4 py-3 text-left">Kapasite (Lt)</th>
-                  <th className="px-4 py-3 text-left">Durum</th>
-                  <th className="px-4 py-3 text-right">Aksiyon</th>
+                  <th className="px-4 py-3 text-left">{ti("drum.colCode")}</th>
+                  <th className="px-4 py-3 text-left">{ti("drum.colType")}</th>
+                  <th className="px-4 py-3 text-left">{t("capacityLt")}</th>
+                  <th className="px-4 py-3 text-left">{ti("drum.colStatus")}</th>
+                  <th className="px-4 py-3 text-right">{ti("drum.colAction")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
@@ -138,7 +144,7 @@ export default function DrumsPage() {
                 ) : drums.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-6 text-center text-slate-500">
-                      Kayıt bulunamadı.
+                      {ti("drum.empty")}
                     </td>
                   </tr>
                 ) : (
@@ -146,9 +152,9 @@ export default function DrumsPage() {
                     <tr key={d.id}>
                       <td className="px-4 py-3 font-semibold text-slate-900">{d.code}</td>
                       <td className="px-4 py-3 text-slate-700">
-                        {d.type === "PLASTIC" ? "PLASTİK" : d.type === "CHROME" ? "KROM" : "TENEKE"}
+                        {ti(`drumTypes.${d.type}`)}
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{d.capacity}</td>
+                      <td className="px-4 py-3 text-slate-700">{formatNumber(d.capacity, locale)}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -162,7 +168,7 @@ export default function DrumsPage() {
                           {d.status === "AVAILABLE" && <CheckCircle2 className="h-3.5 w-3.5" />}
                           {d.status === "WITH_CUSTOMER" && <RotateCcw className="h-3.5 w-3.5" />}
                           {d.status === "FILLED" && <ShieldPlus className="h-3.5 w-3.5" />}
-                          {d.status === "AVAILABLE" ? "Boşta" : d.status === "WITH_CUSTOMER" ? "Müşteride" : "Dolu"}
+                          {d.status === "AVAILABLE" ? ti("status.AVAILABLE") : d.status === "WITH_CUSTOMER" ? ti("status.WITH_CUSTOMER") : ti("status.FILLED")}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -171,7 +177,7 @@ export default function DrumsPage() {
                             onClick={() => handleReturn(d.id)}
                             className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                           >
-                            İade Al
+                            {ti("drum.return")}
                           </button>
                         ) : (
                           <span className="text-xs text-slate-400">-</span>
@@ -187,31 +193,31 @@ export default function DrumsPage() {
 
         {/* Create Form */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-900">Yeni Bidon Ekle</h3>
+          <h3 className="text-sm font-semibold text-slate-900">{ti("drum.addTitle")}</h3>
           <div className="space-y-3 text-sm">
             <div>
-              <label className="block text-slate-600 mb-1">Kod</label>
+              <label className="block text-slate-600 mb-1">{ti("drum.code")}</label>
               <input
                 value={form.code}
                 onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                placeholder="B-001"
+                placeholder={ti("drum.codePlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-slate-600 mb-1">Tip</label>
+              <label className="block text-slate-600 mb-1">{ti("drum.type")}</label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value as Drum["type"] })}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
               >
-                <option value="PLASTIC">PLASTIK</option>
-                <option value="CHROME">KROM</option>
-                <option value="TIN">TENEKe</option>
+                <option value="PLASTIC">{ti("drumTypes.PLASTIC")}</option>
+                <option value="CHROME">{ti("drumTypes.CHROME")}</option>
+                <option value="TIN">{ti("drumTypes.TIN")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-slate-600 mb-1">Kapasite (Lt)</label>
+              <label className="block text-slate-600 mb-1">{t("capacityLt")}</label>
               <input
                 type="number"
                 min={1}
@@ -225,7 +231,7 @@ export default function DrumsPage() {
               disabled={creating}
               className="w-full rounded-lg bg-indigo-600 text-white py-2 font-semibold hover:bg-indigo-700 disabled:opacity-60"
             >
-              {creating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Ekle"}
+              {creating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : ti("drum.add")}
             </button>
           </div>
         </div>

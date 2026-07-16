@@ -743,5 +743,18 @@
       "temp": "Temperatura",
       "filtration": "Filtración"
     }
+  },
+  "tickets": {
+    "title": "Historial de comprobantes de báscula",
+    "subtitle": "Filtre todas las pesadas y consulte los detalles."
+  },
+  "stock": {
+    "title": "Gestión de stock",
+    "subtitle": "Depósitos de la almazara y su nivel de llenado.",
+    "addNew": "Añadir nuevo"
+  },
+  "drums": {
+    "subtitle": "Gestione todos los bidones de la almazara y regístrelos como devueltos.",
+    "capacityLt": "Capacidad (L)"
   }
 }
