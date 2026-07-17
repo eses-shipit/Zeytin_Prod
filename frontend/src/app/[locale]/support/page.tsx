@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { Plus, MessageSquare, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -24,19 +24,15 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
-  // Tenant ID should ideally come from auth context
-  const tenantId = "tenant_demo";
-
   useEffect(() => {
     fetchTickets();
   }, []);
 
   const fetchTickets = async () => {
     try {
-      const res = await axios.get(`${apiBase}/support`, {
-        headers: { "X-Tenant-ID": tenantId },
-      });
+      // Yapılandırılmış axios: token + x-tenant-id otomatik. Eski raw axios +
+      // sabit "tenant_demo" başlığı token taşımadığı için 401 alıyordu.
+      const res = await axios.get(`/support`);
       setTickets(res.data);
     } catch (err) {
       console.error("Error fetching tickets", err);

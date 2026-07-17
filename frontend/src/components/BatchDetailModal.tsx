@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axios";
 import {
   X,
   Droplet,
@@ -52,16 +52,13 @@ export function BatchDetailModal({ isOpen, onClose, batch }: BatchDetailModalPro
   const [detail, setDetail] = useState<BatchDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
-
   useEffect(() => {
     if (isOpen && batch?.id) {
       setLoading(true);
-      // Fetch full details including tickets and origin
+      // Yapılandırılmış axios: token + x-tenant-id otomatik. Raw axios + sabit
+      // "tenant_demo" başlığı token taşımadığı için 401 alıyordu (modal boş açılırdı).
       axios
-        .get(`${apiBase}/production/completed/${batch.id}`, {
-          headers: { "X-Tenant-ID": "tenant_demo" },
-        })
+        .get(`/production/completed/${batch.id}`)
         .then((res) => {
           setDetail(res.data);
         })
