@@ -246,8 +246,8 @@ export default function DashboardPage() {
                             width={80}
                         />
                         <Tooltip
-                            formatter={(value: number) => [
-                              formatKg(value, locale, { digits: 2 }),
+                            formatter={(value) => [
+                              formatKg(Number(value), locale, { digits: 2 }),
                               t("charts.factoryShareByProduct.series"),
                             ]}
                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) =>
-                    `${name} (${formatNumber(percent * 100, locale, {
+                    `${name} (${formatNumber((percent ?? 0) * 100, locale, {
                       style: "percent",
                       maximumFractionDigits: 0,
                     })})`

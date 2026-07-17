@@ -99,7 +99,12 @@ export function useScale(): UseScaleResult {
       portRef.current = port;
 
       const decoder = new TextDecoderStream();
-      const readableStreamClosed = port.readable?.pipeTo(decoder.writable);
+      // TextDecoderStream.writable, BufferSource kabul eder; port.readable ise
+      // Uint8Array yayar. DOM tipleri bu genişleme ilişkisini (BufferSource >
+      // Uint8Array) pipeTo için modellemediğinden daraltılmış tiple eşleştiriyoruz.
+      const readableStreamClosed = port.readable?.pipeTo(
+        decoder.writable as WritableStream<Uint8Array>,
+      );
       readableStreamClosedRef.current = readableStreamClosed ?? null;
 
       const reader = decoder.readable.getReader();

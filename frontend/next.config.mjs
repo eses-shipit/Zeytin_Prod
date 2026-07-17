@@ -6,13 +6,14 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
+    // Build ESLint HATALARINDA durur (warning'ler build'i bozmaz). Gizli hata
+    // borcu temizlendi; bayrak açık kalırsa gerçek hatalar yine gizlenir.
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Also ignore typescript errors during build to be safe
-    ignoreBuildErrors: true,
+    // Tip hataları build'i durdurur. tsc temiz; bu bayrak açıkken kayıt
+    // formundaki gibi hatalar sessizce derleniyordu.
+    ignoreBuildErrors: false,
   },
   // PWA configuration temporarily disabled for debugging
   // Security Headers

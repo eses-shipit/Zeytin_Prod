@@ -27,7 +27,9 @@ export function ContactForm({ defaultInterest }: { defaultInterest?: string }) {
     // Boş opsiyonel alanları göndermiyoruz: backend DTO whitelist'i boş
     // string'i de kabul eder ama veriyi temiz tutmak daha iyi.
     const payload: Record<string, string> = { locale };
-    for (const [key, value] of form.entries()) {
+    // Array.from: FormData.entries() iterator'ını doğrudan for-of ile dönmek
+    // tsconfig target'a bağlı derleme hatası veriyordu.
+    for (const [key, value] of Array.from(form.entries())) {
       const v = String(value).trim();
       if (v) payload[key] = v;
     }
