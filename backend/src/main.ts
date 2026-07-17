@@ -6,6 +6,7 @@ import type { NestExpressApplication } from "@nestjs/platform-express";
 import { json, urlencoded } from "express";
 import helmet from "helmet";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
+import { ErrorReporterService } from "./common/error-reporter.service";
 import { DecimalSerializerInterceptor } from "./common/interceptors/decimal-serializer.interceptor";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const compression = require("compression");
@@ -108,7 +109,7 @@ async function bootstrap() {
   );
 
   // Global hata filtresi: ham mesaj/stack ve Prisma ayrıntısı dışarı sızmaz.
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(new ErrorReporterService()));
 
   // Decimal alanları yanıtta number'a çevirir. Decimal.toJSON() string döndürür
   // ve frontend'in toLocaleString çağrıları sessizce biçimlendirmeyi atlardı.

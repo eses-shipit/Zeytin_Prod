@@ -9,6 +9,7 @@ import {
 import { Prisma } from "@prisma/client";
 import type { Request, Response } from "express";
 import { randomUUID } from "crypto";
+import { ErrorReporterService } from "../error-reporter.service";
 
 /** İstemciye dönen tek tip hata gövdesi. */
 interface ErrorBody {
@@ -38,6 +39,9 @@ const GENERIC_MESSAGE = "Beklenmeyen bir hata oluştu.";
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
+  // Opsiyonel: main.ts filtreyi kurarken enjekte eder. Yoksa bildirim atlanır.
+  constructor(private readonly reporter?: ErrorReporterService) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
@@ -51,6 +55,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const stack = exception instanceof Error ? exception.stack : undefined;
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(`[${requestId}] ${where} -> ${status} ${logDetail}`, stack);
+      // Yalnızca beklenmeyen 5xx'ler harici izlemeye iletilir (PII'siz özet).
+      this.reporter?.report({ requestId, method: req.method, path: req.originalUrl, status, detail: logDetail });
     } else {
       // 4xx beklenen durumdur; stack gürültü yaratır.
       this.logger.warn(`[${requestId}] ${where} -> ${status} ${logDetail}`);
