@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import api from "@/lib/axios";
+import { EmailOtpField } from "@/components/EmailOtpField";
 
 /**
  * Landing page iletişim/lisans talebi formu.
@@ -18,17 +19,23 @@ export function ContactForm({ defaultInterest }: { defaultInterest?: string }) {
   const t = useTranslations("landing.contact");
   const locale = useLocale();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  // E-posta kontrollü: OTP alanı bu değeri okur. Doğrulanmadan gönderim kapalı.
+  const [email, setEmail] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
+  // Formun render edildiği an: bot'lar anında gönderir, insan birkaç saniye alır.
+  const renderedAt = useRef(Date.now());
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!emailVerified) {
+      setStatus("error");
+      return;
+    }
     setStatus("submitting");
     const form = new FormData(e.currentTarget);
 
-    // Boş opsiyonel alanları göndermiyoruz: backend DTO whitelist'i boş
-    // string'i de kabul eder ama veriyi temiz tutmak daha iyi.
-    const payload: Record<string, string> = { locale };
-    // Array.from: FormData.entries() iterator'ını doğrudan for-of ile dönmek
-    // tsconfig target'a bağlı derleme hatası veriyordu.
+    // Boş opsiyonel alanları göndermiyoruz.
+    const payload: Record<string, string | number> = { locale, renderedAt: renderedAt.current };
     for (const [key, value] of Array.from(form.entries())) {
       const v = String(value).trim();
       if (v) payload[key] = v;
@@ -59,13 +66,39 @@ export function ContactForm({ defaultInterest }: { defaultInterest?: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-5 sm:grid-cols-2">
+      {/* Honeypot: gerçek kullanıcı görmez/doldurmaz; bot doldurursa backend
+          isteği sessizce reddeder. Ekran okuyuculardan da gizlenir. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
       <div>
         <label className={labelClass}>{t("name")} <span className="text-[color:var(--ochre)]">*</span></label>
         <input name="name" required maxLength={120} className={inputClass} />
       </div>
       <div>
         <label className={labelClass}>{t("email")} <span className="text-[color:var(--ochre)]">*</span></label>
-        <input name="email" type="email" required maxLength={160} className={inputClass} />
+        <input
+          name="email"
+          type="email"
+          required
+          maxLength={160}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className={inputClass}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <EmailOtpField
+          email={email}
+          purpose="CONTACT"
+          verified={emailVerified}
+          onVerifiedChange={setEmailVerified}
+        />
       </div>
       <div>
         <label className={labelClass}>{t("phone")}</label>
@@ -97,8 +130,8 @@ export function ContactForm({ defaultInterest }: { defaultInterest?: string }) {
       <div className="sm:col-span-2">
         <button
           type="submit"
-          disabled={status === "submitting"}
-          className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 font-medium disabled:opacity-60 sm:w-auto"
+          disabled={status === "submitting" || !emailVerified}
+          className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 font-medium disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
           {status === "submitting" ? t("submitting") : t("submit")}

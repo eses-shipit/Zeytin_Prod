@@ -424,7 +424,8 @@
       "continue": "Continuar",
       "complete": "Completar registro",
       "haveAccount": "¿Ya tiene una cuenta?",
-      "login": "Iniciar sesión"
+      "login": "Iniciar sesión",
+      "emailNotVerified": "Verifica tu correo electrónico antes de continuar."
     },
     "forgot": {
       "title": "¿Olvidaste tu contraseña?",
@@ -1078,5 +1079,22 @@
     "note": "Nota",
     "printReceipt": "Imprimir recibo",
     "close": "Cerrar"
+  },
+  "otp": {
+    "title": "Verificación de correo",
+    "hint": "Verifica tu correo para continuar.",
+    "sendCode": "Enviar código",
+    "sending": "Enviando...",
+    "enterEmailFirst": "Introduce primero un correo válido",
+    "codeSent": "Se envió un código de 6 dígitos a tu correo.",
+    "codeLabel": "Código de verificación",
+    "verify": "Verificar",
+    "verifying": "Verificando...",
+    "verified": "Correo verificado",
+    "resend": "Reenviar código",
+    "resendIn": "Reenviar ({sec}s)",
+    "wrongCode": "Código incorrecto o caducado.",
+    "requestFailed": "No se pudo enviar el código. Inténtalo de nuevo.",
+    "change": "Cambiar correo"
   }
 }

@@ -189,6 +189,30 @@ model PasswordResetToken {
   @@index([userId])
 }
 
+/// E-posta OTP doğrulaması (kayıt + iletişim formu).
+///
+/// Ham 6 haneli kod DEĞİL, bcrypt özeti saklanır: DB sızsa bile kodlar
+/// kullanılamaz. Kısa ömürlü (expiresAt), tek kullanımlık (consumedAt) ve
+/// deneme sınırlı (attempts). `tenantId` YOK — hesap öncesi/herkese açık akış
+/// olduğundan fail-closed tenant katmanı bu modele dokunmaz (Lead gibi).
+///
+/// `purpose`: "REGISTER" | "CONTACT". Bir amaçtan doğrulanan e-posta, kısa bir
+/// güven penceresinde diğer amaç için de doğrulanmış sayılır (bkz. servis) —
+/// böylece iletişim formunda onaylanan kullanıcı kayıtta tekrar OTP girmez.
+model EmailOtp {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  purpose    String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([email, consumedAt])
+  @@index([email, purpose, createdAt])
+}
+
 enum LicenseStatus {
   UNUSED
   USED

@@ -21,6 +21,7 @@ import {
   Phone
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { EmailOtpField } from "@/components/EmailOtpField";
 
 export default function RegisterPage() {
   const t = useTranslations("auth.register");
@@ -29,6 +30,9 @@ export default function RegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  // E-posta OTP: kayıt tamamlanmadan önce doğrulanmalı. İletişim formunda son
+  // 7 gün içinde doğrulanan e-posta için alan otomatik "doğrulandı" olur.
+  const [emailVerified, setEmailVerified] = useState(false);
   
   const [formData, setFormData] = useState({
     licenseCode: "",
@@ -100,6 +104,11 @@ export default function RegisterPage() {
       // Validate short code format (e.g., must be 3-5 chars uppercase)
       if (formData.factoryShortCode.length < 3) {
           throw new Error(t("shortCodeMin"));
+      }
+
+      // E-posta doğrulanmadan kayıt yapılamaz (backend de ayrıca zorunlu kılar).
+      if (!emailVerified) {
+          throw new Error(t("emailNotVerified"));
       }
 
       await axios.post(`${apiBase}/auth/register`, {
@@ -360,6 +369,13 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
+                        <EmailOtpField
+                            email={formData.email}
+                            purpose="REGISTER"
+                            verified={emailVerified}
+                            onVerifiedChange={setEmailVerified}
+                        />
+
                         <div>
                             <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("password")}</label>
                             <div className="relative">
@@ -433,7 +449,7 @@ export default function RegisterPage() {
                         ) : (
                         <button
                             type="submit"
-                            disabled={loading || !formData.acceptedTerms}
+                            disabled={loading || !formData.acceptedTerms || !emailVerified}
                             className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 hover:shadow-emerald-300 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? (

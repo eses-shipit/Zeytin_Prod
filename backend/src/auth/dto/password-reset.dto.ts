@@ -1,8 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class ForgotPasswordDto {
   @IsEmail()
   email!: string;
+
+  /** Sıfırlama e-postasının dili (tr/es/it/pt). Varsayılan tr. */
+  @IsOptional()
+  @IsIn(["tr", "es", "it", "pt"])
+  locale?: string;
 }
 
 export class ResetPasswordDto {

@@ -15,6 +15,8 @@ import { TokenService } from "../common/token.service";
 import { AuditService } from "../audit/audit.service";
 import { PolicyService } from "../policy/policy.service";
 import { ContextService } from "../common/context.service";
+import { EmailVerificationService } from "../verification/email-verification.service";
+import { EmailService } from "../common/email.service";
 
 @Injectable()
 export class AuthService {
@@ -26,6 +28,8 @@ export class AuthService {
     private readonly auditService: AuditService,
     private readonly policyService: PolicyService,
     private readonly contextService: ContextService,
+    private readonly emailVerification: EmailVerificationService,
+    private readonly email: EmailService,
   ) {}
 
   // Eski recoverPassword() KALDIRILDI (parolayı yanıtta dönüyordu). Yerine
@@ -39,7 +43,7 @@ export class AuthService {
    * aynı başarı yanıtı döner. Aksi halde saldırgan hangi e-postaların kayıtlı
    * olduğunu öğrenebilirdi.
    */
-  async forgotPassword(email: string): Promise<{ success: true }> {
+  async forgotPassword(email: string, locale = "tr"): Promise<{ success: true }> {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (user) {
@@ -60,12 +64,17 @@ export class AuthService {
       const base = process.env.FRONTEND_URL?.split(",")[0]?.trim() || "http://localhost:3000";
       const resetLink = `${base}/auth/reset-password?token=${rawToken}`;
 
-      // TODO: e-posta servisi (SMTP/Resend) eklenince buradan gönder.
-      // Servis yokken bağlantıyı logluyoruz ki geliştirme/destek sırasında
-      // erişilebilsin. Token'ın kendisi hassas: yalnızca sunucu loguna yazılır.
-      this.logger.warn(`[PAROLA SIFIRLAMA] ${email} için bağlantı: ${resetLink}`);
+      // Sıfırlama bağlantısını e-posta ile gönder (Brevo). Servis yapılandırılmamışsa
+      // send() false döner; o durumda geliştirme/destek için bağlantıyı YALNIZCA
+      // production dışında logluyoruz. Token hassastır: prod logunda görünmez.
+      const { subject, html } = buildResetEmail(resetLink, locale);
+      const sent = await this.email.send({ to: email, subject, html });
+      if (!sent && process.env.NODE_ENV !== "production") {
+        this.logger.warn(`[PAROLA SIFIRLAMA] ${email} için bağlantı: ${resetLink}`);
+      }
     }
 
+    // Kullanıcı numaralandırmaya karşı: bulunsa da bulunmasa da aynı yanıt.
     return { success: true };
   }
 
@@ -148,6 +157,11 @@ export class AuthService {
     if (existingUser) {
       throw new BadRequestException("Bu e-posta adresi zaten kayıtlı.");
     }
+
+    // 3b. E-posta OTP doğrulaması ZORUNLU. Kullanıcı kayıttan önce e-postasına
+    // gelen kodu girmiş olmalı. İletişim formunda son 7 gün içinde doğrulanan
+    // e-posta için tekrar sorulmaz (assertVerified güven penceresini kontrol eder).
+    await this.emailVerification.assertVerified(dto.email);
 
     // 4. Transaction ile Tenant, User ve Lisans güncelleme
     try {
@@ -438,4 +452,50 @@ export class AuthService {
           ...(impersonatedBy && { impersonatedBy }),
       });
   }
+}
+
+/** Parola sıfırlama e-postasının konu + gövdesini (dile göre) üretir. */
+function buildResetEmail(link: string, locale: string): { subject: string; html: string } {
+  const L: Record<string, { subject: string; intro: string; button: string; expires: string; ignore: string }> = {
+    tr: {
+      subject: "ZeytinSaaS parola sıfırlama",
+      intro: "Parolanızı sıfırlamak için aşağıdaki bağlantıya tıklayın:",
+      button: "Parolayı sıfırla",
+      expires: "Bağlantı 1 saat geçerlidir.",
+      ignore: "Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz; parolanız değişmez.",
+    },
+    es: {
+      subject: "Restablecer contraseña de ZeytinSaaS",
+      intro: "Haz clic en el siguiente enlace para restablecer tu contraseña:",
+      button: "Restablecer contraseña",
+      expires: "El enlace es válido durante 1 hora.",
+      ignore: "Si no solicitaste esto, puedes ignorar este correo; tu contraseña no cambiará.",
+    },
+    it: {
+      subject: "Reimposta la password di ZeytinSaaS",
+      intro: "Clicca sul link seguente per reimpostare la password:",
+      button: "Reimposta password",
+      expires: "Il link è valido per 1 ora.",
+      ignore: "Se non hai richiesto questo, ignora pure questa email; la tua password non cambierà.",
+    },
+    pt: {
+      subject: "Repor palavra-passe do ZeytinSaaS",
+      intro: "Clique no link abaixo para repor a sua palavra-passe:",
+      button: "Repor palavra-passe",
+      expires: "O link é válido durante 1 hora.",
+      ignore: "Se não solicitou isto, ignore este email; a sua palavra-passe não será alterada.",
+    },
+  };
+  const t = L[locale] ?? L.tr;
+  const html = `
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px">
+      <h2 style="color:#0f5132;margin:0 0 16px">ZeytinSaaS</h2>
+      <p style="color:#334155;margin:0 0 16px">${t.intro}</p>
+      <p style="margin:0 0 16px">
+        <a href="${link}" style="display:inline-block;background:#0f5132;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${t.button}</a>
+      </p>
+      <p style="color:#64748b;font-size:13px;margin:0 0 4px">${t.expires}</p>
+      <p style="color:#94a3b8;font-size:12px;margin:16px 0 0">${t.ignore}</p>
+    </div>`;
+  return { subject: t.subject, html };
 }

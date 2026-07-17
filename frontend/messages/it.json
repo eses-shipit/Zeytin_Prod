@@ -424,7 +424,8 @@
       "continue": "Continua",
       "complete": "Completa la registrazione",
       "haveAccount": "Hai già un account?",
-      "login": "Accedi"
+      "login": "Accedi",
+      "emailNotVerified": "Verifica la tua email prima di continuare."
     },
     "forgot": {
       "title": "Password dimenticata?",
@@ -1078,5 +1079,22 @@
     "note": "Nota",
     "printReceipt": "Stampa ricevuta",
     "close": "Chiudi"
+  },
+  "otp": {
+    "title": "Verifica email",
+    "hint": "Verifica la tua email per continuare.",
+    "sendCode": "Invia codice",
+    "sending": "Invio...",
+    "enterEmailFirst": "Inserisci prima un'email valida",
+    "codeSent": "Abbiamo inviato un codice a 6 cifre alla tua email.",
+    "codeLabel": "Codice di verifica",
+    "verify": "Verifica",
+    "verifying": "Verifica in corso...",
+    "verified": "Email verificata",
+    "resend": "Invia di nuovo",
+    "resendIn": "Invia di nuovo ({sec}s)",
+    "wrongCode": "Codice errato o scaduto.",
+    "requestFailed": "Impossibile inviare il codice. Riprova.",
+    "change": "Cambia email"
   }
 }

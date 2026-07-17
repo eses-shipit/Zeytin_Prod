@@ -424,7 +424,8 @@
       "continue": "Devam Et",
       "complete": "Kaydı Tamamla",
       "haveAccount": "Zaten hesabınız var mı?",
-      "login": "Giriş Yap"
+      "login": "Giriş Yap",
+      "emailNotVerified": "Devam etmeden önce e-posta adresinizi doğrulayın."
     },
     "forgot": {
       "title": "Şifreni mi unuttun?",
@@ -1078,5 +1079,22 @@
     "note": "Not",
     "printReceipt": "Fiş Yazdır",
     "close": "Kapat"
+  },
+  "otp": {
+    "title": "E-posta doğrulama",
+    "hint": "Devam etmek için e-postanızı doğrulayın.",
+    "sendCode": "Kod gönder",
+    "sending": "Gönderiliyor...",
+    "enterEmailFirst": "Önce geçerli bir e-posta girin",
+    "codeSent": "E-postanıza 6 haneli kod gönderildi.",
+    "codeLabel": "Doğrulama kodu",
+    "verify": "Doğrula",
+    "verifying": "Doğrulanıyor...",
+    "verified": "E-posta doğrulandı",
+    "resend": "Kodu tekrar gönder",
+    "resendIn": "Tekrar gönder ({sec}sn)",
+    "wrongCode": "Kod hatalı veya süresi dolmuş.",
+    "requestFailed": "Kod gönderilemedi. Lütfen tekrar deneyin.",
+    "change": "E-postayı değiştir"
   }
 }

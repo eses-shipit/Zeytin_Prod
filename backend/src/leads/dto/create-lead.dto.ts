@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsEmail, IsIn, IsInt, IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateLeadDto {
   @IsString()
@@ -36,4 +36,24 @@ export class CreateLeadDto {
   @IsOptional()
   @IsIn(["tr", "es", "it", "pt"])
   locale?: string;
+
+  // --- Bot/spam koruması ---
+
+  /**
+   * HONEYPOT. Formda gizli bir alan; gerçek kullanıcı görmez, boş bırakır.
+   * Botlar otomatik doldurur. Doluysa istek spam sayılır (sessizce yutulur).
+   * Not: forbidNonWhitelisted açık olduğu için bu alan DTO'da tanımlı OLMALI.
+   */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  website?: string;
+
+  /**
+   * Formun render edildiği zaman damgası (ms). İnsan doldurması birkaç saniye
+   * sürer; bot anında gönderir. Çok hızlı gönderimler reddedilir.
+   */
+  @IsOptional()
+  @IsInt()
+  renderedAt?: number;
 }

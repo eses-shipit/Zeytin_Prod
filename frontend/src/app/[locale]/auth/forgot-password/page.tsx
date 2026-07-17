@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import axios from "axios";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Mail, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 
 /**
@@ -17,6 +17,7 @@ import { Mail, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
  */
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth.forgot");
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -26,7 +27,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setStatus("sending");
     try {
-      await axios.post(`${apiBase}/auth/forgot-password`, { email });
+      await axios.post(`${apiBase}/auth/forgot-password`, { email, locale });
       setStatus("sent");
     } catch {
       setStatus("error");

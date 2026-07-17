@@ -16,6 +16,7 @@ import { SupportModule } from "./support/support.module";
 import { TenantModule } from "./tenant/tenant.module";
 import { PolicyModule } from "./policy/policy.module";
 import { LeadsModule } from "./leads/leads.module";
+import { EmailVerificationModule } from "./verification/email-verification.module";
 import { ConfigModule } from "@nestjs/config";
 
 import { AuditModule } from "./audit/audit.module";
@@ -24,13 +25,14 @@ import { APP_GUARD } from "@nestjs/core";
 import * as Joi from "joi";
 import { ContextService } from "./common/context.service";
 import { TokenService } from "./common/token.service";
+import { EmailService } from "./common/email.service";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { RolesGuard } from "./common/guards/roles.guard";
 
-@Global() // ContextService ve TokenService'i global yapalım
+@Global() // ContextService, TokenService ve EmailService global
 @Module({
-  providers: [ContextService, TokenService],
-  exports: [ContextService, TokenService],
+  providers: [ContextService, TokenService, EmailService],
+  exports: [ContextService, TokenService, EmailService],
 })
 export class ContextModule {}
 
@@ -111,6 +113,7 @@ const frontendUrlSchema = Joi.string()
     TenantModule,
     PolicyModule,
     LeadsModule,
+    EmailVerificationModule,
   ],
   providers: [
     PrismaService,
