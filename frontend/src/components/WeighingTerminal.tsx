@@ -30,12 +30,14 @@ type ProductOption = {
   name: string;
 };
 
+// netKg GÖNDERİLMEZ: sunucu grossKg - tareKg olarak kendisi hesaplar ve
+// fazladan alan gönderen istekleri reddeder (forbidNonWhitelisted -> 400).
+// scaleWeightKg de yalnızca doluysa eklenir (@IsOptional null'u kabul etmez).
 type TicketPayload = {
   customerId: string;
   grossKg: number;
   tareKg: number;
-  netKg: number;
-  scaleWeightKg: number | null;
+  scaleWeightKg?: number;
   origin?: string;
   productId?: string;
   variety?: string; // Legacy support
@@ -121,8 +123,8 @@ export function WeighingTerminal() {
       customerId,
       grossKg,
       tareKg,
-      netKg,
-      scaleWeightKg: weightKg,
+      // Kantar bağlı değilse alan hiç gönderilmez (null backend'de reddedilir).
+      ...(weightKg !== null ? { scaleWeightKg: weightKg } : {}),
       origin: origin || undefined,
       productId: productId || undefined,
       quality: quality || undefined,
