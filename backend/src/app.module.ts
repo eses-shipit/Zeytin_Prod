@@ -86,16 +86,23 @@ const frontendUrlSchema = Joi.string()
         NODE_ENV: Joi.string().valid("development", "test", "production").default("development"),
       }),
     }),
+    // DİKKAT: Adlandırılmış throttler'ların HEPSİ her route'a birden uygulanır.
+    // Eskiden 'short' 10 istek/dk idi ve normal panel gezintisi (müşteri
+    // detayı tek başına 4 istek atar) dakikada 10'u anında aşıp 429 fırtınası
+    // üretiyordu ("Tanklar yüklenemedi", "Müşteri bulunamadı" bunun yan
+    // etkisiydi). Artık: 'short' saniyelik patlama koruması, 'long' dakikalık
+    // makul tavan. Auth/leads/OTP gibi hassas uçlar kendi @Throttle
+    // dekoratörleriyle 'short'u route bazında SIKI değerlere ezmeye devam eder.
     ThrottlerModule.forRoot([
       {
         name: 'short',
-        ttl: 60000, // 60 saniye
-        limit: 10, // Auth route'ları için
+        ttl: 1000, // 1 saniye
+        limit: 20, // ani patlama koruması
       },
       {
         name: 'long',
         ttl: 60000, // 60 saniye
-        limit: 100, // Diğer route'lar için (default)
+        limit: 300, // normal kullanım için rahat, kötüye kullanım için tavan
       },
     ]),
     AuditModule,

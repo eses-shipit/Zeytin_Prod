@@ -107,13 +107,16 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
 
   const fetchCustomerData = async () => {
     try {
+      // Yan veriler (geçmiş/tank/özet) başarısız olsa da sayfa ölmesin:
+      // eskiden Promise.all hepsini bağlıyordu ve tek bir 429/500, müşteri
+      // yüklenmişken bile "Müşteri bulunamadı" ekranı gösteriyordu.
       const [custRes, transRes, tanksRes, summaryRes] = await Promise.all([
         axios.get(`/customers/${params.id}`),
-        axios.get(`/transactions/${params.id}/history`),
-        axios.get(`/stock/tanks`),
-        axios.get(`/customers/${params.id}/summary`),
+        axios.get(`/transactions/${params.id}/history`).catch(() => ({ data: [] })),
+        axios.get(`/stock/tanks`).catch(() => ({ data: [] })),
+        axios.get(`/customers/${params.id}/summary`).catch(() => ({ data: null })),
       ]);
-      
+
       setCustomer(custRes.data);
       setTransactions(transRes.data);
       setTanks(tanksRes.data);
