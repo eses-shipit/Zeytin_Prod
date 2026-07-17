@@ -26,6 +26,9 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./
+# tsconfig.json runner'da da bulunsun: `npm run seed:*` (ts-node) commonjs
+# derlesin. Yoksa ts-node dosyayı ESM sanıp bcryptjs importunu bozuyor.
+COPY --from=build /app/tsconfig.json ./
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 EXPOSE 3001
