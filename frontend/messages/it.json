@@ -1054,5 +1054,29 @@
     "backToAdmin": "Torna al pannello admin",
     "openMenu": "Apri menu",
     "closeMenu": "Chiudi menu"
+  },
+  "batchDetail": {
+    "title": "Dettaglio produzione",
+    "loadError": "Impossibile caricare i dettagli.",
+    "notFound": "Nessun dato trovato.",
+    "oliveIn": "Olive conferite",
+    "oilOut": "Olio prodotto",
+    "yield": "Resa",
+    "acid": "Acidità",
+    "technicalData": "Dati tecnici",
+    "processTemp": "Temperatura di molitura",
+    "lineNumber": "Numero linea",
+    "line": "Linea {n}",
+    "filtration": "Filtrazione",
+    "done": "Effettuata",
+    "notDone": "Non effettuata",
+    "sourceAnalysis": "Analisi di origine",
+    "unknown": "Non specificato",
+    "qualityTREE": "Da albero",
+    "qualityGROUND": "Da terra",
+    "qualityMIXED": "Mista",
+    "note": "Nota",
+    "printReceipt": "Stampa ricevuta",
+    "close": "Chiudi"
   }
 }

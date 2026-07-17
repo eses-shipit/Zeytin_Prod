@@ -1054,5 +1054,29 @@
     "backToAdmin": "Volver al panel de admin",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú"
+  },
+  "batchDetail": {
+    "title": "Detalle de producción",
+    "loadError": "No se pudieron cargar los detalles.",
+    "notFound": "No se encontraron datos.",
+    "oliveIn": "Aceituna entrante",
+    "oilOut": "Aceite producido",
+    "yield": "Rendimiento",
+    "acid": "Acidez",
+    "technicalData": "Datos técnicos",
+    "processTemp": "Temperatura de prensado",
+    "lineNumber": "Número de línea",
+    "line": "Línea {n}",
+    "filtration": "Filtración",
+    "done": "Realizada",
+    "notDone": "No realizada",
+    "sourceAnalysis": "Análisis de origen",
+    "unknown": "Sin especificar",
+    "qualityTREE": "Del árbol",
+    "qualityGROUND": "Del suelo",
+    "qualityMIXED": "Mixta",
+    "note": "Nota",
+    "printReceipt": "Imprimir recibo",
+    "close": "Cerrar"
   }
 }

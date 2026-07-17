@@ -1054,5 +1054,29 @@
     "backToAdmin": "Admin paneline dön",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat"
+  },
+  "batchDetail": {
+    "title": "Üretim Detayı",
+    "loadError": "Detaylar yüklenemedi.",
+    "notFound": "Veri bulunamadı.",
+    "oliveIn": "Giren Zeytin",
+    "oilOut": "Çıkan Yağ",
+    "yield": "Randıman",
+    "acid": "Asit",
+    "technicalData": "Teknik Veriler",
+    "processTemp": "Sıkım Sıcaklığı",
+    "lineNumber": "Hat Numarası",
+    "line": "Hat {n}",
+    "filtration": "Filtrasyon",
+    "done": "Yapıldı",
+    "notDone": "Yapılmadı",
+    "sourceAnalysis": "Kaynak Analizi",
+    "unknown": "Belirsiz",
+    "qualityTREE": "Üst",
+    "qualityGROUND": "Dip",
+    "qualityMIXED": "Karışık",
+    "note": "Not",
+    "printReceipt": "Fiş Yazdır",
+    "close": "Kapat"
   }
 }

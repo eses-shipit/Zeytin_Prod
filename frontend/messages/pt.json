@@ -1054,5 +1054,29 @@
     "backToAdmin": "Voltar ao painel de admin",
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu"
+  },
+  "batchDetail": {
+    "title": "Detalhe da produção",
+    "loadError": "Não foi possível carregar os detalhes.",
+    "notFound": "Nenhum dado encontrado.",
+    "oliveIn": "Azeitona recebida",
+    "oilOut": "Azeite produzido",
+    "yield": "Rendimento",
+    "acid": "Acidez",
+    "technicalData": "Dados técnicos",
+    "processTemp": "Temperatura de prensagem",
+    "lineNumber": "Número da linha",
+    "line": "Linha {n}",
+    "filtration": "Filtração",
+    "done": "Realizada",
+    "notDone": "Não realizada",
+    "sourceAnalysis": "Análise de origem",
+    "unknown": "Não especificado",
+    "qualityTREE": "Da árvore",
+    "qualityGROUND": "Do chão",
+    "qualityMIXED": "Mista",
+    "note": "Nota",
+    "printReceipt": "Imprimir recibo",
+    "close": "Fechar"
   }
 }
