@@ -6,7 +6,9 @@ WORKDIR /app
 # Prisma engine'leri için OpenSSL gerekir.
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
-RUN npm ci
+# --include=dev ZORUNLU: Coolify build sırasında NODE_ENV=production geçirir,
+# bu da normal `npm ci`'de devDependencies'i (tsc, prisma CLI) atlatır.
+RUN npm ci --include=dev
 COPY prisma ./prisma
 RUN npx prisma generate
 COPY . .

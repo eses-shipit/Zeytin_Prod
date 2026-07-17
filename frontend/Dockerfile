@@ -4,7 +4,9 @@
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# --include=dev ZORUNLU: next build için typescript/tailwind/postcss devDep'tir;
+# NODE_ENV=production altında normal `npm ci` bunları atlar.
+RUN npm ci --include=dev
 
 # ---------- build ----------
 FROM node:22-bookworm-slim AS build
