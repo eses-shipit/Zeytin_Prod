@@ -15,7 +15,8 @@
     "db:backup": "node ../scripts/backup-db.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "seed:mock": "ts-node --transpile-only prisma/mock/seed-mock.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
