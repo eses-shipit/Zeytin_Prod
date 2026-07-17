@@ -57,7 +57,9 @@ export async function generateMetadata({
   const alternates = localizedAlternates("/");
 
   return {
-    title: t("hero.title"),
+    // Tarayıcı sekmesinde slogan yerine sade marka görünsün ("%s | ZeytinSaaS"
+    // şablonunu da atlar). absolute => tam olarak bu metin.
+    title: { absolute: "ZeytinSaaS" },
     description: t("hero.subtitle"),
     alternates,
     robots: INDEXABLE,
