@@ -154,8 +154,8 @@ export default async function LandingPage({
 
       {/* NAV */}
       <header className="sticky top-0 z-40 border-b border-[color:var(--line)] bg-[color:var(--cream)]/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
-          <a href="#" className="flex items-center gap-2">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-10">
+          <a href="#" className="flex shrink-0 items-center gap-2">
             <span className="medallion flex h-9 w-9 items-center justify-center rounded-full">
               <Droplets className="h-5 w-5" />
             </span>
