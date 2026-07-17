@@ -118,7 +118,9 @@ async function bootstrap() {
   // SIGTERM/SIGINT'te Prisma bağlantısını temiz kapatır (onModuleDestroy).
   app.enableShutdownHooks();
 
-  await app.listen(process.env.PORT ?? 3001);
+  // 0.0.0.0'a bağlan: konteynerde ters vekil (Coolify/Traefik) ancak tüm
+  // arayüzlerden erişilebilen bir porta ulaşabilir; yalnız localhost olmaz.
+  await app.listen(process.env.PORT ?? 3001, "0.0.0.0");
   logger.log(`API ${await app.getUrl()} adresinde. İzinli origin: ${corsOrigins.join(", ") || "(yok)"}`);
 }
 bootstrap();

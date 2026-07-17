@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Docker için yalın çıktı: .next/standalone içinde kendi kendine yeten bir
+  // sunucu (node server.js) üretir; imaj küçük olur, sunucuyu yormaz.
+  output: "standalone",
   eslint: {
     // Build ESLint HATALARINDA durur (warning'ler build'i bozmaz). Gizli hata
     // borcu temizlendi; bayrak açık kalırsa gerçek hatalar yine gizlenir.
